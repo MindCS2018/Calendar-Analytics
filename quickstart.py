@@ -31,7 +31,7 @@ def get_credentials():
     Returns:
         Credentials, the obtained credential.
     """
-    home_dir = os.path.expanduser('~')
+    home_dir = os.path.expanduser('~/Desktop/Hackbright/proj')
     credential_dir = os.path.join(home_dir, '.credentials')
     if not os.path.exists(credential_dir):
         os.makedirs(credential_dir)
@@ -56,22 +56,47 @@ def main():
     Creates a Google Calendar API service object and outputs a list of the next
     10 events on the user's calendar.
     """
+
+    #calls get credentials function
     credentials = get_credentials()
+
     http = credentials.authorize(httplib2.Http())
+
     service = discovery.build('calendar', 'v3', http=http)
 
-    now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
+    # 'Z' indicates UTC time
+    now = datetime.datetime.utcnow().isoformat() + 'Z'
     print('Getting the upcoming 10 events')
+
+    # calendarResult = service.calendarList() #<googleapiclient.discovery.Resource object at 0x1032201d0>
+    # calendarResult = service.calendarList().list() #<googleapiclient.http.HttpRequest object at 0x103120390>
+    # calendarResult = service.calendarList().list().execute() # dictionary
+
+    # eventsResult is a dictionary
     eventsResult = service.events().list(
+
+        # filter on the dictionary
         calendarId='primary', timeMin=now, maxResults=10, singleEvents=True,
         orderBy='startTime').execute()
+
+    # list of event dictionaries, value for 'items' key
     events = eventsResult.get('items', [])
 
+    # if empty list, print no upcoming events
     if not events:
         print('No upcoming events found.')
+
+    # for each event dictionary in the events list
     for event in events:
+
+        # start key has a dictionary as the value
+        # if the key dateTime exists bind that to start
+        # if dateTime does not exist, bind the date
         start = event['start'].get('dateTime', event['start'].get('date'))
-        print(start, event['summary'])
+        end = event['end'].get('dateTime', event['start'].get('date'))
+
+        # print variables and the value to the summary key
+        print(start, end, event['summary'])
 
 
 if __name__ == '__main__':
