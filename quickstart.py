@@ -80,80 +80,140 @@ def main():
     #   name of the API ('calendar')
     #   version of the API you are using ('v3')
     #   authorized httplib2.Http() object that can be used for API calls
-
     service = discovery.build('calendar', 'v3', http=http)
 
     # 'Z' indicates UTC time
     now = datetime.datetime.utcnow().isoformat() + 'Z'
-    print('Getting the upcoming 10 events')
 
-    # calendarResult = service.calendarList()
+    # calendarsResult = service.calendarList()
     """Collection object: <googleapiclient.discovery.Resource object at 0x1032201d0>"""
 
-    # calendarResult = service.calendarList().list()
+    # calendarsResult = service.calendarList().list()
     """Http request object: <googleapiclient.http.HttpRequest object at 0x103120390>"""
 
-    # calendarResult = service.calendarList().list().execute()
+    # calendarsResult = service.calendarList().list().execute()
     """Creating a request does not actually call the API. To execute the request
     and get a response, call the execute() function. The response is a Python
     object built from the JSON response sent by the API server."""
 
-    # eventsResult is a dictionary
-    eventsResult = service.events().list(
+    # calendar dictionary
+    calendarsResult = service.calendarList().list().execute()
 
-        # filter on the dictionary
-        calendarId='primary', timeMin=now, maxResults=10, singleEvents=True,
-        orderBy='startTime').execute()
+    calendars_kind = calendarsResult['kind']
+    next_sync_token = calendarsResult['nextSyncToken']
+
+    print ("\n")
+    print ("Main Calendar Info: ",
+           calendars_kind,
+           next_sync_token)
+    print ("\n")
+
+    calendars = calendarsResult.get('items', [])
+    id_list = []
+
+    if not calendars:
+        print ("No calendars found.")
+
+    for calendar in calendars:
+        calendar_id = calendar['id']
+        calendar_kind = calendar['kind']
+        calendar_timezone = calendar['timeZone']
+
+        print ("\n")
+        print ("Calendars Info: ",
+               calendar_id,
+               calendar_kind,
+               calendar_timezone)
+
+        if 'selected' in calendar:
+            calendar_selected = calendar['selected']
+            print (calendar_selected)
+            id_list.append(calendar_id)
+
+        if 'description' in calendar:
+            calendar_description = calendar['description']
+            print (calendar_description)
+
+        print ("\n")
+
+    print ("\n")
+    print ("Id_list: ", id_list)
+    print ("\n")
+
+    for id_ in id_list:
+
+    # eventsResult is a dictionary
+        eventsResult = service.events().list(
+
+            # filter on the event dictionary
+            calendarId=id_,
+            timeMin=now, maxResults=100, singleEvents=True,
+            orderBy='startTime').execute()
 
     # list of event dictionaries, value for 'items' key
-    events = eventsResult.get('items', [])
+        events_etag = eventsResult['etag']
+        events_kind = eventsResult['kind']
+        events_email = eventsResult['summary']
+        events_timezone = eventsResult['timeZone']
+        events_last_updated = eventsResult['updated']
 
-    # if empty list, print no upcoming events
-    if not events:
-        print('No upcoming events found.')
+        print ("\n")
+        print ("Events info: ",
+               events_etag,
+               events_kind,
+               events_email,
+               events_timezone,
+               events_last_updated)
+        print ("\n")
 
-    # for each event dictionary in the events list
-    for event in events:
+        events = eventsResult.get('items', [])
 
-        # start key has a dictionary as the value
-        # if the key dateTime exists bind that to start
-        # if dateTime does not exist, bind the date
-        calendar_email = event['summary']
-        start = event['start'].get('dateTime', event['start'].get('date'))
-        end = event['end'].get('dateTime', event['start'].get('date'))
-        creator = event['creator'].get('email', [])
-        kind = event['kind']
-        status = event['status']
-        summary = event['summary']
-        event_id = event['id']
-        created_dateTime = event['created']
-        updated_dateTime = event['updated']
+        # if empty list, print no upcoming events
+        if not events:
+            print('No upcoming events found.')
 
-        # print variables and the value to the summary key
-        print ("******")
-        print ("Calendar for: ", calendar_email)
-        print ("Event Title: ", summary)
-        print ("Event id:", event_id)
-        print ("Created: ", created_dateTime)
-        print ("Updated ", updated_dateTime)
-        print ("Start DateTime: ", start)
-        print ("End DateTime: ", end)
-        print ("Event Creator: ", creator)
-        print ("Kind: ", kind)
-        print ("Status: ", status)
+        # for each event dictionary in the events list
+        for event in events:
 
-        if 'attendees' in event:
-            attendees = event['attendees']
+            # start key has a dictionary as the value
+            # if the key dateTime exists bind that to start
+            # if dateTime does not exist, bind the date
+            start = event['start'].get('dateTime', event['start'].get('date'))
+            end = event['end'].get('dateTime', event['start'].get('date'))
+            creator = event['creator'].get('email', [])
+            kind = event['kind']
+            status = event['status']
+            summary = event['summary']
+            event_id = event['id']
+            created_dateTime = event['created']
+            updated_dateTime = event['updated']
 
-            for attendee in attendees:
-                if 'resource' in attendee:
-                    display_name = attendee['displayName']
-                    print ("Where: ", display_name)
+            # print variables and the value to the summary key
+            print ("\n")
+            print ("Event Title: ", summary)
+            print ("Event id:", event_id)
+            print ("Created: ", created_dateTime)
+            print ("Updated ", updated_dateTime)
+            print ("Start DateTime: ", start)
+            print ("End DateTime: ", end)
+            print ("Event Creator: ", creator)
+            print ("Kind: ", kind)
+            print ("Status: ", status)
 
-                #TODO: remove primary email from guest
-                else:
-                    guest = attendee['email']
-                    print ("Who: ", guest)
+            if 'attendees' in event:
+                attendees = event['attendees']
+
+                for attendee in attendees:
+                    if 'resource' in attendee:
+                        display_name = attendee['displayName']
+                        print ("Where: ", display_name)
+
+                    #TODO: remove primary email from guest
+                    else:
+                        guest = attendee['email']
+                        print ("Who: ", guest)
+
+            print ("\n")
 
 
 if __name__ == '__main__':
