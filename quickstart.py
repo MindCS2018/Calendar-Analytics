@@ -118,6 +118,7 @@ def main():
         # start key has a dictionary as the value
         # if the key dateTime exists bind that to start
         # if dateTime does not exist, bind the date
+        calendar_email = event['summary']
         start = event['start'].get('dateTime', event['start'].get('date'))
         end = event['end'].get('dateTime', event['start'].get('date'))
         creator = event['creator'].get('email', [])
@@ -130,6 +131,7 @@ def main():
 
         # print variables and the value to the summary key
         print ("******")
+        print ("Calendar for: ", calendar_email)
         print ("Event Title: ", summary)
         print ("Event id:", event_id)
         print ("Created: ", created_dateTime)
