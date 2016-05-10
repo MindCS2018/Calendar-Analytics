@@ -101,9 +101,11 @@ def main():
 
     calendars_kind = calendarsResult['kind']
     next_sync_token = calendarsResult['nextSyncToken']
+    etag = calendarsResult['etag']
 
     print ("\n")
     print ("Main Calendar Info: ",
+           etag,
            calendars_kind,
            next_sync_token)
     print ("\n")
@@ -125,6 +127,10 @@ def main():
                calendar_kind,
                calendar_timezone)
 
+        if 'primary' in calendar:
+            primary = calendar['primary']
+            print (primary)
+
         if 'selected' in calendar:
             calendar_selected = calendar['selected']
             print (calendar_selected)
@@ -133,6 +139,9 @@ def main():
         if 'description' in calendar:
             calendar_description = calendar['description']
             print (calendar_description)
+
+        if 'summary' in calendar:
+            calendar_summary = calendar['summary']
 
         print ("\n")
 
@@ -155,7 +164,7 @@ def main():
         events_kind = eventsResult['kind']
         events_email = eventsResult['summary']
         events_timezone = eventsResult['timeZone']
-        events_last_updated = eventsResult['updated']
+        events_updated_at = eventsResult['updated']
 
         print ("\n")
         print ("Events info: ",
@@ -163,7 +172,7 @@ def main():
                events_kind,
                events_email,
                events_timezone,
-               events_last_updated)
+               events_updated_at)
         print ("\n")
 
         events = eventsResult.get('items', [])
@@ -185,15 +194,15 @@ def main():
             status = event['status']
             summary = event['summary']
             event_id = event['id']
-            created_dateTime = event['created']
-            updated_dateTime = event['updated']
+            created_at = event['created']
+            updated_at = event['updated']
 
             # print variables and the value to the summary key
             print ("\n")
             print ("Event Title: ", summary)
             print ("Event id:", event_id)
-            print ("Created: ", created_dateTime)
-            print ("Updated ", updated_dateTime)
+            print ("Created: ", created_at)
+            print ("Updated ", updated_at)
             print ("Start DateTime: ", start)
             print ("End DateTime: ", end)
             print ("Event Creator: ", creator)
