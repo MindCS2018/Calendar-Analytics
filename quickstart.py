@@ -2,6 +2,9 @@ from __future__ import print_function
 import httplib2
 import os
 
+from model import connect_to_db, db, Event, Calendar, User
+from server import app
+
 from apiclient import discovery
 import oauth2client
 from oauth2client import client
@@ -20,13 +23,6 @@ except ImportError:
 SCOPES = 'https://www.googleapis.com/auth/calendar.readonly'
 CLIENT_SECRET_FILE = 'client_secret.json'
 APPLICATION_NAME = 'Google Calendar API Python Quickstart'
-
-
-# def oauth():
-#        """Your application must be authenticated, the user must
-#     grant access for your application, and the user must be authenticated
-#     in order to grant that access.
-#     """
 
 
 def get_credentials():
@@ -62,53 +58,28 @@ def get_credentials():
 
 
 def main():
-    """Shows basic usage of the Google Calendar API.
-
-    Creates a Google Calendar API service object and outputs a list of the next
-    10 events on the user's calendar.
-    """
+    """"""
 
     # calls get_credentials function
     credentials = get_credentials()
 
+    # would be passed from database/credentials
+    user_id = 1
+
     # Creates an httplib2.Http object to handle HTTP requests and authorizes it
     http = credentials.authorize(httplib2.Http())
 
-    # The apiclient.discovery.build() function returns an instance of an API service
-    # object can be used to make API calls. The object is constructed with
-    # methods specific to the calendar API. The arguments provided are:
-    #   name of the API ('calendar')
-    #   version of the API you are using ('v3')
-    #   authorized httplib2.Http() object that can be used for API calls
+    # Returns an instance of an API service object that can be used to make API calls. 
     service = discovery.build('calendar', 'v3', http=http)
 
     # 'Z' indicates UTC time
     now = datetime.datetime.utcnow().isoformat() + 'Z'
 
-    # calendarsResult = service.calendarList()
-    """Collection object: <googleapiclient.discovery.Resource object at 0x1032201d0>"""
-
-    # calendarsResult = service.calendarList().list()
-    """Http request object: <googleapiclient.http.HttpRequest object at 0x103120390>"""
-
-    # calendarsResult = service.calendarList().list().execute()
-    """Creating a request does not actually call the API. To execute the request
-    and get a response, call the execute() function. The response is a Python
-    object built from the JSON response sent by the API server."""
-
-    # calendar dictionary
     calendarsResult = service.calendarList().list().execute()
 
     calendars_kind = calendarsResult['kind']
     next_sync_token = calendarsResult['nextSyncToken']
     etag = calendarsResult['etag']
-
-    print ("\n")
-    print ("Main Calendar Info: ",
-           etag,
-           calendars_kind,
-           next_sync_token)
-    print ("\n")
 
     calendars = calendarsResult.get('items', [])
     id_list = []
@@ -118,62 +89,49 @@ def main():
 
     for calendar in calendars:
         calendar_id = calendar['id']
-        calendar_kind = calendar['kind']
-        calendar_timezone = calendar['timeZone']
-
-        print ("\n")
-        print ("Calendars Info: ",
-               calendar_id,
-               calendar_kind,
-               calendar_timezone)
+        timezone = calendar['timeZone']
+        summary = calendar['summary']
 
         if 'primary' in calendar:
             primary = calendar['primary']
-            print (primary)
+        else:
+            primary = False
 
         if 'selected' in calendar:
-            calendar_selected = calendar['selected']
-            print (calendar_selected)
+            selected = calendar['selected']
             id_list.append(calendar_id)
-
+        else:
+            selected = False
         if 'description' in calendar:
-            calendar_description = calendar['description']
-            print (calendar_description)
+            description = calendar['description']
+        else:
+            description = None
 
-        if 'summary' in calendar:
-            calendar_summary = calendar['summary']
+        calendar = Calendar(calendar_id=calendar_id,
+                            user_id=user_id,
+                            summary=summary,
+                            timezone=timezone,
+                            selected=selected,
+                            description=description,
+                            primary=primary)
 
-        print ("\n")
+        db.session.add(calendar)
 
-    print ("\n")
-    print ("Id_list: ", id_list)
-    print ("\n")
+        db.session.commit()
 
     for id_ in id_list:
 
-    # eventsResult is a dictionary
-        eventsResult = service.events().list(
+        eventsResult = service.events().list(calendarId=id_,
+                                             timeMin=now,
+                                             maxResults=100,
+                                             singleEvents=True,
+                                             orderBy='startTime').execute()
 
-            # filter on the event dictionary
-            calendarId=id_,
-            timeMin=now, maxResults=100, singleEvents=True,
-            orderBy='startTime').execute()
-
-    # list of event dictionaries, value for 'items' key
         events_etag = eventsResult['etag']
         events_kind = eventsResult['kind']
         events_email = eventsResult['summary']
         events_timezone = eventsResult['timeZone']
         events_updated_at = eventsResult['updated']
-
-        print ("\n")
-        print ("Events info: ",
-               events_etag,
-               events_kind,
-               events_email,
-               events_timezone,
-               events_updated_at)
-        print ("\n")
 
         events = eventsResult.get('items', [])
 
@@ -184,12 +142,11 @@ def main():
         # for each event dictionary in the events list
         for event in events:
 
-            # start key has a dictionary as the value
-            # if the key dateTime exists bind that to start
-            # if dateTime does not exist, bind the date
+            etag = event['etag']
             start = event['start'].get('dateTime', event['start'].get('date'))
             end = event['end'].get('dateTime', event['start'].get('date'))
             creator = event['creator'].get('email', [])
+            created = event['created']
             kind = event['kind']
             status = event['status']
             summary = event['summary']
@@ -197,33 +154,35 @@ def main():
             created_at = event['created']
             updated_at = event['updated']
 
-            # print variables and the value to the summary key
-            print ("\n")
-            print ("Event Title: ", summary)
-            print ("Event id:", event_id)
-            print ("Created: ", created_at)
-            print ("Updated ", updated_at)
-            print ("Start DateTime: ", start)
-            print ("End DateTime: ", end)
-            print ("Event Creator: ", creator)
-            print ("Kind: ", kind)
-            print ("Status: ", status)
+            event = Event(event_id=event_id,
+                          calendar_id=id_,
+                          etag=etag,
+                          creator=creator,
+                          start=start,
+                          end=end,
+                          created_at=created_at,
+                          updated_at=updated_at,
+                          status=status,
+                          summary=summary
+                          )
 
-            if 'attendees' in event:
-                attendees = event['attendees']
+            db.session.add(event)
 
-                for attendee in attendees:
-                    if 'resource' in attendee:
-                        display_name = attendee['displayName']
-                        print ("Where: ", display_name)
+            db.session.commit()
 
-                    #TODO: remove primary email from guest
-                    else:
-                        guest = attendee['email']
-                        print ("Who: ", guest)
+            # if 'attendees' in event:
+            #     attendees = event['attendees']
 
-            print ("\n")
+            #     for attendee in attendees:
+            #         if 'resource' in attendee:
+            #             display_name = attendee['displayName']
 
+            #         #TODO: remove primary email from guest
+            #         else:
+            #             guest = attendee['email']
 
 if __name__ == '__main__':
+    connect_to_db(app)
+    print ('connect to db')
     main()
+    print('all done')
