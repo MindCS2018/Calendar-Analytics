@@ -1,0 +1,8 @@
+.DS_Store
+*env*
+*bin*
+.credentials
+*.pyc
+*secret*
+.webassets-cache
+instance/
