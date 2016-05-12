@@ -4,8 +4,10 @@ from jinja2 import StrictUndefined
 # import sys
 # import os
 
-from flask import Flask, render_template, redirect, request, flash, session
+from flask import Flask, render_template, redirect, request, flash, session, url_for
 from flask_debugtoolbar import DebugToolbarExtension
+from model import connect_to_db, db
+import quickstart
 
 app = Flask(__name__)
 
@@ -20,11 +22,21 @@ app.jinja_env.undefined = StrictUndefined
 #Use os.envir (see lecture notes on how to store)
 
 
-# @app.route('/')
-# def index():
-#     """Index page"""
+@app.route('/')
+def index():
+    """Index page"""
 
-#     return render_template("login.html")
+    return render_template("homepage.html")
+
+
+@app.route('/login/')
+def login():
+    """Login page"""
+
+    # print "Hi, Taylor!"
+    quickstart.main()
+
+    return redirect(url_for('index'))
 
 
 # @app.route('/upcoming')

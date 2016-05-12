@@ -27,7 +27,7 @@ class Calendar(db.Model):
     calendar_id = db.Column(db.String(100), primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
     summary = db.Column(db.String(100), nullable=True)
-    # etag = db.Column(db.String(100), nullable=False)
+    etag = db.Column(db.String(100), nullable=False)
 
     description = db.Column(db.String(1000), nullable=True)
     timezone = db.Column(db.String(100), nullable=False)
@@ -40,22 +40,29 @@ class Calendar(db.Model):
                                                   self.user_id)
 
 
+class GuestResponse(db.Model):
+
+    __tablename__ = "guest_responses"
+
+    guest_response_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    calendar_id = db.Column(db.String(100), db.ForeignKey('calendars.calendar_id'))
+    event_id = db.Column(db.String(100), db.ForeignKey('events.event_id'))
+    status = db.Column(db.String(20), nullable=True)
+    # cancelled
+
+
 class Event(db.Model):
     """Each event on each calendar."""
 
     __tablename__ = "events"
 
     event_id = db.Column(db.String(100), primary_key=True)
-    calendar_id = db.Column(db.String(100), db.ForeignKey('calendars.calendar_id'))
     etag = db.Column(db.String(100), nullable=True)
     creator = db.Column(db.String(100), nullable=True)
-
     start = db.Column(db.DateTime, nullable=True)
     end = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, nullable=True)
     updated_at = db.Column(db.DateTime, nullable=True)
-
-    status = db.Column(db.String(100), nullable=True)
     summary = db.Column(db.String(1000), nullable=True)
 
     #Define relationship to movie
@@ -65,19 +72,6 @@ class Event(db.Model):
 
         return "<Event event_id={}, calendar_id={}>".format(self.event_id,
                                                             self.calendar_id)
-
-
-class Attendee(db.Model):
-    """Association table for attendees of events"""
-
-    __tablename__ = "attendees"
-
-    attendee_id = db.Column(db.String(100), primary_key=True)
-    event_id = db.Column(db.String(100), db.ForeignKey('events.event_id'))
-    attendee_email = db.Column(db.String(100), nullable=False)
-
-
-
 
 
 def connect_to_db(app):
