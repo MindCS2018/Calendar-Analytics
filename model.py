@@ -1,58 +1,57 @@
 from flask_sqlalchemy import SQLAlchemy
 
-# This is the connection to the PostgreSQL database; we're getting this through
-# the Flask-SQLAlchemy helper library. On this, we can find the `session`
+# This is the connection to the PostgreSQL database; through the
+# Flask-SQLAlchemy helper library. On this, we can find the `session`
 # object, where we do most of our interactions (like committing, etc.)
 
 db = SQLAlchemy()
 
 
 class User(db.Model):
-    """Logged-in user"""
+    """User of app"""
 
     __tablename__ = "users"
 
     user_id = db.Column(db.Integer, primary_key=True)
 
-    def __repr__(self):
 
-        return "<User user_id={}>".format(self.user_id)
+class UserCal(db.Model):
+    """Each calendar shared with a user"""
+
+    __tablename__ = "usercals"
+
+    usercal_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
+    calendar_id = db.Column(db.String(100), db.ForeignKey('calendars.calendar_id'))
+    primary = db.Column(db.String(10), nullable=True)
+    selected = db.Column(db.String(10), nullable=True)
 
 
 class Calendar(db.Model):
-    """Calendars that are shared with user"""
+    """Each calendar"""
 
     __tablename__ = "calendars"
 
     calendar_id = db.Column(db.String(100), primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
-    summary = db.Column(db.String(100), nullable=True)
     etag = db.Column(db.String(100), nullable=False)
-
+    summary = db.Column(db.String(100), nullable=True)
     description = db.Column(db.String(1000), nullable=True)
     timezone = db.Column(db.String(100), nullable=False)
-    selected = db.Column(db.String(10), nullable=True)
-    primary = db.Column(db.String(10), nullable=True)
-
-    def __repr__(self):
-
-        return "<Calendar calendar_id={}>".format(self.calendar_id,
-                                                  self.user_id)
 
 
-class GuestResponse(db.Model):
+class CalEvent(db.Model):
+    """Relationship between events and calendars"""
 
-    __tablename__ = "guest_responses"
+    __tablename__ = "calevents"
 
-    guest_response_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    calevent_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     calendar_id = db.Column(db.String(100), db.ForeignKey('calendars.calendar_id'))
     event_id = db.Column(db.String(100), db.ForeignKey('events.event_id'))
     status = db.Column(db.String(20), nullable=True)
-    # cancelled
 
 
 class Event(db.Model):
-    """Each event on each calendar."""
+    """Each event"""
 
     __tablename__ = "events"
 
@@ -64,21 +63,14 @@ class Event(db.Model):
     created_at = db.Column(db.DateTime, nullable=True)
     updated_at = db.Column(db.DateTime, nullable=True)
     summary = db.Column(db.String(1000), nullable=True)
-
-    #Define relationship to movie
-    # movie = db.relationship("Movie", backref=db.backref("ratings", order_by=rating_id))
-
-    def __repr__(self):
-
-        return "<Event event_id={}, calendar_id={}>".format(self.event_id,
-                                                            self.calendar_id)
+    # conf_rm = db.Column(db.String(40), nullable=True)
 
 
 def connect_to_db(app):
     """Connect the database to our Flask app."""
 
     # Configure to use our PstgreSQL database
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///calanalytics'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///cals'
     db.app = app
     db.init_app(app)
 
@@ -88,8 +80,8 @@ if __name__ == "__main__":
     from server import app
     import os
 
-    os.system("dropdb calanalytics")
-    os.system("createdb calanalytics")
+    os.system("dropdb cals")
+    os.system("createdb cals")
 
     connect_to_db(app)
     print "Connected to DB."
