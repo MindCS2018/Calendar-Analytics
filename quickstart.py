@@ -2,9 +2,8 @@ from __future__ import print_function
 import httplib2
 import os
 
-from model import connect_to_db, db, Event, Calendar, User, GuestResponse
+from model import connect_to_db, db, Event, Calendar, User, UserCal, CalEvent
 # from server import app
-
 from apiclient import discovery
 import oauth2client
 from oauth2client import client
@@ -72,12 +71,12 @@ def main():
     # Returns an instance of an API service object that can be used to make API calls.
     service = discovery.build('calendar', 'v3', http=http)
 
-    return service
-
-
-def load_db(service):
     # 'Z' indicates UTC time
     now = datetime.datetime.utcnow().isoformat() + 'Z'
+
+    # print("\n")
+    # print(now)
+    # print("\n")
 
     calendarsResult = service.calendarList().list().execute()
 
@@ -111,23 +110,43 @@ def load_db(service):
         else:
             description = None
 
-        # calendar_exists = Calendar.query.get(calendar_id)
-
         # if calendar_exists and calendar_exists.etag == etag:
         #     continue
         # else:
-        calendar = Calendar(calendar_id=calendar_id,
-                            user_id=user_id,
-                            summary=summary,
-                            timezone=timezone,
-                            selected=selected,
-                            description=description,
-                            primary=primary,
-                            etag=etag)
 
-        db.session.add(calendar)
+        cal_exists = Calendar.query.get(calendar_id)
 
-        db.session.commit()
+        if cal_exists:
+
+            usercal = UserCal(user_id=user_id,
+                              calendar_id=calendar_id,
+                              primary=primary,
+                              selected=selected)
+
+            db.session.add(usercal)
+            db.session.commit()
+
+        # elif cal_exists and cal_exists.etag != etag:
+        #     update db
+
+        else:
+
+            calendar = Calendar(calendar_id=calendar_id,
+                                etag=etag,
+                                summary=summary,
+                                description=description,
+                                timezone=timezone)
+
+            db.session.add(calendar)
+            db.session.commit()
+
+            usercal = UserCal(user_id=user_id,
+                              calendar_id=calendar_id,
+                              primary=primary,
+                              selected=selected)
+
+            db.session.add(usercal)
+            db.session.commit()
 
     for id_ in id_list:
 
@@ -166,16 +185,35 @@ def load_db(service):
 
             # if event is not already in database:
                 # add event
-                # add guest response
+                # add guest
             # else: (if event is in the database)
                 # if we haven't looked @ their calendar before
-                # add guest response
+                # add guest
 
-            # event_exists = Event.query.get(event_id)
-
-            # if event_exists and event_exists.etag == etag:
-            #     continue
+            # if 'attendees' in event:
+            #     attendees = event['attendees']
             # else:
+            #     conf_rm = None
+
+            # for attendee in attendees:
+            #     if 'resource' in attendee:
+            #         conf_rm = attendee['displayName']
+            #         break
+            #     else:
+            #         conf_rm = None
+
+            event_exists = Event.query.get(event_id)
+
+            if event_exists:
+
+                calevent = CalEvent(calendar_id=id_,
+                                    event_id=event_id,
+                                    status=status)
+
+                db.session.add(calevent)
+                db.session.commit()
+
+            else:
 
             # if 'attendees' in event:
             #     attendees = event['attendees']
@@ -189,23 +227,29 @@ def load_db(service):
             #             email = attendee['email']
             #             print(email)
 
-            event_obj = Event(event_id=event_id,
-                              etag=etag,
-                              creator=creator,
-                              start=start,
-                              end=end,
-                              created_at=created_at,
-                              updated_at=updated_at,
-                              summary=summary)
+                # print ("\n")
+                # print(conf_rm)
+                # print ("\n")
 
-            guest_response = GuestResponse(calendar_id=id_,
-                                           event_id=event_id,
-                                           status=status)
+                event_obj = Event(event_id=event_id,
+                                  etag=etag,
+                                  creator=creator,
+                                  start=start,
+                                  end=end,
+                                  created_at=created_at,
+                                  updated_at=updated_at,
+                                  summary=summary)
+                                  # conf_rm=conf_rm)
 
-            db.session.add(event_obj)
-            db.session.add(guest_response)
+                db.session.add(event_obj)
+                db.session.commit()
 
-            db.session.commit()
+                calevent = CalEvent(calendar_id=id_,
+                                    event_id=event_id,
+                                    status=status)
+
+                db.session.add(calevent)
+                db.session.commit()
 
             # responseStatus = ResponseStatus(event_id=event_id)
 
