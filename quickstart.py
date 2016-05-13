@@ -74,10 +74,6 @@ def main():
     # 'Z' indicates UTC time
     now = datetime.datetime.utcnow().isoformat() + 'Z'
 
-    # print("\n")
-    # print(now)
-    # print("\n")
-
     calendarsResult = service.calendarList().list().execute()
 
     calendars_kind = calendarsResult['kind']
@@ -122,6 +118,8 @@ def main():
                               calendar_id=calendar_id,
                               primary=primary,
                               selected=selected)
+
+            # usercal.calendar_id = calendar_id
 
             db.session.add(usercal)
             db.session.commit()
