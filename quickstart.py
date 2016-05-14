@@ -76,8 +76,8 @@ def main():
 
     calendarsResult = service.calendarList().list().execute()
 
-    calendars_kind = calendarsResult['kind']
-    next_sync_token = calendarsResult['nextSyncToken']
+    # calendars_kind = calendarsResult['kind']
+    # next_sync_token = calendarsResult['nextSyncToken']
     etag = calendarsResult['etag']
 
     calendars = calendarsResult.get('items', [])
@@ -111,8 +111,10 @@ def main():
         # else:
 
         cal_exists = Calendar.query.get(calendar_id)
+        usercal_exists = UserCal.query.filter_by(user_id=user_id,
+                                                 calendar_id=calendar_id).first()
 
-        if cal_exists:
+        if cal_exists and usercal_exists is None:
 
             usercal = UserCal(user_id=user_id,
                               calendar_id=calendar_id,
@@ -127,15 +129,15 @@ def main():
         # elif cal_exists and cal_exists.etag != etag:
         #     update db
 
-        else:
+        elif cal_exists is None:
 
-            calendar = Calendar(calendar_id=calendar_id,
-                                etag=etag,
-                                summary=summary,
-                                description=description,
-                                timezone=timezone)
+            calendar_obj = Calendar(calendar_id=calendar_id,
+                                    etag=etag,
+                                    summary=summary,
+                                    description=description,
+                                    timezone=timezone)
 
-            db.session.add(calendar)
+            db.session.add(calendar_obj)
             db.session.commit()
 
             usercal = UserCal(user_id=user_id,
@@ -146,7 +148,7 @@ def main():
             db.session.add(usercal)
             db.session.commit()
 
-    for id_ in id_list:
+    for id_ in id_list:  # for each calendar
 
         eventsResult = service.events().list(calendarId=id_,
                                              timeMin=now,
@@ -154,16 +156,15 @@ def main():
                                              singleEvents=True,
                                              orderBy='startTime').execute()
 
-        events_etag = eventsResult['etag']
-        events_kind = eventsResult['kind']
-        events_email = eventsResult['summary']
-        events_timezone = eventsResult['timeZone']
-        events_updated_at = eventsResult['updated']
+        # events_etag = eventsResult['etag']
+        # events_kind = eventsResult['kind']
+        # events_email = eventsResult['summary']
+        # events_timezone = eventsResult['timeZone']
+        # events_updated_at = eventsResult['updated']
 
-        events = eventsResult.get('items', [])
+        events = eventsResult.get('items', [])  # pulls events
 
-        # if empty list, print no upcoming events
-        if not events:
+        if not events:  # if empty list, print no upcoming events
             print('No upcoming events found.')
 
         # for each event dictionary in the events list
@@ -173,8 +174,7 @@ def main():
             start = event['start'].get('dateTime', event['start'].get('date'))
             end = event['end'].get('dateTime', event['start'].get('date'))
             creator = event['creator'].get('email', [])
-            created = event['created']
-            kind = event['kind']
+            # kind = event['kind']
             status = event['status']
             summary = event['summary']
             event_id = event['id']
@@ -200,9 +200,12 @@ def main():
             #     else:
             #         conf_rm = None
 
+            # event_exists is object in the db
             event_exists = Event.query.get(event_id)
+            calevents_exists = CalEvent.query.filter_by(calendar_id=id_,
+                                                        event_id=event_id).first()
 
-            if event_exists:
+            if event_exists and calevents_exists is None:
 
                 calevent = CalEvent(calendar_id=id_,
                                     event_id=event_id,
@@ -211,7 +214,24 @@ def main():
                 db.session.add(calevent)
                 db.session.commit()
 
-            else:
+            # elif event_exists and event_exists.etag != etag:
+
+            #     event_exists.etag = etag
+            #     event_exists.creator = creator
+            #     event_exists.start = start
+            #     event_exists.end = end
+            #     event_exists.created_at = created_at
+            #     event_exists.updated_at = updated_at
+            #     event_exists.summary = summary
+
+            #     calevent = CalEvent(calendar_id=id_,
+            #                         event_id=event_id,
+            #                         status=status)
+
+            #     db.session.add(calevent)
+            #     db.session.commit()
+
+            elif event_exists is None:
 
             # if 'attendees' in event:
             #     attendees = event['attendees']
@@ -224,10 +244,6 @@ def main():
             #         else:
             #             email = attendee['email']
             #             print(email)
-
-                # print ("\n")
-                # print(conf_rm)
-                # print ("\n")
 
                 event_obj = Event(event_id=event_id,
                                   etag=etag,
