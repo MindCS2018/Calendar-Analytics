@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+    <head>
+        <link href="/static/style.css" rel="stylesheet"></link>
+        <link href="http://fonts.googleapis.com/css?family=Raleway" rel="stylesheet" type="text/css">
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.js"></script>
+        <script src="https://code.jquery.com/jquery.js"></script>
+
+
+    </head>
+
+    <body>
+        <p>Hi! Upcoming page</p>
+     
+       {% for event_obj in next_week_wfh %}
+            <br>Event: {{ event_obj.summary }}
+            <br>Start time: {{ event_obj.start.weekday() }}
+            <br>End time: {{ event_obj.end }}
+       {% endfor %}
+       <br>
+
+       <!-- cal_list = [] -->
+
+       {% for event_obj in next_week_wfh %}
+            {% for calevent in event_obj.calevents %}
+                <br>Attendee: {{ calevent.calendar_id }}
+                <!-- cal_list.append(calendar_id) -->
+            {% endfor %}
+       {% endfor %}
+
+        <div class="week-chart">
+        <canvas id="lineChart" width="400" height="200"></canvas>
+        <div id="lineLegend" class="chart-legend"></div>
+        </div>
+
+        <script>
+    var options = {
+      responsive: true
+    };
+
+    // chart
+    var ctx_line = $("#lineChart").get(0).getContext("2d");
+
+    $.get("/weekly.json", function (data) {
+
+      var myLineChart = new Chart(ctx_line).Line(data, 
+          { responsive: true,
+            maintainAspectRatio: true,
+            scaleOverride:true,
+            scaleSteps:5,
+            scaleStartValue:0,
+            scaleStepWidth:1 });
+
+      $("#lineLegend").html(myLineChart.generateLegend());
+    });
+
+  </script>
+
+
+    </body>
+</html>

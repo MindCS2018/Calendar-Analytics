@@ -26,6 +26,10 @@ class UserCal(db.Model):
     primary = db.Column(db.String(10), nullable=True)
     selected = db.Column(db.String(10), nullable=True)
 
+    user = db.relationship("User", backref=db.backref("usercals", order_by=usercal_id))
+
+    calendar = db.relationship("Calendar", backref=db.backref("usercals", order_by=usercal_id))
+
 
 class Calendar(db.Model):
     """Each calendar"""
@@ -48,6 +52,10 @@ class CalEvent(db.Model):
     calendar_id = db.Column(db.String(100), db.ForeignKey('calendars.calendar_id'))
     event_id = db.Column(db.String(100), db.ForeignKey('events.event_id'))
     status = db.Column(db.String(20), nullable=True)
+
+    event = db.relationship("Event", backref=db.backref("calevents", order_by=calevent_id))
+
+    calendar = db.relationship("Calendar", backref=db.backref("calevents", order_by=calevent_id))
 
 
 class Event(db.Model):

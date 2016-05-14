@@ -4,7 +4,7 @@ from jinja2 import StrictUndefined
 # import sys
 import os
 
-from flask import Flask, render_template, redirect, request, flash, session, url_for
+from flask import Flask, render_template, redirect, request, flash, session, url_for, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
 from model import connect_to_db, db
 import quickstart
@@ -12,12 +12,13 @@ import quickstart
 import os
 # import json
 import httplib2
+import datetime
 
 from apiclient import discovery, errors
 from oauth2client import client
 from flask import Flask, session, render_template, request, flash, redirect, url_for
 # from flask.ext.session import Session
-from flask.json import jsonify
+# from flask.json import jsonify
 from flask_debugtoolbar import DebugToolbarExtension
 from model import db, connect_to_db, Event, Calendar, User, UserCal, CalEvent
 
@@ -94,7 +95,52 @@ def login():
 def upcoming():
     """Upcoming events data analysis"""
 
-    return render_template("upcoming.html")
+    query = CalEvent.query.filter_by(event_id='sapfclg7jg6u41srgojjt66vdo_20160516').all()
+
+    current_time = datetime.datetime.utcnow()
+    ten_weeks_from_now = current_time + datetime.timedelta(weeks=10)
+    one_week_from_now = current_time + datetime.timedelta(weeks=1)
+
+    event = Event.query.filter(Event.start < ten_weeks_from_now).all()
+    week_from_now = Event.query.filter(Event.start < one_week_from_now).all()
+
+    #list of event objects
+    next_week_wfh = Event.query.filter(Event.start < one_week_from_now, Event.summary.like('%WFH%')).all()
+
+    return render_template("upcoming.html",
+                           next_week_wfh=next_week_wfh)
+
+
+@app.route('/weekly.json')
+def weekly_data():
+
+    data_dict = {
+        "labels": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        "datasets": [
+            {
+                "label": "In Office",
+                "fillColor": "rgba(220,220,220,0.2)",
+                "strokeColor": "rgba(220,220,220,1)",
+                "pointColor": "rgba(220,220,220,1)",
+                "pointStrokeColor": "#fff",
+                "pointHighlightFill": "#fff",
+                "pointHighlightStroke": "rgba(220,220,220,1)",
+                "data": [1, 0, 0, 0, 0]
+            }
+            # ,
+            # {
+            #     "label": "Cantaloupe",
+            #     "fillColor": "rgba(151,187,205,0.2)",
+            #     "strokeColor": "rgba(151,187,205,1)",
+            #     "pointColor": "rgba(151,187,205,1)",
+            #     "pointStrokeColor": "#fff",
+            #     "pointHighlightFill": "#fff",
+            #     "pointHighlightStroke": "rgba(151,187,205,1)",
+            #     "data": [28, 48, 40, 19, 86, 27, 90]
+            # }
+        ]
+    }
+    return jsonify(data_dict)
 
 
 # @app.route('/history')
