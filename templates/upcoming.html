@@ -20,21 +20,23 @@
        {% endfor %}
        <br>
 
-       <!-- cal_list = [] -->
-
        {% for event_obj in next_week_wfh %}
+            # of Attendees: {{ event_obj.calevents | length }}
             {% for calevent in event_obj.calevents %}
                 <br>Attendee: {{ calevent.calendar_id }}
-                <!-- cal_list.append(calendar_id) -->
             {% endfor %}
        {% endfor %}
 
+        <div id="bunnyslippers"></div>
         <div class="week-chart">
         <canvas id="lineChart" width="400" height="200"></canvas>
         <div id="lineLegend" class="chart-legend"></div>
         </div>
 
         <script>
+    //    var data = $.get("/week-wfh.json", function (data) {
+    //         return(data);
+    // });
     var options = {
       responsive: true
     };

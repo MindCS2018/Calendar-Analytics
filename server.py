@@ -5,7 +5,7 @@ from jinja2 import StrictUndefined
 import os
 
 from flask import Flask, render_template, redirect, request, flash, session, url_for, jsonify
-from flask_debugtoolbar import DebugToolbarExtension
+# from flask_debugtoolbar import DebugToolbarExtension
 from model import connect_to_db, db
 import quickstart
 
@@ -95,17 +95,13 @@ def login():
 def upcoming():
     """Upcoming events data analysis"""
 
-    query = CalEvent.query.filter_by(event_id='sapfclg7jg6u41srgojjt66vdo_20160516').all()
-
     current_time = datetime.datetime.utcnow()
-    ten_weeks_from_now = current_time + datetime.timedelta(weeks=10)
     one_week_from_now = current_time + datetime.timedelta(weeks=1)
 
-    event = Event.query.filter(Event.start < ten_weeks_from_now).all()
+    # event = Event.query.filter(Event.start < ten_weeks_from_now).all()
     week_from_now = Event.query.filter(Event.start < one_week_from_now).all()
-
-    #list of event objects
-    next_week_wfh = Event.query.filter(Event.start < one_week_from_now, Event.summary.like('%WFH%')).all()
+    next_week_wfh = Event.query.filter(Event.start < one_week_from_now,
+                                       Event.summary.like('%WFH%')).all()
 
     return render_template("upcoming.html",
                            next_week_wfh=next_week_wfh)
@@ -114,8 +110,25 @@ def upcoming():
 @app.route('/weekly.json')
 def weekly_data():
 
+    current_time = datetime.datetime.utcnow()
+    one_week_from_now = current_time + datetime.timedelta(weeks=1)
+
+    next_week_wfh = Event.query.filter(Event.start < one_week_from_now, Event.summary.like('%WFH%')).all()
+
+    week = {}
+
+    for event in next_week_wfh:
+        day = event.start.weekday()
+        for calevent in event.calevents:
+            week.setdefault(day, []).append(calevent.calendar_id)
+
+    week_data = [0, 0, 0, 0, 0, 0, 0]
+
+    for key, value in week.iteritems():
+        week_data[key] = len(value)
+
     data_dict = {
-        "labels": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        "labels": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
         "datasets": [
             {
                 "label": "In Office",
@@ -125,43 +138,11 @@ def weekly_data():
                 "pointStrokeColor": "#fff",
                 "pointHighlightFill": "#fff",
                 "pointHighlightStroke": "rgba(220,220,220,1)",
-                "data": [1, 0, 0, 0, 0]
+                "data": week_data
             }
-            # ,
-            # {
-            #     "label": "Cantaloupe",
-            #     "fillColor": "rgba(151,187,205,0.2)",
-            #     "strokeColor": "rgba(151,187,205,1)",
-            #     "pointColor": "rgba(151,187,205,1)",
-            #     "pointStrokeColor": "#fff",
-            #     "pointHighlightFill": "#fff",
-            #     "pointHighlightStroke": "rgba(151,187,205,1)",
-            #     "data": [28, 48, 40, 19, 86, 27, 90]
-            # }
         ]
     }
     return jsonify(data_dict)
-
-
-# @app.route('/history')
-# def index():
-#     """Historical events data analysis"""
-
-#     return render_template("history.html")
-
-
-# @app.route("/setting")
-# def settings_page():
-#     """Settings page."""
-
-#     return render_template("settings.html")
-
-
-# @app.route('/signout')
-# def index():
-#     """Signout"""
-
-#     return redirect("/")
 
 
 if __name__ == "__main__":
@@ -169,6 +150,6 @@ if __name__ == "__main__":
 
     connect_to_db(app)
 
-    DebugToolbarExtension(app)
+    # DebugToolbarExtension(app)
 
     app.run()
