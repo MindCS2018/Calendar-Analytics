@@ -12,16 +12,16 @@
                 <br>Event: {{ event_obj.summary }}
                 <br>Start time: {{ event_obj.start }}
                 <br>End time: {{ event_obj.end }}
+                <br># of Attendees: {{ event_obj.calevents | length }}<br>
            {% endfor %}
         </div>
-        <div>
-           {% for event_obj in wfh_next_week %}
-                # of Attendees: {{ event_obj.calevents | length }}
-                {% for calevent in event_obj.calevents %}
-                    <br>Attendee: {{ calevent.calendar_id }}
-                {% endfor %}
-           {% endfor %}
-        </div>
+<!--         <div>
+           {% for event_obj in wfh_next_week %} -->
+              <!--   {% for calevent in event_obj.calevents %}
+                    <br>Attendee: {{ calevent.calendar_id }} -->
+             <!--    {% endfor %} -->
+      <!--      {% endfor %}
+        </div> -->
         <div class="week-chart">
             <canvas id="lineChart" width="400" height="200"></canvas>
             <div id="lineLegend" class="chart-legend"></div>

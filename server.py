@@ -17,6 +17,7 @@ app.jinja_env.undefined = StrictUndefined
 
 
 def next_week():
+    """Pulls events for next week from db"""
 
     now = datetime.datetime.utcnow()
     next_week = now + datetime.timedelta(weeks=1)
@@ -54,6 +55,7 @@ def upcoming():
 
 @app.route('/weekly.json')
 def weekly_data():
+    """Creates data for weekly chart"""
 
     wfh_next_week = next_week()
     week = {}
@@ -63,10 +65,10 @@ def weekly_data():
         for calevent in event.calevents:
             week.setdefault(day, set()).add(calevent.calendar_id)
 
-    week_data = [0, 0, 0, 0, 0, 0, 0]
+    data = [0, 0, 0, 0, 0, 0, 0]
 
     for key, value in week.iteritems():
-        week_data[key] = len(value)
+        data[key] = len(value)
 
     data_dict = {
         "labels": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
@@ -79,7 +81,7 @@ def weekly_data():
                 "pointStrokeColor": "#fff",
                 "pointHighlightFill": "#fff",
                 "pointHighlightStroke": "rgba(151,187,205,1)",
-                "data": week_data
+                "data": data
             }
         ]
     }
