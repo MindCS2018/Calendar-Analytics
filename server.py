@@ -61,7 +61,7 @@ def weekly_data():
     for event in wfh_next_week:
         day = event.start.weekday()
         for calevent in event.calevents:
-            week.setdefault(day, []).append(calevent.calendar_id)
+            week.setdefault(day, set()).add(calevent.calendar_id)
 
     week_data = [0, 0, 0, 0, 0, 0, 0]
 

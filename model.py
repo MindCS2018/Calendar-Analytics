@@ -13,7 +13,8 @@ class User(db.Model):
     __tablename__ = "users"
 
     user_id = db.Column(db.Integer, primary_key=True)
-    calendar_list_etag = db.Column(db.String(10), nullable=True)
+    # email = db.Column(db.String(100), nullable=True)
+    # timezone = db.Column(db.String(100), nullable=True)
 
 
 class UserCal(db.Model):
@@ -25,7 +26,7 @@ class UserCal(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
     calendar_id = db.Column(db.String(100), db.ForeignKey('calendars.calendar_id'))
     primary = db.Column(db.String(10), nullable=True)
-    selected = db.Column(db.String(10), nullable=True)
+    # selected = db.Column(db.String(10), nullable=True)
 
     user = db.relationship("User", backref=db.backref("usercals", order_by=usercal_id))
 
@@ -40,7 +41,6 @@ class Calendar(db.Model):
     calendar_id = db.Column(db.String(100), primary_key=True)
     etag = db.Column(db.String(100), nullable=False)
     summary = db.Column(db.String(100), nullable=True)
-    description = db.Column(db.String(1000), nullable=True)
     timezone = db.Column(db.String(100), nullable=False)
 
 
@@ -52,7 +52,7 @@ class CalEvent(db.Model):
     calevent_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     calendar_id = db.Column(db.String(100), db.ForeignKey('calendars.calendar_id'))
     event_id = db.Column(db.String(100), db.ForeignKey('events.event_id'))
-    status = db.Column(db.String(20), nullable=True)
+    # status = db.Column(db.String(20), nullable=True)
 
     event = db.relationship("Event", backref=db.backref("calevents", order_by=calevent_id))
 
@@ -97,8 +97,3 @@ if __name__ == "__main__":
 
     # makes tables and columns
     db.create_all()
-
-    # user = User(user_id=1)
-
-    # db.session.add(user)
-    # db.session.commit()
