@@ -13,6 +13,7 @@ class User(db.Model):
     __tablename__ = "users"
 
     user_id = db.Column(db.Integer, primary_key=True)
+    calendar_list_etag = db.Column(db.String(10), nullable=True)
 
 
 class UserCal(db.Model):
@@ -97,7 +98,7 @@ if __name__ == "__main__":
     # makes tables and columns
     db.create_all()
 
-    user = User(user_id=1)
+    # user = User(user_id=1)
 
-    db.session.add(user)
-    db.session.commit()
+    # db.session.add(user)
+    # db.session.commit()

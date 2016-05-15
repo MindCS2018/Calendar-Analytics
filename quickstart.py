@@ -48,22 +48,16 @@ def get_credentials():
         flow.user_agent = APPLICATION_NAME
         if flags:
             credentials = tools.run_flow(flow, store, flags)
-
-        # Needed only for compatibility with Python 2.6
-        else:
+        else:  # Needed only for compatibility with Python 2.6
             credentials = tools.run(flow, store)
         print('Storing credentials to ' + credential_path)
     return credentials
 
 
-def main():
-    """"""
+def get_api_service():
 
     # calls get_credentials function
     credentials = get_credentials()
-
-    # would be passed from database/credentials
-    user_id = 1
 
     # Creates an httplib2.Http object to handle HTTP requests and authorizes it
     http = credentials.authorize(httplib2.Http())
@@ -71,16 +65,24 @@ def main():
     # Returns an instance of an API service object that can be used to make API calls.
     service = discovery.build('calendar', 'v3', http=http)
 
-    # 'Z' indicates UTC time
-    now = datetime.datetime.utcnow().isoformat() + 'Z'
+    return service
+
+
+def main():
+
+    service = get_api_service()
+
+    # would be passed from database/credentials
+    user_id = 1
 
     calendarsResult = service.calendarList().list().execute()
 
     # calendars_kind = calendarsResult['kind']
     # next_sync_token = calendarsResult['nextSyncToken']
-    etag = calendarsResult['etag']
+    # etag = calendarsResult['etag']
 
     calendars = calendarsResult.get('items', [])
+
     id_list = []
 
     if not calendars:
@@ -90,6 +92,7 @@ def main():
         calendar_id = calendar['id']
         timezone = calendar['timeZone']
         summary = calendar['summary']
+        etag = calendar['etag']
 
         if 'primary' in calendar:
             primary = calendar['primary']
@@ -147,6 +150,9 @@ def main():
 
             db.session.add(usercal)
             db.session.commit()
+
+    # 'Z' indicates UTC time
+    now = datetime.datetime.utcnow().isoformat() + 'Z'
 
     for id_ in id_list:  # for each calendar
 

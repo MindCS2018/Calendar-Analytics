@@ -3,62 +3,45 @@
     <head>
         <link href="/static/style.css" rel="stylesheet"></link>
         <link href="http://fonts.googleapis.com/css?family=Raleway" rel="stylesheet" type="text/css">
-
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.js"></script>
         <script src="https://code.jquery.com/jquery.js"></script>
-
-
     </head>
-
     <body>
-        <p>Hi! Upcoming page</p>
-     
-       {% for event_obj in next_week_wfh %}
-            <br>Event: {{ event_obj.summary }}
-            <br>Start time: {{ event_obj.start.weekday() }}
-            <br>End time: {{ event_obj.end }}
-       {% endfor %}
-       <br>
-
-       {% for event_obj in next_week_wfh %}
-            # of Attendees: {{ event_obj.calevents | length }}
-            {% for calevent in event_obj.calevents %}
-                <br>Attendee: {{ calevent.calendar_id }}
-            {% endfor %}
-       {% endfor %}
-
-        <div id="bunnyslippers"></div>
-        <div class="week-chart">
-        <canvas id="lineChart" width="400" height="200"></canvas>
-        <div id="lineLegend" class="chart-legend"></div>
+        <div>
+           {% for event_obj in wfh_next_week %}
+                <br>Event: {{ event_obj.summary }}
+                <br>Start time: {{ event_obj.start }}
+                <br>End time: {{ event_obj.end }}
+           {% endfor %}
         </div>
-
+        <div>
+           {% for event_obj in wfh_next_week %}
+                # of Attendees: {{ event_obj.calevents | length }}
+                {% for calevent in event_obj.calevents %}
+                    <br>Attendee: {{ calevent.calendar_id }}
+                {% endfor %}
+           {% endfor %}
+        </div>
+        <div class="week-chart">
+            <canvas id="lineChart" width="400" height="200"></canvas>
+            <div id="lineLegend" class="chart-legend"></div>
+        </div>
         <script>
-    //    var data = $.get("/week-wfh.json", function (data) {
-    //         return(data);
-    // });
-    var options = {
-      responsive: true
-    };
+            // chart
+            var ctx_line = $("#lineChart").get(0).getContext("2d");
 
-    // chart
-    var ctx_line = $("#lineChart").get(0).getContext("2d");
+            $.get("/weekly.json", function (data) {
 
-    $.get("/weekly.json", function (data) {
+              var myLineChart = new Chart(ctx_line).Line(data, 
+                  { responsive: true,
+                    maintainAspectRatio: true,
+                    scaleOverride:true,
+                    scaleSteps:5,
+                    scaleStartValue:0,
+                    scaleStepWidth:1 });
 
-      var myLineChart = new Chart(ctx_line).Line(data, 
-          { responsive: true,
-            maintainAspectRatio: true,
-            scaleOverride:true,
-            scaleSteps:5,
-            scaleStartValue:0,
-            scaleStepWidth:1 });
-
-      $("#lineLegend").html(myLineChart.generateLegend());
-    });
-
-  </script>
-
-
+              $("#lineLegend").html(myLineChart.generateLegend());
+            });
+        </script>
     </body>
 </html>
