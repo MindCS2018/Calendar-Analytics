@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="google-signin-client_id" 
+          content="607236860513-esmluht9bgt7bvdeu8i685a67414pg37.apps.googleusercontent.com">
+    <title>Login</title>
+    <script src="https://code.jquery.com/jquery.js"></script>
+</head>
+
+<!-- google something about onsignin redirect to calendar -->
+<body>
+    <div class="g-signin2" 
+         data-onsuccess="onSignIn"
+         data-onfailure="onSignInFailure">
+    </div>
+    <script>
+        function onSignIn(googleUser) {
+            window.location.replace("http://localhost:5000/calendar")
+        }
+    </script>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <br>
+    <a href="#" onclick="signOut();">Sign out</a>
+    <script>
+      function signOut() {
+        var auth2 = gapi.auth2.getAuthInstance();
+        auth2.signOut().then(function () {
+          console.log('User signed out.');
+        });
+      }
+    </script>
+    <br>
+    <a href="/calendar">Calendar</a>
+</body>
+</html>
+

@@ -3,9 +3,9 @@ from flask import Flask, render_template, redirect, url_for, jsonify  # session,
 # from flask_debugtoolbar import DebugToolbarExtension
 from jinja2 import StrictUndefined
 import quickstart
-# import httplib2
-# from apiclient import discovery, errors
-# from oauth2client import client
+import httplib2
+from apiclient import discovery, errors
+from oauth2client import client
 from model import connect_to_db, Event  # db
 import datetime
 
