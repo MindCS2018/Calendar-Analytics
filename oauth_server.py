@@ -22,6 +22,7 @@ def next_week():
     """Pulls events for next week from db"""
 
     now = datetime.datetime.utcnow()
+    # need to only pull events from calendars associated with user_id
     next_week = now + datetime.timedelta(weeks=1)
     wfh_next_week = Event.query.filter(Event.start < next_week,
                                        Event.summary.like('%WFH%')).all()
