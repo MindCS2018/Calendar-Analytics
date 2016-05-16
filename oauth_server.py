@@ -1,34 +1,32 @@
-from jinja2 import StrictUndefined
-
-# # import json
-# # import sys
-# import os
-
-# from flask import Flask, render_template, redirect, request, flash, session, url_for
-# from flask_debugtoolbar import DebugToolbarExtension
-# from model import connect_to_db, db
-# import quickstart
-
 import os
-# import json
+from flask import Flask, session, render_template, request, flash, redirect, url_for
+from flask_debugtoolbar import DebugToolbarExtension
+from flask.json import jsonify
+from jinja2 import StrictUndefined
 import httplib2
-
 from apiclient import discovery, errors
 from oauth2client import client
-from flask import Flask, session, render_template, request, flash, redirect, url_for
-# from flask.ext.session import Session
-from flask.json import jsonify
-from flask_debugtoolbar import DebugToolbarExtension
-from model import db, connect_to_db, Event, Calendar, User, UserCal, CalEvent
+from model import connect_to_db, Event, Calendar, User, UserCal, CalEvent
+import datetime
 import logging
+from seed import seed
 
 app = Flask(__name__)
-
 app.secret_key = os.environ["FLASK_APP_KEY"]
-
 app.jinja_env.undefined = StrictUndefined
 
-# Session(app)
+# import pdb; pdb.set_trace()
+
+
+def next_week():
+    """Pulls events for next week from db"""
+
+    now = datetime.datetime.utcnow()
+    next_week = now + datetime.timedelta(weeks=1)
+    wfh_next_week = Event.query.filter(Event.start < next_week,
+                                       Event.summary.like('%WFH%')).all()
+
+    return wfh_next_week
 
 
 @app.route('/')
@@ -58,9 +56,9 @@ def oauth2callback():
 
 @app.route('/calendar')
 def calendar():
+
     print("got to credentials")
 
-    # import pdb; pdb.set_trace()
     if 'credentials' not in session:
         return redirect(url_for('oauth2callback'))
     credentials = client.OAuth2Credentials.from_json(session['credentials'])
@@ -71,34 +69,50 @@ def calendar():
         http_auth = credentials.authorize(httplib2.Http())
         service = discovery.build('calendar', 'v3', http_auth)
     print "built service"
-    # return service
-    return render_template('calendar.html')
 
-    # import pdb; pdb.set_trace()
+    # seed database
+    seed(service)
 
+    # db query
+    wfh_next_week = next_week()
 
-# @app.route('/')
-# def index():
-#     """Google calendar login"""
-
-#     return render_template("homepage.html")
+    return render_template('upcoming.html',
+                           wfh_next_week=wfh_next_week)
 
 
-# @app.route('/login/')
-# def login():
-#     """Login page"""
+@app.route('/weekly.json')
+def weekly_data():
+    """Creates data for weekly chart"""
 
-#     # print "Hi, Taylor!"
-#     quickstart.main()
+    wfh_next_week = next_week()
+    week = {}
 
-#     return redirect(url_for('index'))
+    for event in wfh_next_week:
+        day = event.start.weekday()
+        for calevent in event.calevents:
+            week.setdefault(day, set()).add(calevent.calendar_id)
 
+    data = [0, 0, 0, 0, 0, 0, 0]
 
-# @app.route('/upcoming')
-# def index():
-#     """Upcoming events data analysis"""
+    for key, value in week.iteritems():
+        data[key] = len(value)
 
-#     return render_template("upcoming.html")
+    data_dict = {
+        "labels": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        "datasets": [
+            {
+                "label": "Out of Office",
+                "fillColor": "rgba(151,187,205,0.2)",
+                "strokeColor": "rgba(151,187,205,1)",
+                "pointColor": "rgba(151,187,205,1)",
+                "pointStrokeColor": "#fff",
+                "pointHighlightFill": "#fff",
+                "pointHighlightStroke": "rgba(151,187,205,1)",
+                "data": data
+            }
+        ]
+    }
+    return jsonify(data_dict)
 
 
 # @app.route('/history')
@@ -128,7 +142,7 @@ if __name__ == "__main__":
 
     app.debug = True
 
-    # connect_to_db(app)
+    connect_to_db(app)
 
     # DebugToolbarExtension(app)
 
