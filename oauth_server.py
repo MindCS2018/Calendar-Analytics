@@ -115,16 +115,17 @@ def calendar():
 #     return render_template("settings.html")
 
 
-# @app.route('/signout')
-# def index():
-#     """Signout"""
+@app.route('/logout')
+def logout():
+    """Logout"""
 
-#     return redirect("/")
+    del session['credentials']
+
+    return render_template("logout.html")
 
 
 if __name__ == "__main__":
-    # import logging
-    # logging.basicConfig(filename='debug.log', level=logging.DEBUG)
+
     app.debug = True
 
     # connect_to_db(app)
@@ -132,6 +133,3 @@ if __name__ == "__main__":
     # DebugToolbarExtension(app)
 
     app.run()
-
-    import logging
-    logging.basicConfig(filename='debug.log', level=logging.DEBUG)
