@@ -66,6 +66,7 @@ class Event(db.Model):
     etag = db.Column(db.String(100), nullable=True)
     creator = db.Column(db.String(100), nullable=True)
     start = db.Column(db.DateTime, nullable=True)
+    start_time = db.Column(db.Time, nullable=True)
     end = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, nullable=True)
     updated_at = db.Column(db.DateTime, nullable=True)

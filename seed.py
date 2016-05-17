@@ -106,8 +106,18 @@ def seed_db(service):
         for event in events:
 
             etag = event['etag']
+
+            # datetime objects
             start = event['start'].get('dateTime', event['start'].get('date'))
+
+            if 'dateTime' in event['start']:
+                start_time = start[11:]
+            else:
+                start_time = "00:00:00"
+
+            # datetime objects
             end = event['end'].get('dateTime', event['start'].get('date'))
+
             creator = event['creator'].get('email', [])
             # status = event['status']
             summary = event['summary']
@@ -182,6 +192,7 @@ def seed_db(service):
                                   etag=etag,
                                   creator=creator,
                                   start=start,
+                                  start_time=start_time,
                                   end=end,
                                   created_at=created_at,
                                   updated_at=updated_at,
