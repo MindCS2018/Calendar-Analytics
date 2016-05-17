@@ -9,7 +9,7 @@ from oauth2client import client
 from model import connect_to_db, Event, Calendar, User, UserCal, CalEvent
 import datetime
 import logging
-from seed import seed
+from seed import seed_db
 
 app = Flask(__name__)
 app.secret_key = os.environ["FLASK_APP_KEY"]
@@ -39,6 +39,7 @@ def login():
 
 @app.route("/oauth2callback")
 def oauth2callback():
+
     logging.basicConfig(filename='debug.log', level=logging.WARNING)
 
     flow = client.flow_from_clientsecrets('client_secret.json',
@@ -55,11 +56,20 @@ def oauth2callback():
         return redirect(url_for('calendar'))
 
 
-@app.route('/calendar')
+# @app.route('/tokensignin', methods=['POST'])
+# def tokensignin():
+
+#     user_id = request.form.get("user_id")
+#     username = request.form.get("username")
+#     user_email = request.form.get("user_email")
+
+#     return "hello"
+
+
+@app.route('/calendar', methods=['GET', 'POST'])
 def calendar():
 
     print("got to credentials")
-
     if 'credentials' not in session:
         return redirect(url_for('oauth2callback'))
     credentials = client.OAuth2Credentials.from_json(session['credentials'])
@@ -71,8 +81,13 @@ def calendar():
         service = discovery.build('calendar', 'v3', http_auth)
     print "built service"
 
+    # user_id = session['user_id']
+    # username = session['username']
+    # user_email = session['user_email']
+
     # seed database
-    seed(service)
+    seed_db(service)
+    # seed(service, user_id, username, user_email)
 
     # db query
     wfh_next_week = next_week()

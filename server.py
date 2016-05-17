@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, redirect, url_for, jsonify  # session, flash, request
+from flask import Flask, render_template, redirect, url_for, jsonify, session  # flash, request
 # from flask_debugtoolbar import DebugToolbarExtension
 from jinja2 import StrictUndefined
 import quickstart
@@ -86,6 +86,15 @@ def weekly_data():
         ]
     }
     return jsonify(data_dict)
+
+
+@app.route('/logout')
+def logout():
+    """Logout"""
+
+    del session['credentials']
+
+    return render_template("logout.html")
 
 
 if __name__ == "__main__":

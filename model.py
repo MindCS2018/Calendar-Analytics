@@ -1,9 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
 
-# This is the connection to the PostgreSQL database; through the
-# Flask-SQLAlchemy helper library. On this, we can find the `session`
-# object, where we do most of our interactions (like committing, etc.)
-
 db = SQLAlchemy()
 
 
@@ -12,9 +8,10 @@ class User(db.Model):
 
     __tablename__ = "users"
 
-    user_id = db.Column(db.Integer, primary_key=True)
-    # email = db.Column(db.String(100), nullable=True)
-    # timezone = db.Column(db.String(100), nullable=True)
+    # user_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String(200), primary_key=True)
+    # username = db.Column(db.String(100), nullable=True)
+    # user_email = db.Column(db.String(100), nullable=True)
 
 
 class UserCal(db.Model):
@@ -23,10 +20,11 @@ class UserCal(db.Model):
     __tablename__ = "usercals"
 
     usercal_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
+    # user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'))
+    user_id = db.Column(db.String(200), db.ForeignKey('users.user_id'))
     calendar_id = db.Column(db.String(100), db.ForeignKey('calendars.calendar_id'))
     primary = db.Column(db.String(10), nullable=True)
-    # selected = db.Column(db.String(10), nullable=True)
+    selected = db.Column(db.String(10), nullable=True)
 
     user = db.relationship("User", backref=db.backref("usercals", order_by=usercal_id))
 
@@ -76,9 +74,9 @@ class Event(db.Model):
 
 
 def connect_to_db(app):
-    """Connect the database to our Flask app."""
+    """Connects database to Flask app."""
 
-    # Configure to use our PstgreSQL database
+    # configures PostgreSQL database
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///cals'
     db.app = app
     db.init_app(app)
@@ -95,5 +93,5 @@ if __name__ == "__main__":
     connect_to_db(app)
     print "Connected to DB."
 
-    # makes tables and columns
+    # creates tables and columns
     db.create_all()
