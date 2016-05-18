@@ -1,5 +1,6 @@
 from model import db, Event, Calendar, User, UserCal, CalEvent
 import datetime
+from dateutil.relativedelta import relativedelta
 
 
 def seed_db(service, user_id, first_name, last_name, full_name):
@@ -86,11 +87,14 @@ def seed_db(service, user_id, first_name, last_name, full_name):
 
     # 'Z' indicates UTC time
     now = datetime.datetime.utcnow().isoformat() + 'Z'
+    three_months = datetime.datetime.now() + datetime.timedelta(weeks=12)
+    three_months = three_months.isoformat() + 'Z'
 
     for id_ in id_list:  # for each calendar
 
         eventsResult = service.events().list(calendarId=id_,
                                              timeMin=now,
+                                             timeMax=three_months,
                                              maxResults=100,
                                              singleEvents=True,
                                              orderBy='startTime').execute()
