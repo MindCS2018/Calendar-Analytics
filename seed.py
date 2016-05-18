@@ -1,12 +1,23 @@
 from model import db, Event, Calendar, User, UserCal, CalEvent
-import datetime
-from dateutil.relativedelta import relativedelta
+from datetime import datetime, timedelta
+from dateutil import relativedelta, parser
 
 
-def seed_db(service, user_id, first_name, last_name, full_name):
+def seed_db(calendarsResult, profile, calendar_service):
 
-    calendarsResult = service.calendarList().list().execute()
+    user_id = profile['names'][0]['metadata']['source']['id']
+    first_name = profile['names'][0].get("givenName")
+    last_name = profile['names'][0].get("familyName")
+    full_name = profile['names'][0].get("displayName")
 
+    print("\n")
+    print("started calendar service")
+    print datetime.now()
+    print("\n")
+
+    print("finished calendar service")
+    print datetime.now()
+    print("\n")
     # next_sync_token = calendarsResult['nextSyncToken']
     # calendar_etags = calendarsResult['etag']
 
@@ -26,6 +37,9 @@ def seed_db(service, user_id, first_name, last_name, full_name):
 
     id_list = []
 
+    print("for loop before calendars")
+    print datetime.now()
+    print("\n")
     for calendar in calendars:
 
         calendar_id = calendar['id']
@@ -85,19 +99,35 @@ def seed_db(service, user_id, first_name, last_name, full_name):
             db.session.add(usercal)
             db.session.commit()
 
+    print("finished calendar for loop")
+    print datetime.now()
+    print("\n")
+
     # 'Z' indicates UTC time
-    now = datetime.datetime.utcnow().isoformat() + 'Z'
-    three_months = datetime.datetime.now() + datetime.timedelta(weeks=12)
+    now = datetime.utcnow().isoformat() + 'Z'
+    three_months = datetime.now() + timedelta(weeks=12)
     three_months = three_months.isoformat() + 'Z'
+
+    # now = datetime.now().isoformat() + 'Z'
+    # three_months = datetime.now() + relativedelta(months=+6)
+    # three_months = three_months.isoformat() + 'Z'
 
     for id_ in id_list:  # for each calendar
 
-        eventsResult = service.events().list(calendarId=id_,
-                                             timeMin=now,
-                                             timeMax=three_months,
-                                             maxResults=100,
-                                             singleEvents=True,
-                                             orderBy='startTime').execute()
+        print("before event api call")
+        print datetime.now()
+        print("\n")
+
+        eventsResult = calendar_service.events().list(calendarId=id_,
+                                                      timeMin=now,
+                                                      timeMax=three_months,
+                                                      maxResults=100,
+                                                      singleEvents=True,
+                                                      orderBy='startTime').execute()
+
+        print("after event api call")
+        print datetime.now()
+        print("\n")
 
         # events_etag = eventsResult['etag']
         # events_email = eventsResult['summary']
@@ -105,6 +135,10 @@ def seed_db(service, user_id, first_name, last_name, full_name):
         # events_updated_at = eventsResult['updated']
 
         events = eventsResult.get('items', [])  # pulls events
+
+        print("before event assigning")
+        print datetime.now()
+        print("\n")
 
         for event in events:
 
@@ -115,20 +149,22 @@ def seed_db(service, user_id, first_name, last_name, full_name):
 
             if 'dateTime' in event['start']:
                 start_time = start[11:]
-                start = start[:10]
+                dt_start = parser.parse(start)
             else:
                 start_time = "00:00:00"
+                start = datetime.strptime(start, "%Y-%m-%d")
 
             # datetime objects
             end = event['end'].get('dateTime', event['start'].get('date'))
 
             if 'dateTime' in event['end']:
                 end_time = end[11:]
-                end = end[:10]
+                dt_end = parser.parse(end)
             else:
                 end_time = "00:00:00"
 
-            # time_delta =
+            duration = dt_end - dt_start
+
             creator = event['creator'].get('email', [])
             # status = event['status']
             summary = event['summary']
@@ -203,9 +239,10 @@ def seed_db(service, user_id, first_name, last_name, full_name):
                                   etag=etag,
                                   creator=creator,
                                   start=start,
-                                  start_time=start_time,
                                   end=end,
+                                  start_time=start_time,
                                   end_time=end_time,
+                                  duration=duration,
                                   # created_at=created_at,
                                   # updated_at=updated_at,
                                   summary=summary)
@@ -218,3 +255,7 @@ def seed_db(service, user_id, first_name, last_name, full_name):
 
                 db.session.add(calevent)
                 db.session.commit()
+
+        print("after event assigning")
+        print datetime.now()
+        print("\n")

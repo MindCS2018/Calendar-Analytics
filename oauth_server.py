@@ -7,7 +7,7 @@ import httplib2
 from apiclient import discovery, errors
 from oauth2client import client
 from model import connect_to_db, Event, Calendar, User, UserCal, CalEvent
-import datetime
+from datetime import datetime, timedelta
 import logging
 from seed import seed_db
 
@@ -22,10 +22,10 @@ def next_week():
     """Pulls events for next week from db"""
 
     # datetime with timezone
-    now = datetime.datetime.now()
+    now = datetime.now()
 
     # need to only pull events from calendars associated with user_id
-    next_week = now + datetime.timedelta(weeks=1)
+    next_week = now + timedelta(weeks=1)
 
     wfh_next_week = Event.query.filter(Event.start < next_week,
                                        Event.summary.like('%WFH%')).all()
@@ -36,11 +36,11 @@ def next_week():
 def out_for_lunch():
     """Out for lunch next week"""
 
-    now = datetime.datetime.now()
+    now = datetime.now()
     lunch_start = datetime.time(12)
     lunch_end = datetime.time(13)
 
-    next_week = now + datetime.timedelta(weeks=1)
+    next_week = now + timedelta(weeks=1)
 
     ofl_next_week = Event.query.filter(Event.start_time < lunch_start,
                                        Event.end_time > lunch_end,
@@ -87,18 +87,23 @@ def calendar():
         return redirect(url_for('oauth2callback'))
     else:
         http_auth = credentials.authorize(httplib2.Http())
-        service = discovery.build('calendar', 'v3', http_auth)
         people_service = discovery.build('people', 'v1', http_auth)
+        calendar_service = discovery.build('calendar', 'v3', http_auth)
+        event_service = discovery.build('calendar', 'v3')
     print "built services"
 
+    # api calls
     profile = people_service.people().get(resourceName='people/me').execute()
+    calendarsResult = calendar_service.calendarList().list().execute()
 
-    user_id = profile['names'][0]['metadata']['source']['id']
-    first_name = profile['names'][0].get("givenName")
-    last_name = profile['names'][0].get("familyName")
-    full_name = profile['names'][0].get("displayName")
+    # calendars = calendarsResult.get('items', [])
 
-    seed_db(service, user_id, first_name, last_name, full_name)
+    # id_list = []
+    # for calendar in calendars:
+    #     calendar_id = calendar['id']
+    #     id_list.append(calendar_id)
+
+    seed_db(calendarsResult, profile, calendar_service)
 
     # db query
     wfh_next_week = next_week()
