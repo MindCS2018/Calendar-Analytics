@@ -2,9 +2,7 @@ from model import db, Event, Calendar, User, UserCal, CalEvent
 import datetime
 
 
-def seed_db(service):
-
-    user_id = "1"
+def seed_db(service, user_id, first_name, last_name, full_name):
 
     calendarsResult = service.calendarList().list().execute()
 
@@ -15,9 +13,10 @@ def seed_db(service):
 
     if user_exists is None:
 
-        user = User(user_id=user_id)
-                    # username=username,
-                    # user_email=user_email)
+        user = User(user_id=user_id,
+                    first_name=first_name,
+                    last_name=last_name,
+                    full_name=full_name)
 
         db.session.add(user)
         db.session.commit()
@@ -112,18 +111,26 @@ def seed_db(service):
 
             if 'dateTime' in event['start']:
                 start_time = start[11:]
+                start = start[:10]
             else:
                 start_time = "00:00:00"
 
             # datetime objects
             end = event['end'].get('dateTime', event['start'].get('date'))
 
+            if 'dateTime' in event['end']:
+                end_time = end[11:]
+                end = end[:10]
+            else:
+                end_time = "00:00:00"
+
+            # time_delta =
             creator = event['creator'].get('email', [])
             # status = event['status']
             summary = event['summary']
             event_id = event['id']
-            created_at = event['created']
-            updated_at = event['updated']
+            # created_at = event['created']
+            # updated_at = event['updated']
 
             # if event is not already in database:
                 # add event
@@ -194,8 +201,9 @@ def seed_db(service):
                                   start=start,
                                   start_time=start_time,
                                   end=end,
-                                  created_at=created_at,
-                                  updated_at=updated_at,
+                                  end_time=end_time,
+                                  # created_at=created_at,
+                                  # updated_at=updated_at,
                                   summary=summary)
 
                 db.session.add(event_obj)

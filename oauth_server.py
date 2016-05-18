@@ -23,16 +23,30 @@ def next_week():
 
     # datetime with timezone
     now = datetime.datetime.now()
-    time = datetime.time(10, 0, 0, 0)
 
     # need to only pull events from calendars associated with user_id
     next_week = now + datetime.timedelta(weeks=1)
 
     wfh_next_week = Event.query.filter(Event.start < next_week,
-                                       Event.start_time > time,
                                        Event.summary.like('%WFH%')).all()
 
     return wfh_next_week
+
+
+def out_for_lunch():
+    """Out for lunch next week"""
+
+    now = datetime.datetime.now()
+    lunch_start = datetime.time(12)
+    lunch_end = datetime.time(13)
+
+    next_week = now + datetime.timedelta(weeks=1)
+
+    ofl_next_week = Event.query.filter(Event.start_time < lunch_start,
+                                       Event.end_time > lunch_end,
+                                       (Event.summary.like('%site%') | Event.summary.like('%ooo%'))).all()
+
+    return ofl_next_week
 
 
 @app.route('/')
@@ -48,7 +62,7 @@ def oauth2callback():
     logging.basicConfig(filename='debug.log', level=logging.WARNING)
 
     flow = client.flow_from_clientsecrets('client_secret.json',
-                                          scope='https://www.googleapis.com/auth/calendar.readonly',
+                                          scope='https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/plus.login',
                                           redirect_uri=url_for('oauth2callback', _external=True))
     if 'code' not in request.args:
         auth_uri = flow.step1_get_authorize_url()
@@ -61,17 +75,7 @@ def oauth2callback():
         return redirect(url_for('calendar'))
 
 
-# @app.route('/tokensignin', methods=['POST'])
-# def tokensignin():
-
-#     user_id = request.form.get("user_id")
-#     username = request.form.get("username")
-#     user_email = request.form.get("user_email")
-
-#     return "hello"
-
-
-@app.route('/calendar', methods=['GET', 'POST'])
+@app.route('/calendar')
 def calendar():
 
     print("got to credentials")
@@ -84,15 +88,17 @@ def calendar():
     else:
         http_auth = credentials.authorize(httplib2.Http())
         service = discovery.build('calendar', 'v3', http_auth)
-    print "built service"
+        people_service = discovery.build('people', 'v1', http_auth)
+    print "built services"
 
-    # user_id = session['user_id']
-    # username = session['username']
-    # user_email = session['user_email']
+    profile = people_service.people().get(resourceName='people/me').execute()
 
-    # seed database
-    seed_db(service)
-    # seed(service, user_id, username, user_email)
+    user_id = profile['names'][0]['metadata']['source']['id']
+    first_name = profile['names'][0].get("givenName")
+    last_name = profile['names'][0].get("familyName")
+    full_name = profile['names'][0].get("displayName")
+
+    seed_db(service, user_id, first_name, last_name, full_name)
 
     # db query
     wfh_next_week = next_week()
@@ -106,6 +112,7 @@ def weekly_data():
     """Creates data for weekly chart"""
 
     wfh_next_week = next_week()
+
     week = {}
 
     for event in wfh_next_week:
@@ -130,10 +137,29 @@ def weekly_data():
                 "pointHighlightFill": "#fff",
                 "pointHighlightStroke": "rgba(151,187,205,1)",
                 "data": data
-            }
+            },
+            {
+                "label": "Out for Lunch",
+                "fillColor": "rgba(219,186,52,0.4)",
+                "strokeColor": "rgba(220,220,220,1)",
+                "pointColor": "rgba(220,220,220,1)",
+                "pointStrokeColor": "#fff",
+                "pointHighlightFill": "#fff",
+                "pointHighlightStroke": "rgba(151,187,205,1)",
+                "data": [0, 1, 1, 1, 3, 0, 0]
+            },
         ]
     }
     return jsonify(data_dict)
+
+
+@app.route('/breakdown')
+def breakdown():
+
+    wfh_next_week = next_week()
+
+    return render_template('breakdown.html',
+                           wfh_next_week=wfh_next_week)
 
 
 # @app.route('/history')
@@ -167,4 +193,4 @@ if __name__ == "__main__":
 
     # DebugToolbarExtension(app)
 
-    # app.run()
+    app.run()

@@ -1,66 +1,11 @@
 <!doctype html>
 <html>
 <head>
-    <meta name="google-signin-client_id" 
-          content="607236860513-esmluht9bgt7bvdeu8i685a67414pg37.apps.googleusercontent.com">
-    <title>Login</title>
-    <script src="https://code.jquery.com/jquery.js"></script>
 </head>
 <body>
-    <div class="g-signin2" 
-         data-onsuccess="onSignIn"
-         data-onfailure="onSignInFailure">
-    </div>
-
-    <script>
-
-        function onSignIn(googleUser) {
-
-          var id_token = googleUser.getAuthResponse().id_token;
-
-          // console.log(id_token)
-
-          // var xhr = new XMLHttpRequest();
-          // xhr.open('POST', 'http://localhost:5000/tokensignin');
-          // xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-          // xhr.onload = function() {
-          //   console.log('Signed in as: ' + xhr.responseText);
-          // };
-          // xhr.send('idtoken=' + id_token);
-
-          //requests profile info from api
-          
-          // var profile = googleUser.getBasicProfile();
-          //   var user_id = profile.getId()
-          //   var username = profile.getName()
-          //   var user_email = profile.getEmail()
-
-          // user_data = {"user_id":user_id,
-          //              "username":username,
-          //              "user_email":user_email}
-
-          // $.ajax({
-          //         type: "POST",
-          //         url: "/tokensignin",
-          //         data: user_data
-          //       });
-
-          window.location.assign("http://localhost:5000/calendar")
-
-          // sends id to server
-          // var form = $('<form action="/calendar" method="post">' +
-          //   '<input type="hidden" name="user_id" value="' + user_id + '" />' +
-          //   '<input type="hidden" name="username" value="' + username + '" />' +
-          //   '<input type="hidden" name="user_email" value="' + user_email + '" />' +
-          //   '</form>');
-        
-
-          // $('body').append(form);
-          // form.submit();
-
-        }
-    </script>
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <form action="/oauth2callback">
+      <input type="submit" value="Sign in with google"/>
+    </form>
 </body>
 </html>
 
