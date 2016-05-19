@@ -3,21 +3,13 @@ from datetime import datetime, timedelta
 from dateutil import relativedelta, parser
 
 
-def seed_db(calendarsResult, profile, calendar_service):
+def seed_db(profile, calendarsResult, eventsResult):
 
     user_id = profile['names'][0]['metadata']['source']['id']
     first_name = profile['names'][0].get("givenName")
     last_name = profile['names'][0].get("familyName")
     full_name = profile['names'][0].get("displayName")
 
-    print("\n")
-    print("started calendar service")
-    print datetime.now()
-    print("\n")
-
-    print("finished calendar service")
-    print datetime.now()
-    print("\n")
     # next_sync_token = calendarsResult['nextSyncToken']
     # calendar_etags = calendarsResult['etag']
 
@@ -35,11 +27,12 @@ def seed_db(calendarsResult, profile, calendar_service):
 
     calendars = calendarsResult.get('items', [])
 
-    id_list = []
+    # id_list = []
 
     print("for loop before calendars")
     print datetime.now()
     print("\n")
+
     for calendar in calendars:
 
         calendar_id = calendar['id']
@@ -55,7 +48,7 @@ def seed_db(calendarsResult, profile, calendar_service):
 
         if 'selected' in calendar:
             selected = calendar['selected']
-            id_list.append(calendar_id)
+            # id_list.append(calendar_id)
         else:
             selected = False
 
@@ -104,43 +97,48 @@ def seed_db(calendarsResult, profile, calendar_service):
     print("\n")
 
     # 'Z' indicates UTC time
-    now = datetime.utcnow().isoformat() + 'Z'
-    three_months = datetime.now() + timedelta(weeks=12)
-    three_months = three_months.isoformat() + 'Z'
+    # now = datetime.utcnow().isoformat() + 'Z'
+    # three_months = datetime.now() + timedelta(weeks=12)
+    # three_months = three_months.isoformat() + 'Z'
 
     # now = datetime.now().isoformat() + 'Z'
     # three_months = datetime.now() + relativedelta(months=+6)
     # three_months = three_months.isoformat() + 'Z'
 
-    for id_ in id_list:  # for each calendar
+    # for id_ in id_list:  # for each calendar
 
-        print("before event api call")
-        print datetime.now()
-        print("\n")
+    #     print("before event api call")
+    #     print datetime.now()
+    #     print("\n")
 
-        eventsResult = calendar_service.events().list(calendarId=id_,
-                                                      timeMin=now,
-                                                      timeMax=three_months,
-                                                      maxResults=100,
-                                                      singleEvents=True,
-                                                      orderBy='startTime').execute()
+    #     eventsResult = calendar_service.events().list(calendarId=id_,
+    #                                                   timeMin=now,
+    #                                                   timeMax=three_months,
+    #                                                   maxResults=100,
+    #                                                   singleEvents=True,
+    #                                                   orderBy='startTime').execute()
 
-        print("after event api call")
-        print datetime.now()
-        print("\n")
+    #     print("after event api call")
+    #     print datetime.now()
+    #     print("\n")
 
         # events_etag = eventsResult['etag']
         # events_email = eventsResult['summary']
         # events_timezone = eventsResult['timeZone']
         # events_updated_at = eventsResult['updated']
 
-        events = eventsResult.get('items', [])  # pulls events
+    ##************* start here!
+
+    for key, value in eventsResult.iteritems():
+        items = value.get('items', [])
+
+    # events = eventsResult.get('items', [])  # pulls events
 
         print("before event assigning")
         print datetime.now()
         print("\n")
 
-        for event in events:
+        for event in items:
 
             etag = event['etag']
 
@@ -193,12 +191,12 @@ def seed_db(calendarsResult, profile, calendar_service):
 
             # event_exists in db
             event_exists = Event.query.get(event_id)
-            calevents_exists = CalEvent.query.filter_by(calendar_id=id_,
+            calevents_exists = CalEvent.query.filter_by(calendar_id=key,
                                                         event_id=event_id).first()
 
             if event_exists and calevents_exists is None:
 
-                calevent = CalEvent(calendar_id=id_,
+                calevent = CalEvent(calendar_id=key,
                                     event_id=event_id)
 
                 db.session.add(calevent)
@@ -214,7 +212,7 @@ def seed_db(calendarsResult, profile, calendar_service):
             #     event_exists.updated_at = updated_at
             #     event_exists.summary = summary
 
-            #     calevent = CalEvent(calendar_id=id_,
+            #     calevent = CalEvent(calendar_id=key,
             #                         event_id=event_id,
             #                         status=status)
 
@@ -250,7 +248,7 @@ def seed_db(calendarsResult, profile, calendar_service):
                 db.session.add(event_obj)
                 db.session.commit()
 
-                calevent = CalEvent(calendar_id=id_,
+                calevent = CalEvent(calendar_id=key,
                                     event_id=event_id)
 
                 db.session.add(calevent)

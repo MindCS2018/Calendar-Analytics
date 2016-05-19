@@ -42,7 +42,8 @@ def out_for_lunch():
 
     next_week = now + timedelta(weeks=1)
 
-    ofl_next_week = Event.query.filter(Event.start_time < lunch_start,
+    ofl_next_week = Event.query.filter(Event.start < next_week,
+                                       Event.start_time < lunch_start,
                                        Event.end_time > lunch_end,
                                        (Event.summary.like('%site%') | Event.summary.like('%ooo%'))).all()
 
@@ -75,6 +76,15 @@ def oauth2callback():
         return redirect(url_for('calendar'))
 
 
+# def batched_events(request_id, response, exception):
+#         if exception is not None:
+#             print "batched events error"
+#         else:
+#             print("\n")
+#             print request_id, response
+#             print("\n")
+
+
 @app.route('/calendar')
 def calendar():
 
@@ -89,21 +99,44 @@ def calendar():
         http_auth = credentials.authorize(httplib2.Http())
         people_service = discovery.build('people', 'v1', http_auth)
         calendar_service = discovery.build('calendar', 'v3', http_auth)
-        event_service = discovery.build('calendar', 'v3')
+        event_service = discovery.build('calendar', 'v3', http_auth)
     print "built services"
 
     # api calls
     profile = people_service.people().get(resourceName='people/me').execute()
     calendarsResult = calendar_service.calendarList().list().execute()
 
-    # calendars = calendarsResult.get('items', [])
+    eventsResult = {}
 
-    # id_list = []
-    # for calendar in calendars:
-    #     calendar_id = calendar['id']
-    #     id_list.append(calendar_id)
+    def batched_events(request_id, response, exception):
+        if exception is not None:
+            print "batching error"
+        else:
+            eventsResult[request_id] = response
 
-    seed_db(calendarsResult, profile, calendar_service)
+    batch = event_service.new_batch_http_request(callback=batched_events)
+
+    calendars = calendarsResult.get('items', [])
+
+    now = datetime.utcnow().isoformat() + 'Z'
+    three_months = datetime.now() + timedelta(weeks=12)
+    three_months = three_months.isoformat() + 'Z'
+
+    id_list = [calendar['id'] for calendar in calendars]
+
+    for id_ in id_list:
+
+        batch.add(calendar_service.events().list(calendarId=id_,
+                                                 timeMin=now,
+                                                 timeMax=three_months,
+                                                 maxResults=100,
+                                                 singleEvents=True,
+                                                 orderBy='startTime'),
+                                                 request_id=id_)
+
+    batch.execute()
+
+    seed_db(profile, calendarsResult, eventsResult)
 
     # db query
     wfh_next_week = next_week()
