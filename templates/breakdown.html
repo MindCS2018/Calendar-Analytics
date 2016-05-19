@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+    <body>
+        <div>
+           {% for event_obj in wfh_next_week %}
+                <br>Event: {{ event_obj.summary }}
+                <br>Start time: {{ event_obj.start }}
+                <br>End time: {{ event_obj.end }}
+                <br>Attendees: {{ event_obj.calevents | length }}<br>
+                {% for calevent in event_obj.calevents %}
+                    {{ calevent.calendar_id }}<br>
+                {% endfor%}
+           {% endfor %}
+        </div>
+    </body>
+</html>
