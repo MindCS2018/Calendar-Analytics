@@ -3,24 +3,27 @@ from datetime import datetime, timedelta
 from dateutil import relativedelta, parser
 
 
-def seed_db(profile, calendarsResult, eventsResult):
+def seed_db(profile, user_id, calendarsResult, eventsResult):
 
-    user_id = profile['names'][0]['metadata']['source']['id']
     first_name = profile['names'][0].get("givenName")
     last_name = profile['names'][0].get("familyName")
     full_name = profile['names'][0].get("displayName")
-
-    # next_sync_token = calendarsResult['nextSyncToken']
+    user_sync_token = calendarsResult['nextSyncToken']
     # calendar_etags = calendarsResult['etag']
 
     user_exists = User.query.get(user_id)
+
+    if user_exists:
+
+        User.user_sync_token = user_sync_token
 
     if user_exists is None:
 
         user = User(user_id=user_id,
                     first_name=first_name,
                     last_name=last_name,
-                    full_name=full_name)
+                    full_name=full_name,
+                    user_sync_token=user_sync_token)
 
         db.session.add(user)
         db.session.commit()
@@ -59,6 +62,10 @@ def seed_db(profile, calendarsResult, eventsResult):
         usercal_exists = UserCal.query.filter_by(user_id=user_id,
                                                  calendar_id=calendar_id).first()
 
+        # if next page token exists, call back to the api with the next page token
+        # next sync token @ the end
+        calendar_sync_token = eventsResult[calendar_id]['nextSyncToken']
+
         if cal_exists and usercal_exists is None:
 
             usercal = UserCal(user_id=user_id,
@@ -79,7 +86,8 @@ def seed_db(profile, calendarsResult, eventsResult):
             calendar_obj = Calendar(calendar_id=calendar_id,
                                     etag=etag,
                                     summary=summary,
-                                    timezone=timezone)
+                                    timezone=timezone,
+                                    calendar_sync_token=calendar_sync_token)
 
             db.session.add(calendar_obj)
             db.session.commit()
@@ -126,6 +134,7 @@ def seed_db(profile, calendarsResult, eventsResult):
         # events_email = eventsResult['summary']
         # events_timezone = eventsResult['timeZone']
         # events_updated_at = eventsResult['updated']
+        # calendar_sync_token = eventsResult['syncToken']
 
     ##************* start here!
 

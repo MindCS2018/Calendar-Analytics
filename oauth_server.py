@@ -89,6 +89,9 @@ def oauth2callback():
 def calendar():
 
     print("got to credentials")
+    print datetime.now()
+    print("\n")
+
     if 'credentials' not in session:
         return redirect(url_for('oauth2callback'))
     credentials = client.OAuth2Credentials.from_json(session['credentials'])
@@ -100,46 +103,112 @@ def calendar():
         people_service = discovery.build('people', 'v1', http_auth)
         calendar_service = discovery.build('calendar', 'v3', http_auth)
         event_service = discovery.build('calendar', 'v3', http_auth)
-    print "built services"
 
-    # api calls
+    print "built services"
+    print datetime.now()
+    print("\n")
+
+    print("before profile api call")
+    print datetime.now()
+    print("\n")
+
     profile = people_service.people().get(resourceName='people/me').execute()
-    calendarsResult = calendar_service.calendarList().list().execute()
+    user_id = profile['names'][0]['metadata']['source']['id']
+
+    print("after profile api call")
+    print datetime.now()
+    print("\n")
+
+    # user_exists = User.query.get(user_id)
+
+    # if user_exists:
+    #     # get sync token
+    #     user_sync_token = user_exists.user_sync_token
+    #     calendarsResult = calendar_service.calendarList().list(syncToken=user_sync_token).execute()
+    #     # update calendar info
+
+    # else:
+
+    print("before calendar api call")
+    print datetime.now()
+    print("\n")
+
+    calendarsResult = calendar_service.calendarList().list(
+        fields='nextSyncToken, etag, items, items/etag, items/id, \
+        items/primary, items/selected, items/timeZone, items/summary').execute()
+
+    print("calendarsResult")
+    print calendarsResult
+    print("\n")
+
+    print("after calendar api call")
+    print datetime.now()
+    print("\n")
+
+    calendars = calendarsResult.get('items', [])
+
+    # now = datetime.utcnow().isoformat() + 'Z'
+    # three_months = datetime.now() + timedelta(weeks=12)
+    # three_months = three_months.isoformat() + 'Z'
 
     eventsResult = {}
 
     def batched_events(request_id, response, exception):
         if exception is not None:
-            print "batching error"
+            print exception
         else:
             eventsResult[request_id] = response
 
     batch = event_service.new_batch_http_request(callback=batched_events)
 
-    calendars = calendarsResult.get('items', [])
-
-    now = datetime.utcnow().isoformat() + 'Z'
-    three_months = datetime.now() + timedelta(weeks=12)
-    three_months = three_months.isoformat() + 'Z'
-
     id_list = [calendar['id'] for calendar in calendars]
+
+    print("before events api call")
+    print datetime.now()
+    print("\n")
 
     for id_ in id_list:
 
-        batch.add(calendar_service.events().list(calendarId=id_,
-                                                 timeMin=now,
-                                                 timeMax=three_months,
-                                                 maxResults=100,
-                                                 singleEvents=True,
-                                                 orderBy='startTime'),
-                                                 request_id=id_)
+        print("before calendar db queries")
+        print datetime.now()
+        print("\n")
+        calendar_exists = Calendar.query.get(user_id)
+        if calendar_exists:
+            batch.add(calendar_service.events().list(calendarId=id_,
+                                                     syncToken=calendar_exists.calendar_sync_token,
+                                                     singleEvents=True),
+                                                     request_id=id_)
+        else:
+            batch.add(calendar_service.events().list(calendarId=id_,
+                                                     singleEvents=True),
+                                                     request_id=id_)
+    print("after calendar db queries")
+    print datetime.now()
+    print("\n")
 
     batch.execute()
 
-    seed_db(profile, calendarsResult, eventsResult)
+    print("after events api call")
+    print datetime.now()
+    print("\n")
+
+    print("before db seed")
+    print datetime.now()
+    print("\n")
+
+    print "eventsResult"
+    print eventsResult
+    print("\n")
+    seed_db(profile, user_id, calendarsResult, eventsResult)
+    print("after db seed")
+    print datetime.now()
+    print("\n")
 
     # db query
     wfh_next_week = next_week()
+    print("after db query")
+    print datetime.now()
+    print("\n")
 
     return render_template('upcoming.html',
                            wfh_next_week=wfh_next_week)
