@@ -1,6 +1,6 @@
 from model import db, Event, Calendar, User, UserCal, CalEvent
-from datetime import datetime, timedelta
-from dateutil import relativedelta, parser
+from datetime import datetime
+# from dateutil import relativedelta, parser
 
 
 def seed_db(profile, calendarsResult, eventsResult):
@@ -31,8 +31,6 @@ def seed_db(profile, calendarsResult, eventsResult):
 
     calendars = calendarsResult.get('items', [])
 
-    # id_list = []
-
     print("for loop before calendars")
     print datetime.now()
     print("\n")
@@ -46,13 +44,13 @@ def seed_db(profile, calendarsResult, eventsResult):
 
         if 'primary' in calendar:
             primary = calendar['primary']
-            # user_id = calendar_id
+
         else:
             primary = False
 
         if 'selected' in calendar:
             selected = calendar['selected']
-            # id_list.append(calendar_id)
+
         else:
             selected = False
 
@@ -105,44 +103,8 @@ def seed_db(profile, calendarsResult, eventsResult):
     print datetime.now()
     print("\n")
 
-    # 'Z' indicates UTC time
-    # now = datetime.utcnow().isoformat() + 'Z'
-    # three_months = datetime.now() + timedelta(weeks=12)
-    # three_months = three_months.isoformat() + 'Z'
-
-    # now = datetime.now().isoformat() + 'Z'
-    # three_months = datetime.now() + relativedelta(months=+6)
-    # three_months = three_months.isoformat() + 'Z'
-
-    # for id_ in id_list:  # for each calendar
-
-    #     print("before event api call")
-    #     print datetime.now()
-    #     print("\n")
-
-    #     eventsResult = calendar_service.events().list(calendarId=id_,
-    #                                                   timeMin=now,
-    #                                                   timeMax=three_months,
-    #                                                   maxResults=100,
-    #                                                   singleEvents=True,
-    #                                                   orderBy='startTime').execute()
-
-    #     print("after event api call")
-    #     print datetime.now()
-    #     print("\n")
-
-        # events_etag = eventsResult['etag']
-        # events_email = eventsResult['summary']
-        # events_timezone = eventsResult['timeZone']
-        # events_updated_at = eventsResult['updated']
-        # calendar_sync_token = eventsResult['syncToken']
-
-    ##************* start here!
-
     for key, value in eventsResult.iteritems():
         items = value.get('items', [])
-
-    # events = eventsResult.get('items', [])  # pulls events
 
         print("before event assigning")
         print datetime.now()
@@ -151,55 +113,13 @@ def seed_db(profile, calendarsResult, eventsResult):
         for event in items:
 
             etag = event['etag']
-
-            # datetime objects
             start = event['start'].get('dateTime', event['start'].get('date'))
-
-            if 'dateTime' in event['start']:
-                start_time = start[11:]
-                dt_start = parser.parse(start)
-            else:
-                start_time = "00:00:00"
-                start = datetime.strptime(start, "%Y-%m-%d")
-
-            # datetime objects
             end = event['end'].get('dateTime', event['start'].get('date'))
-
-            if 'dateTime' in event['end']:
-                end_time = end[11:]
-                dt_end = parser.parse(end)
-            else:
-                end_time = "00:00:00"
-
-            duration = dt_end - dt_start
-
             creator = event['creator'].get('email', [])
             # status = event['status']
             summary = event['summary']
             event_id = event['id']
-            # created_at = event['created']
-            # updated_at = event['updated']
 
-            # if event is not already in database:
-                # add event
-                # add guest
-            # else: (if event is in the database)
-                # if we haven't looked @ their calendar before
-                # add guest
-
-            # if 'attendees' in event:
-            #     attendees = event['attendees']
-            # else:
-            #     conf_rm = None
-
-            # for attendee in attendees:
-            #     if 'resource' in attendee:
-            #         conf_rm = attendee['displayName']
-            #         break
-            #     else:
-            #         conf_rm = None
-
-            # event_exists in db
             event_exists = Event.query.get(event_id)
             calevents_exists = CalEvent.query.filter_by(calendar_id=key,
                                                         event_id=event_id).first()
@@ -212,47 +132,13 @@ def seed_db(profile, calendarsResult, eventsResult):
                 db.session.add(calevent)
                 db.session.commit()
 
-            # elif event_exists and event_exists.etag != etag:
-
-            #     event_exists.etag = etag
-            #     event_exists.creator = creator
-            #     event_exists.start = start
-            #     event_exists.end = end
-            #     event_exists.created_at = created_at
-            #     event_exists.updated_at = updated_at
-            #     event_exists.summary = summary
-
-            #     calevent = CalEvent(calendar_id=key,
-            #                         event_id=event_id,
-            #                         status=status)
-
-            #     db.session.add(calevent)
-            #     db.session.commit()
-
             elif event_exists is None:
-
-            # if 'attendees' in event:
-            #     attendees = event['attendees']
-            #     print(attendees)
-
-            #     for attendee in attendees:
-            #         if 'resource' in attendee:
-            #             display_name = attendee['displayName']
-            #             print(display_name)
-            #         else:
-            #             email = attendee['email']
-            #             print(email)
 
                 event_obj = Event(event_id=event_id,
                                   etag=etag,
                                   creator=creator,
                                   start=start,
                                   end=end,
-                                  start_time=start_time,
-                                  end_time=end_time,
-                                  duration=duration,
-                                  # created_at=created_at,
-                                  # updated_at=updated_at,
                                   summary=summary)
 
                 db.session.add(event_obj)

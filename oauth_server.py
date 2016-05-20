@@ -194,21 +194,6 @@ def breakdown():
                            wfh_next_week=wfh_next_week)
 
 
-@app.route('/chart')
-def index():
-    """Example chart"""
-
-    return render_template("index.html")
-
-
-# @app.route("/debt.csv")
-# def settings_page():
-#     """"""
-#     f = open('debt.csv')
-
-#     return jsonify
-
-
 @app.route('/logout')
 def logout():
     """Logout"""
@@ -228,4 +213,4 @@ if __name__ == "__main__":
 
     app.run()
 
-    url_for('static', filename='debt.csv')
+    # url_for('static', filename='debt.csv')

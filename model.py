@@ -68,12 +68,18 @@ class Event(db.Model):
     creator = db.Column(db.String(100), nullable=True)
     start = db.Column(db.DateTime, nullable=True)
     end = db.Column(db.DateTime, nullable=True)
-    start_time = db.Column(db.Time, nullable=True)
-    end_time = db.Column(db.Time, nullable=True)
-    duration = db.Column(db.Interval, nullable=True)
-    # updated_at = db.Column(db.DateTime, nullable=True)
     summary = db.Column(db.String(1000), nullable=True)
-    # conf_rm = db.Column(db.String(40), nullable=True)
+
+    @property
+    def duration(self):
+        return self.end - self.start
+
+    # def serialize(self):
+        """Return DB object as dictionary.
+        given a list of Events, do (in route)
+        my_future_json = {"data" :[e.serialize() for e in events_objects]}
+        """
+    #   return {id: seld.event_id, end: seld.end.str() }
 
 
 def connect_to_db(app):
