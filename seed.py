@@ -3,9 +3,8 @@ from datetime import datetime
 # from dateutil import relativedelta, parser
 
 
-def seed_db(profile, calendarsResult, eventsResult):
+def seed_user(profile, user_id):
 
-    user_id = profile['names'][0]['metadata']['source']['id']
     first_name = profile['names'][0].get("givenName")
     last_name = profile['names'][0].get("familyName")
     full_name = profile['names'][0].get("displayName")
@@ -29,11 +28,12 @@ def seed_db(profile, calendarsResult, eventsResult):
         db.session.add(user)
         db.session.commit()
 
-    calendars = calendarsResult.get('items', [])
+    return user_id
 
-    print("for loop before calendars")
-    print datetime.now()
-    print("\n")
+
+def seed_calendars(calendarsResult, user_id):
+
+    calendars = calendarsResult.get('items', [])
 
     for calendar in calendars:
 
@@ -99,16 +99,13 @@ def seed_db(profile, calendarsResult, eventsResult):
             db.session.add(usercal)
             db.session.commit()
 
-    print("finished calendar for loop")
-    print datetime.now()
-    print("\n")
+    return calendar_id
+
+
+def seed_events(eventsResult):
 
     for key, value in eventsResult.iteritems():
         items = value.get('items', [])
-
-        print("before event assigning")
-        print datetime.now()
-        print("\n")
 
         for event in items:
 
@@ -149,7 +146,3 @@ def seed_db(profile, calendarsResult, eventsResult):
 
                 db.session.add(calevent)
                 db.session.commit()
-
-        print("after event assigning")
-        print datetime.now()
-        print("\n")

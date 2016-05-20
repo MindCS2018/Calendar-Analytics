@@ -75,7 +75,7 @@ class Event(db.Model):
         return self.end - self.start
 
     # def serialize(self):
-        """Return DB object as dictionary.
+        """Returns DB object as dictionary
         given a list of Events, do (in route)
         my_future_json = {"data" :[e.serialize() for e in events_objects]}
         """

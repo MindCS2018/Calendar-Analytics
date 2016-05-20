@@ -9,7 +9,7 @@ from oauth2client import client
 from model import connect_to_db, Event, Calendar, User, UserCal, CalEvent
 from datetime import datetime, timedelta
 import logging
-from seed import seed_db
+from seed import seed_user, seed_calendars, seed_events
 
 
 app = Flask(__name__)
@@ -93,6 +93,7 @@ def calendar():
         event_service = discovery.build('calendar', 'v3', http_auth)
 
     profile = people_service.people().get(resourceName='people/me').execute()
+    user_id = profile['names'][0]['metadata']['source']['id']
 
     calendarsResult = calendar_service.calendarList().list(
         fields='etag, items, items/etag, items/id, items/primary, \
@@ -128,7 +129,9 @@ def calendar():
 
     batch.execute()
 
-    seed_db(profile, calendarsResult, eventsResult)
+    seed_user(profile, user_id)
+    seed_calendars(calendarsResult, user_id)
+    seed_events(eventsResult)
 
     # db query
     wfh_next_week = next_week()
