@@ -133,12 +133,16 @@ def calendar():
     seed_calendars(calendarsResult, user_id)
     seed_events(eventsResult)
 
+    return render_template('calendars.html')
+
+
+@app.route('/chart')
+def chart():
+
     # db query
     wfh_next_week = next_week()
 
-    print datetime.now()
-
-    return render_template('upcoming.html',
+    return render_template('chart.html',
                            wfh_next_week=wfh_next_week)
 
 
