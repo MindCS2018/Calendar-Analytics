@@ -1,6 +1,6 @@
 import os
 from flask import Flask, session, render_template, request, flash, redirect, url_for
-from flask_debugtoolbar import DebugToolbarExtension
+# from flask_debugtoolbar import DebugToolbarExtension
 from flask.json import jsonify
 from jinja2 import StrictUndefined
 import httplib2
@@ -87,48 +87,60 @@ def calendar():
     if credentials.access_token_expired:
         return redirect(url_for('oauth2callback'))
     else:
+        # creates api service objects
         http_auth = credentials.authorize(httplib2.Http())
         people_service = discovery.build('people', 'v1', http_auth)
         calendar_service = discovery.build('calendar', 'v3', http_auth)
         event_service = discovery.build('calendar', 'v3', http_auth)
 
+    # profile api call
     profile = people_service.people().get(resourceName='people/me').execute()
     user_id = profile['names'][0]['metadata']['source']['id']
 
+    # calendars api call
     calendarsResult = calendar_service.calendarList().list(
         fields='etag, items, items/etag, items/id, items/primary, \
         items/selected, items/timeZone, items/summary').execute()
 
+    # empty dictionary for events api call
     eventsResult = {}
 
+    # callback from events batch needs to be created before batch request
     def batched_events(request_id, response, exception):
         if exception is not None:
             print "batching error"
         else:
             eventsResult[request_id] = response
 
+    # batch request
     batch = event_service.new_batch_http_request(callback=batched_events)
 
-    calendars = calendarsResult.get('items', [])
-
+    # datetime variables for event API calls
     now = datetime.utcnow().isoformat() + 'Z'
     three_months = datetime.now() + timedelta(weeks=12)
     three_months = three_months.isoformat() + 'Z'
 
+    # list of calendar dictionaries
+    calendars = calendarsResult.get('items', [])
+
+    # creates list of calendar_ids to iterate through
     id_list = [calendar['id'] for calendar in calendars]
 
-    for id_ in id_list:
+    # API request for events in each calendar
+    for calendar_id in id_list:
 
-        batch.add(calendar_service.events().list(calendarId=id_,
+        batch.add(calendar_service.events().list(calendarId=calendar_id,
                                                  timeMin=now,
                                                  timeMax=three_months,
                                                  maxResults=100,
                                                  singleEvents=True,
                                                  orderBy='startTime'),
-                                                 request_id=id_)
+                                                 request_id=calendar_id)
 
+    # executes batch api call
     batch.execute()
 
+    # database seed
     seed_user(profile, user_id)
     seed_calendars(calendarsResult, user_id)
     seed_events(eventsResult)
