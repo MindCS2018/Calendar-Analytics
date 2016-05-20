@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 import logging
 from seed import seed_db
 
+
 app = Flask(__name__)
 app.secret_key = os.environ["FLASK_APP_KEY"]
 app.jinja_env.undefined = StrictUndefined
@@ -76,21 +77,8 @@ def oauth2callback():
         return redirect(url_for('calendar'))
 
 
-# def batched_events(request_id, response, exception):
-#         if exception is not None:
-#             print "batched events error"
-#         else:
-#             print("\n")
-#             print request_id, response
-#             print("\n")
-
-
 @app.route('/calendar')
 def calendar():
-
-    print("got to credentials")
-    print datetime.now()
-    print("\n")
 
     if 'credentials' not in session:
         return redirect(url_for('oauth2callback'))
@@ -104,111 +92,48 @@ def calendar():
         calendar_service = discovery.build('calendar', 'v3', http_auth)
         event_service = discovery.build('calendar', 'v3', http_auth)
 
-    print "built services"
-    print datetime.now()
-    print("\n")
-
-    print("before profile api call")
-    print datetime.now()
-    print("\n")
-
     profile = people_service.people().get(resourceName='people/me').execute()
-    user_id = profile['names'][0]['metadata']['source']['id']
-
-    print("after profile api call")
-    print datetime.now()
-    print("\n")
-
-    # user_exists = User.query.get(user_id)
-
-    # if user_exists:
-    #     # get sync token
-    #     user_sync_token = user_exists.user_sync_token
-    #     calendarsResult = calendar_service.calendarList().list(syncToken=user_sync_token).execute()
-    #     # update calendar info
-
-    # else:
-
-    print("before calendar api call")
-    print datetime.now()
-    print("\n")
 
     calendarsResult = calendar_service.calendarList().list(
-        fields='nextSyncToken, etag, items, items/etag, items/id, \
-        items/primary, items/selected, items/timeZone, items/summary').execute()
-
-    print("calendarsResult")
-    print calendarsResult
-    print("\n")
-
-    print("after calendar api call")
-    print datetime.now()
-    print("\n")
-
-    calendars = calendarsResult.get('items', [])
-
-    # now = datetime.utcnow().isoformat() + 'Z'
-    # three_months = datetime.now() + timedelta(weeks=12)
-    # three_months = three_months.isoformat() + 'Z'
+        fields='etag, items, items/etag, items/id, items/primary, \
+        items/selected, items/timeZone, items/summary').execute()
 
     eventsResult = {}
 
     def batched_events(request_id, response, exception):
         if exception is not None:
-            print exception
+            print "batching error"
         else:
             eventsResult[request_id] = response
 
     batch = event_service.new_batch_http_request(callback=batched_events)
 
-    id_list = [calendar['id'] for calendar in calendars]
+    calendars = calendarsResult.get('items', [])
 
-    print("before events api call")
-    print datetime.now()
-    print("\n")
+    now = datetime.utcnow().isoformat() + 'Z'
+    three_months = datetime.now() + timedelta(weeks=12)
+    three_months = three_months.isoformat() + 'Z'
+
+    id_list = [calendar['id'] for calendar in calendars]
 
     for id_ in id_list:
 
-        print("before calendar db queries")
-        print datetime.now()
-        print("\n")
-        calendar_exists = Calendar.query.get(user_id)
-        if calendar_exists:
-            batch.add(calendar_service.events().list(calendarId=id_,
-                                                     syncToken=calendar_exists.calendar_sync_token,
-                                                     singleEvents=True),
-                                                     request_id=id_)
-        else:
-            batch.add(calendar_service.events().list(calendarId=id_,
-                                                     singleEvents=True),
-                                                     request_id=id_)
-    print("after calendar db queries")
-    print datetime.now()
-    print("\n")
+        batch.add(calendar_service.events().list(calendarId=id_,
+                                                 timeMin=now,
+                                                 timeMax=three_months,
+                                                 maxResults=100,
+                                                 singleEvents=True,
+                                                 orderBy='startTime'),
+                                                 request_id=id_)
 
     batch.execute()
 
-    print("after events api call")
-    print datetime.now()
-    print("\n")
-
-    print("before db seed")
-    print datetime.now()
-    print("\n")
-
-    print "eventsResult"
-    print eventsResult
-    print("\n")
-    seed_db(profile, user_id, calendarsResult, eventsResult)
-    print("after db seed")
-    print datetime.now()
-    print("\n")
+    seed_db(profile, calendarsResult, eventsResult)
 
     # db query
     wfh_next_week = next_week()
-    print("after db query")
+
     print datetime.now()
-    print("\n")
 
     return render_template('upcoming.html',
                            wfh_next_week=wfh_next_week)
@@ -269,18 +194,19 @@ def breakdown():
                            wfh_next_week=wfh_next_week)
 
 
-# @app.route('/history')
-# def index():
-#     """Historical events data analysis"""
+@app.route('/chart')
+def index():
+    """Example chart"""
 
-#     return render_template("history.html")
+    return render_template("index.html")
 
 
-# @app.route("/setting")
+# @app.route("/debt.csv")
 # def settings_page():
-#     """Settings page."""
+#     """"""
+#     f = open('debt.csv')
 
-#     return render_template("settings.html")
+#     return jsonify
 
 
 @app.route('/logout')
@@ -301,3 +227,5 @@ if __name__ == "__main__":
     # DebugToolbarExtension(app)
 
     app.run()
+
+    url_for('static', filename='debt.csv')

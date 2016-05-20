@@ -12,7 +12,7 @@ class User(db.Model):
     first_name = db.Column(db.String(200), nullable=True)
     last_name = db.Column(db.String(200), nullable=True)
     full_name = db.Column(db.String(200), nullable=True)
-    user_sync_token = db.Column(db.String(200), nullable=True)
+    # user_sync_token = db.Column(db.String(200), nullable=True)
 
 
 class UserCal(db.Model):
@@ -40,7 +40,7 @@ class Calendar(db.Model):
     etag = db.Column(db.String(100), nullable=False)
     summary = db.Column(db.String(100), nullable=True)
     timezone = db.Column(db.String(100), nullable=False)
-    calendar_sync_token = db.Column(db.String(200), nullable=True)
+    # calendar_sync_token = db.Column(db.String(200), nullable=True)
 
 
 class CalEvent(db.Model):
