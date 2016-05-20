@@ -136,16 +136,6 @@ def calendar():
     return render_template('calendars.html')
 
 
-@app.route('/chart')
-def chart():
-
-    # db query
-    wfh_next_week = next_week()
-
-    return render_template('chart.html',
-                           wfh_next_week=wfh_next_week)
-
-
 @app.route('/weekly.json')
 def weekly_data():
     """Creates data for weekly chart"""
@@ -190,6 +180,16 @@ def weekly_data():
         ]
     }
     return jsonify(data_dict)
+
+
+@app.route('/chart')
+def chart():
+
+    # db query
+    wfh_next_week = next_week()
+
+    return render_template('chart.html',
+                           wfh_next_week=wfh_next_week)
 
 
 @app.route('/breakdown')
