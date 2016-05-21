@@ -75,11 +75,18 @@ class Event(db.Model):
         return self.end - self.start
 
     # def serialize(self):
-        """Returns DB object as dictionary
-        given a list of Events, do (in route)
-        my_future_json = {"data" :[e.serialize() for e in events_objects]}
-        """
-    #   return {id: seld.event_id, end: seld.end.str() }
+    #     """Returns DB object as dictionary
+    #     given a list of Events, do (in route)
+    #     my_future_json = {"data" :[e.serialize() for e in events_objects]}
+    #     """
+        # def cal_id():
+        #     """"""
+        #     return calendar_id # or calevent object
+
+        # return {"event_id": self.event_id,
+        #         "duration": self.duration, # stringify, create helper function
+        #         "summary": self.summary,
+        #         "calendar_id": self.calevents}
 
 
 def connect_to_db(app):

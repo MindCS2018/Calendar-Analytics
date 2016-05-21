@@ -1,7 +1,7 @@
 import os
-from flask import Flask, session, render_template, request, flash, redirect, url_for
+from flask import Flask, session, render_template, request
+from flask import flash, redirect, url_for, jsonify
 # from flask_debugtoolbar import DebugToolbarExtension
-from flask.json import jsonify
 from jinja2 import StrictUndefined
 import httplib2
 from apiclient import discovery, errors
@@ -34,21 +34,21 @@ def next_week():
     return wfh_next_week
 
 
-def out_for_lunch():
-    """Out for lunch next week"""
+# def out_for_lunch():
+#     """Out for lunch next week"""
 
-    now = datetime.now()
-    lunch_start = datetime.time(12)
-    lunch_end = datetime.time(13)
+#     now = datetime.now()
+#     lunch_start = datetime.time(12)
+#     lunch_end = datetime.time(13)
 
-    next_week = now + timedelta(weeks=1)
+#     next_week = now + timedelta(weeks=1)
 
-    ofl_next_week = Event.query.filter(Event.start < next_week,
-                                       Event.start_time < lunch_start,
-                                       Event.end_time > lunch_end,
-                                       (Event.summary.like('%site%') | Event.summary.like('%ooo%'))).all()
+#     ofl_next_week = Event.query.filter(Event.start < next_week,
+#                                        Event.start_time < lunch_start,
+#                                        Event.end_time > lunch_end,
+#                                        (Event.summary.like('%site%') | Event.summary.like('%ooo%'))).all()
 
-    return ofl_next_week
+#     return ofl_next_week
 
 
 @app.route('/')
@@ -146,6 +146,14 @@ def calendar():
     seed_events(eventsResult)
 
     return render_template('calendars.html')
+
+
+@app.route('/chord.json')
+def chord():
+
+    chord_data = {"data": [e.serialize() for e in Event.query.all()]}
+
+    return jsonify(chord_data)
 
 
 @app.route('/weekly.json')
