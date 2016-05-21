@@ -71,22 +71,32 @@ class Event(db.Model):
     summary = db.Column(db.String(1000), nullable=True)
 
     @property
-    def duration(self):
-        return self.end - self.start
+    def duration_minutes(self):
+        """Given an event object,
+        returns number of minutes."""
 
-    # def serialize(self):
-    #     """Returns DB object as dictionary
-    #     given a list of Events, do (in route)
-    #     my_future_json = {"data" :[e.serialize() for e in events_objects]}
-    #     """
-        # def cal_id():
-        #     """"""
-        #     return calendar_id # or calevent object
+        time_delta = self.end - self.start
+        minutes = int(time_delta.total_seconds()/60)
+        return minutes
 
-        # return {"event_id": self.event_id,
-        #         "duration": self.duration, # stringify, create helper function
-        #         "summary": self.summary,
-        #         "calendar_id": self.calevents}
+    def get_calendar_ids(self):
+        """Given an event object,
+        return a list of calendar_ids associated with the event"""
+
+        calendar_ids = [calevent.calendar_id for calevent in self.calevents]
+
+        return calendar_ids
+
+    def serialize(self):
+        """Given a list of events,
+        returns DB object as a dictionary"""
+
+        calendar_ids = self.get_calendar_ids()
+
+        return {"event_id": self.event_id,
+                "duration": self.duration_minutes,
+                "summary": self.summary,
+                "calendar_ids": calendar_ids}
 
 
 def connect_to_db(app):

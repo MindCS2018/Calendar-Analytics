@@ -111,7 +111,7 @@ def seed_events(eventsResult):
 
             etag = event['etag']
             start = event['start'].get('dateTime', event['start'].get('date'))
-            end = event['end'].get('dateTime', event['start'].get('date'))
+            end = event['end'].get('dateTime', event['end'].get('date'))
             creator = event['creator'].get('email', [])
             # status = event['status']
             summary = event['summary']

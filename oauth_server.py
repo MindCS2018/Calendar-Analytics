@@ -19,6 +19,11 @@ app.jinja_env.undefined = StrictUndefined
 # import pdb; pdb.set_trace()
 
 
+def events_query():
+
+    return Event.query.all()
+
+
 def next_week():
     """Pulls events for next week from db"""
 
@@ -28,10 +33,8 @@ def next_week():
     # need to only pull events from calendars associated with user_id
     next_week = now + timedelta(weeks=1)
 
-    wfh_next_week = Event.query.filter(Event.start < next_week,
-                                       Event.summary.like('%WFH%')).all()
-
-    return wfh_next_week
+    return Event.query.filter(Event.start < next_week,
+                              Event.summary.like('%WFH%')).all()
 
 
 # def out_for_lunch():
@@ -66,6 +69,7 @@ def oauth2callback():
     flow = client.flow_from_clientsecrets('client_secret.json',
                                           scope='https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/plus.login',
                                           redirect_uri=url_for('oauth2callback', _external=True))
+
     if 'code' not in request.args:
         auth_uri = flow.step1_get_authorize_url()
         return redirect(auth_uri)
@@ -151,7 +155,9 @@ def calendar():
 @app.route('/chord.json')
 def chord():
 
-    chord_data = {"data": [e.serialize() for e in Event.query.all()]}
+    events = events_query()
+
+    chord_data = {"data": [event.serialize() for event in events]}
 
     return jsonify(chord_data)
 
