@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="static/style.css">
+    <style>
+
+      /* on hover info for chord diagram*/
+      #tooltip {
+        color: black;
+        opacity: 1;
+        background: white;
+        padding: 5px;
+        border: 1px solid lightgrey;
+        border-radius: 5px;
+        position: absolute;
+        z-index: 10;
+        visibility: hidden;
+        white-space: nowrap;
+        pointer-events: none;
+      }
+      #circle circle {
+        fill: none;
+        pointer-events: all;
+      }
+      path.group {
+        fill-opacity: .8;
+      }
+      path.chord {
+        fill-opacity: .8;
+        stroke: #000;
+        stroke-width: .25px;
+      }
+      #circle:hover path.fade {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="tooltip"></div>
+    <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore.js"></script>
+    <script src="{{ url_for('static', filename='mapper.js') }}"></script>
+    <script>
+       "use strict"; 
+
+      //  creates matrix and map
+      d3.csv('static/meetings.csv', function (error, data) {
+        var mpr = chordMpr(data);
+
+        mpr
+          .addValuesToMap('importer1')
+          .addValuesToMap('importer2')
+          .setFilter(function (row, a, b) {
+            return (row.importer1 === a.name && row.importer2 === b.name) ||
+                   (row.importer1 === b.name && row.importer2 === a.name)
+          })
+          .setAccessor(function (recs, a, b) {
+            if (!recs[0]) return 0;
+              return recs[0].importer1 === a.name ? +recs[0].flow1 : +recs[0].flow2; 
+          });
+        drawChords(mpr.getMatrix(), mpr.getMap());
+      });
+
+      // draws the chord diagram
+      function drawChords (matrix, mmap) {
+        var w = 880, h = 700, r1 = h / 2, r0 = r1 - 110;
+
+        // sets color palette 
+        // var fill = d3.scale.category20b()
+
+        var fill = d3.scale.ordinal()
+            .range(['#d4d7d9','#3c3c3c','#bd7aa9','#848589','#884e7a','#6a657c','#606165','#9999a4','#61475d','#8ca49c',]);
+
+        // constructs a new chord layout
+        var chord = d3.layout.chord()
+            .padding(.02)
+            .sortSubgroups(d3.descending)
+            .sortChords(d3.descending);
+
+        var arc = d3.svg.arc()
+            .innerRadius(r0)
+            .outerRadius(r0 + 20);
+
+        // attempting to make responsive
+        var svg = d3.select("body").append("svg:svg")
+            .attr("width", w)
+            .attr("height", h)
+            .append("svg:g")
+            .attr("id", "circle")
+            .attr("transform", "translate(" + w / 2 + "," + h / 2 + ")")
+            svg.append("circle")
+                .attr("r", r0 + 20)
+                // .attr("viewBox","0 0 880 700")
+                // .attr("preserveAspectRation","xMidYMid meet");
+
+        // function that returns a function
+        var rdr = chordRdr(matrix, mmap);
+        chord.matrix(matrix);
+
+        // mousover and mouseout for tooltip
+        var g = svg.selectAll("g.group")
+            .data(chord.groups())
+          .enter().append("svg:g")
+            .attr("class", "group")
+            .on("mouseover", mouseover)
+            .on("mouseout", function (d) { d3.select("#tooltip").style("visibility", "hidden") });
+
+        g.append("svg:path")
+            // border color for nodes
+            .style("stroke", "black")
+            .style("fill", function(d) { return fill(rdr(d).gname); })
+            .attr("d", arc);
+
+        // node names
+        g.append("svg:text")
+            .each(function(d) { d.angle = (d.startAngle + d.endAngle) / 2; })
+            .attr("dy", ".35em")
+            .style("font-family", "helvetica, arial, sans-serif")
+            .style("font-size", "10px")
+            .attr("text-anchor", function(d) { return d.angle > Math.PI ? "end" : null; })
+
+            // rotates node labels
+            .attr("transform", function(d) {
+              return "rotate(" + (d.angle * 180 / Math.PI - 90) + ")"
+                  + "translate(" + (r0 + 26) + ")"
+                  + (d.angle > Math.PI ? "rotate(180)" : "");
+            })
+            .text(function(d) { return rdr(d).gname; });
+
+          var chordPaths = svg.selectAll("path.chord")
+                .data(chord.chords())
+              .enter().append("svg:path")
+                .attr("class", "chord")
+                .style("stroke", function(d) { return d3.rgb(fill(rdr(d).sname)).darker(); })
+                .style("fill", function(d) { return fill(rdr(d).sname); })
+                .attr("d", d3.svg.chord().radius(r0))
+                .on("mouseover", function (d) {
+                  d3.select("#tooltip")
+                    .style("visibility", "visible")
+                    // calls chord tip
+                    // sets location of hover text
+                    .html(chordTip(rdr(d)))
+                    .style("top", function () { return (d3.event.pageY - 170)+"px"})
+                    .style("left", function () { return (d3.event.pageX - 100)+"px";})
+                })
+                .on("mouseout", function (d) { d3.select("#tooltip").style("visibility", "hidden") });
+
+          // use moment.js for datetime conversions!
+          // hover text
+          function chordTip (d) {
+            var p = d3.format(".1%"), q = d3.format(",.2f")
+            return "Chord Info:<br/>"
+              +  d.sname + " imports from " + d.tname
+              + ": $" + q(d.svalue) + "M<br/>"
+              + p(d.svalue/d.stotal) + " of " + d.sname + "'s Total ($" + q(d.stotal) + "M)<br/>"
+              + p(d.svalue/d.mtotal) + " of Matrix Total ($" + q(d.mtotal) + "M)<br/>"
+              + "<br/>"
+              + d.tname + " imports from " + d.sname
+              + ": $" + q(d.tvalue) + "M<br/>"
+              + p(d.tvalue/d.ttotal) + " of " + d.tname + "'s Total ($" + q(d.ttotal) + "M)<br/>"
+              + p(d.tvalue/d.mtotal) + " of Matrix Total ($" + q(d.mtotal) + "M)";
+          }
+
+          function groupTip (d) {
+            var p = d3.format(".1%"), q = d3.format(",.2f")
+            return "Group Info:<br/>"
+                + d.gname + " : " + q(d.gvalue) + "M<br/>"
+                + p(d.gvalue/d.mtotal) + " of Matrix Total (" + q(d.mtotal) + "M)"
+          }
+
+          function mouseover(d, i) {
+            d3.select("#tooltip")
+              .style("visibility", "visible")
+              .html(groupTip(rdr(d)))
+              .style("top", function () { return (d3.event.pageY - 80)+"px"})
+              .style("left", function () { return (d3.event.pageX - 130)+"px";})
+
+            chordPaths.classed("fade", function(p) {
+              return p.source.index != i
+                  && p.target.index != i;
+            });
+          }
+      }
+    </script>
+    <script
+        src="https://code.jquery.com/jquery-1.12.4.min.js"
+        integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
+        crossorigin="anonymous"></script>
+    
+  </body>
+</html>
