@@ -4,12 +4,13 @@ from flask import flash, redirect, url_for, jsonify
 # from flask_debugtoolbar import DebugToolbarExtension
 from jinja2 import StrictUndefined
 import httplib2
-from apiclient import discovery, errors
+from apiclient.discovery import build
 from oauth2client import client
 from model import connect_to_db, Event, Calendar, User, UserCal, CalEvent
 from datetime import datetime, timedelta
 import logging
 from seed import seed_user, seed_calendars, seed_events
+import json
 
 
 app = Flask(__name__)
@@ -70,6 +71,9 @@ def oauth2callback():
                                           scope='https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/plus.login',
                                           redirect_uri=url_for('oauth2callback', _external=True))
 
+    flow.params['access_type'] = 'online'
+    flow.params['approval_prompt'] = 'auto'
+
     if 'code' not in request.args:
         auth_uri = flow.step1_get_authorize_url()
         return redirect(auth_uri)
@@ -92,14 +96,17 @@ def calendar():
         return redirect(url_for('oauth2callback'))
     else:
         # creates api service objects
+        # print session['credentials']
         http_auth = credentials.authorize(httplib2.Http())
-        people_service = discovery.build('people', 'v1', http_auth)
-        calendar_service = discovery.build('calendar', 'v3', http_auth)
-        event_service = discovery.build('calendar', 'v3', http_auth)
+        people_service = build('people', 'v1', http_auth)
+        calendar_service = build('calendar', 'v3', http_auth)
+        event_service = build('calendar', 'v3', http_auth)
 
     # profile api call
     profile = people_service.people().get(resourceName='people/me').execute()
-    user_id = profile['names'][0]['metadata']['source']['id']
+    # user_id = profile['names'][0]['metadata']['source']['id']
+    cred_dict = json.loads(session['credentials'])
+    user_id = cred_dict['id_token']['sub']
 
     # calendars api call
     calendarsResult = calendar_service.calendarList().list(
@@ -149,6 +156,8 @@ def calendar():
     seed_calendars(calendarsResult, user_id)
     seed_events(eventsResult)
 
+    credentials.revoke(httplib2.Http())  # for demo purposes
+
     return render_template('calendars.html')
 
 
@@ -160,6 +169,12 @@ def chord():
     chord_data = {"data": [event.serialize() for event in events]}
 
     return jsonify(chord_data)
+
+
+@app.route('/d3')
+def d3():
+
+    return render_template('trade-a.html')
 
 
 @app.route('/weekly.json')
@@ -245,5 +260,3 @@ if __name__ == "__main__":
     # DebugToolbarExtension(app)
 
     app.run()
-
-    # url_for('static', filename='debt.csv')
