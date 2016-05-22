@@ -48,8 +48,10 @@
       //  creates matrix and map
       d3.csv('static/meetings.csv', function (error, data) {
         var mpr = chordMpr(data);
-
+        console.log("******data*****")
+        console.log(data)
         mpr
+          // add unique nodes
           .addValuesToMap('importer1')
           .addValuesToMap('importer2')
           .setFilter(function (row, a, b) {
@@ -60,8 +62,11 @@
             if (!recs[0]) return 0;
               return recs[0].importer1 === a.name ? +recs[0].flow1 : +recs[0].flow2; 
           });
+        // str = JSON.stringify(mpr);
+        // console.log(mpr);
         drawChords(mpr.getMatrix(), mpr.getMap());
       });
+      
 
       // draws the chord diagram
       function drawChords (matrix, mmap) {
@@ -113,7 +118,7 @@
             .style("fill", function(d) { return fill(rdr(d).gname); })
             .attr("d", arc);
 
-        // node names
+        // node labels
         g.append("svg:text")
             .each(function(d) { d.angle = (d.startAngle + d.endAngle) / 2; })
             .attr("dy", ".35em")
