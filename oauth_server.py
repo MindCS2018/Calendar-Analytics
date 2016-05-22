@@ -171,10 +171,10 @@ def chord():
     return jsonify(chord_data)
 
 
-@app.route('/d3')
+@app.route('/chord')
 def d3():
 
-    return render_template('trade-a.html')
+    return render_template('meetings.html')
 
 
 @app.route('/weekly.json')
@@ -260,3 +260,5 @@ if __name__ == "__main__":
     # DebugToolbarExtension(app)
 
     app.run()
+
+    # url_for('static', filename="mapper.js")
