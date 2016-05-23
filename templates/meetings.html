@@ -7,6 +7,7 @@
     <style>
 
       /* on hover info for chord diagram*/
+
       #tooltip {
         color: black;
         opacity: 1;
@@ -49,23 +50,36 @@
     // Creating own matrix and map
 
       // global variables
-      var mapper;
-      var numKeys;
+      // var mapper;
+      // var numKeys;
       var emptyMatrix;
 
+      // get mapper object from flask route
       $.get("/mapper.json", function (data) {
-        mapper = data;
-        numKeys = Object.keys(mapper).length;
-        getMatrix(numKeys);
-        console.log(emptyMatrix);
-        
+        var mapper = data;
 
+        // count number of keys
+        var numKeys = Object.keys(mapper).length;
+        getMatrix(numKeys);
+
+        // get events object from flask route
         $.get("/events.json", function(data) {
             var events = data["data"];
 
+            // given a list of events
+            // get number of attendees per event
+            // if number of attendes is greater than 1
+            // for each attendee in list of attendees
+            // get mapper index assigned to attendee
+            // switch out those numbers in the array
+            // add duration to array
+            // plug duration into matrix at correct indexes
+
             for (var i=0; i < events.length; i++) {
               var calendars = events[i]['calendars']
+
               if (calendars.length > 1) {
+
                 for (var j in calendars) {
                   calendars[j] = mapper[calendars[j]]['id'];
                 }
@@ -94,44 +108,6 @@
         }
         emptyMatrix = matrix;
       }
-      
-      //  creates matrix and map
-      d3.csv('static/meetings.csv', function (error, data) {
-        var mpr = chordMpr(data);
-        mpr
-          // add unique nodes
-          .addValuesToMap('importer1')
-          .addValuesToMap('importer2')
-          .setFilter(function (row, a, b) {
-            return (row.importer1 === a.name && row.importer2 === b.name) ||
-                   (row.importer1 === b.name && row.importer2 === a.name)
-          })
-          .setAccessor(function (recs, a, b) {
-            if (!recs[0]) return 0;
-              return recs[0].importer1 === a.name ? +recs[0].flow1 : +recs[0].flow2; 
-          });
-        // str = JSON.stringify(mpr);
-        // console.log(mpr);
-      //   drawChords([[0,1,2,3,4,5,0,0],
-      //               [1,0,1,2,3,4,0,0],
-      //               [2,1,0,1,2,3,0,0],
-      //               [3,2,1,0,1,2,0,0],
-      //               [4,3,2,1,0,1,0,0],
-      //               [5,4,3,2,1,0,0,0],
-      //               [0,0,0,0,0,0,0,0],
-      //               [0,0,0,0,0,0,0,0]], mapper);
-      });
-      //   drawChords(mpr.getMatrix(), mpr.getMap());
-      // });
-           //  {
-           //    "Don": {"id":0, "name":"Don"}, 
-           //    "Megan": {"id":1, "name":"Megan"}, 
-           //    "Andrew": {"id":2, "name":"Andrew"}, 
-           //    "Hannah": {"id":3, "name":"Hannah"}
-           //  });
-          // });
-
-          
 
       // draws the chord diagram
       function drawChords (matrix, mmap) {
