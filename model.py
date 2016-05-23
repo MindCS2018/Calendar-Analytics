@@ -79,25 +79,27 @@ class Event(db.Model):
         minutes = int(time_delta.total_seconds()/60)
         return minutes
 
-    def get_calendar_ids(self):
+    def get_calendars(self):
         """Given an event object,
         return a list of calendar_ids associated with the event"""
 
-        calendar_ids = [calevent.calendar_id for calevent in self.calevents]
+        calendars = []
+        for calevent in self.calevents:
+            calendar = calevent.calendar_id.split("@")[0].title()
+            calendars.append(calendar)
 
-        return calendar_ids
-
+        return calendars
 
     def serialize(self):
         """Given a list of events,
         returns DB object as a dictionary"""
 
-        calendar_ids = self.get_calendar_ids()
+        calendars = self.get_calendars()
 
         return {"event_id": self.event_id,
                 "duration": self.duration_minutes,
                 "summary": self.summary,
-                "calendar_ids": calendar_ids}
+                "calendars": calendars}
 
 
 def connect_to_db(app):

@@ -173,7 +173,7 @@ def build_mapper():
     mpr = {}
     x = 0
     for calendar in calendar_objs:
-        calendar_summary = (calendar.summary.split("@")[0]).title()
+        calendar_summary = (calendar.calendar_id.split("@")[0]).title()
         mpr[calendar_summary] = {"id": x,
                                  "name": calendar_summary}
         x += 1
@@ -191,6 +191,18 @@ def build_mapper():
     # empty_matrix = numpy.zeros(shape=(n, n))
 
     return jsonify(mpr)
+
+
+# @app.route('/matrix.json')
+# def build_matrix():
+
+#     n = 8
+
+#     empty_matrix = numpy.zeros(shape=(n, n))
+
+#     matrix_data = {"data": {"date": empty_matrix}}
+
+#     return jsonify(matrix_data)
 
 
 @app.route('/events.json')

@@ -57,28 +57,40 @@
         mapper = data;
         numKeys = Object.keys(mapper).length;
         getMatrix(numKeys);
-        // console.log(mapper)
+        console.log(emptyMatrix);
+        
 
         $.get("/events.json", function(data) {
-            console.log("stuffy");
-            console.log(data);
-        })
+            var events = data["data"];
 
-        drawChords([[0,1,2,3,4,5,0,0],
-                    [1,0,1,2,3,4,0,0],
-                    [2,1,0,1,2,3,0,0],
-                    [3,2,1,0,1,2,0,0],
-                    [4,3,2,1,0,1,0,0],
-                    [5,4,3,2,1,0,0,0],
-                    [0,0,0,0,0,0,0,0],
-                    [0,0,0,0,0,0,0,0]], mapper);
-        });
+            for (var i=0; i < events.length; i++) {
+              var calendars = events[i]['calendars']
+              if (calendars.length > 1) {
+                for (var j in calendars) {
+                  calendars[j] = mapper[calendars[j]]['id'];
+                }
+                calendars.push(events[i]['duration']);
+                emptyMatrix[calendars[0]][calendars[1]] += calendars[2]
+                emptyMatrix[calendars[1]][calendars[0]] += calendars[2]
+                
+                // TODO: make work for 2+ calendars
+                // for (var k in calendars) {
+                //   console.log(calendars);
+                //   console.log(calendars[k], events[i]['duration']);
+                //   console.log(emptyMatrix[calendars[k]]);
+                // }
+              } 
+            } drawChords(emptyMatrix, mapper);
+        })
+        
+      });
 
       // empty matrix
       function getMatrix (numKeys) {
         var matrix = [];
         for(var i=0; i<numKeys; i++) {
-        matrix[i] = new Array(numKeys);
+        matrix[i] = new Array(numKeys).fill(0);
+
         }
         emptyMatrix = matrix;
       }
@@ -165,6 +177,7 @@
             .on("mouseover", mouseover)
             .on("mouseout", function (d) { d3.select("#tooltip").style("visibility", "hidden") });
 
+        // draws outer ring
         g.append("svg:path")
             // border color for nodes
             .style("stroke", "black")
