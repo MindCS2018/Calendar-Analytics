@@ -42,14 +42,50 @@
     <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore.js"></script>
     <script src="{{ url_for('static', filename='mapper.js') }}"></script>
+    <script src="https://code.jquery.com/jquery.js"></script>
     <script>
        "use strict"; 
 
+    // Creating own matrix and map
+
+      // global variables
+      var mapper;
+      var numKeys;
+      var emptyMatrix;
+
+      $.get("/mapper.json", function (data) {
+        mapper = data;
+        numKeys = Object.keys(mapper).length;
+        getMatrix(numKeys);
+        // console.log(mapper)
+
+        $.get("/events.json", function(data) {
+            console.log("stuffy");
+            console.log(data);
+        })
+
+        drawChords([[0,1,2,3,4,5,0,0],
+                    [1,0,1,2,3,4,0,0],
+                    [2,1,0,1,2,3,0,0],
+                    [3,2,1,0,1,2,0,0],
+                    [4,3,2,1,0,1,0,0],
+                    [5,4,3,2,1,0,0,0],
+                    [0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0]], mapper);
+        });
+
+      // empty matrix
+      function getMatrix (numKeys) {
+        var matrix = [];
+        for(var i=0; i<numKeys; i++) {
+        matrix[i] = new Array(numKeys);
+        }
+        emptyMatrix = matrix;
+      }
+      
       //  creates matrix and map
       d3.csv('static/meetings.csv', function (error, data) {
         var mpr = chordMpr(data);
-        console.log("******data*****")
-        console.log(data)
         mpr
           // add unique nodes
           .addValuesToMap('importer1')
@@ -64,9 +100,26 @@
           });
         // str = JSON.stringify(mpr);
         // console.log(mpr);
-        drawChords(mpr.getMatrix(), mpr.getMap());
+      //   drawChords([[0,1,2,3,4,5,0,0],
+      //               [1,0,1,2,3,4,0,0],
+      //               [2,1,0,1,2,3,0,0],
+      //               [3,2,1,0,1,2,0,0],
+      //               [4,3,2,1,0,1,0,0],
+      //               [5,4,3,2,1,0,0,0],
+      //               [0,0,0,0,0,0,0,0],
+      //               [0,0,0,0,0,0,0,0]], mapper);
       });
-      
+      //   drawChords(mpr.getMatrix(), mpr.getMap());
+      // });
+           //  {
+           //    "Don": {"id":0, "name":"Don"}, 
+           //    "Megan": {"id":1, "name":"Megan"}, 
+           //    "Andrew": {"id":2, "name":"Andrew"}, 
+           //    "Hannah": {"id":3, "name":"Hannah"}
+           //  });
+          // });
+
+          
 
       // draws the chord diagram
       function drawChords (matrix, mmap) {

@@ -87,6 +87,7 @@ class Event(db.Model):
 
         return calendar_ids
 
+
     def serialize(self):
         """Given a list of events,
         returns DB object as a dictionary"""

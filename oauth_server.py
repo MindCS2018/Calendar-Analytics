@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 import logging
 from seed import seed_user, seed_calendars, seed_events
 import json
+import numpy
 
 
 app = Flask(__name__)
@@ -161,8 +162,39 @@ def calendar():
     return render_template('calendars.html')
 
 
-@app.route('/chord.json')
-def chord():
+@app.route('/mapper.json')
+def build_mapper():
+
+    # list of calendar objects
+    # TODO: pull from choose calendars page
+    calendar_objs = Calendar.query.all()
+
+    # creates mapper object
+    mpr = {}
+    x = 0
+    for calendar in calendar_objs:
+        calendar_summary = (calendar.summary.split("@")[0]).title()
+        mpr[calendar_summary] = {"id": x,
+                                 "name": calendar_summary}
+        x += 1
+
+    # print mpr
+
+    # ids = set()
+
+    # for event in events:
+    #     for calevent in event.calevents:
+    #         ids.add(calevent.calendar_id)
+
+    # n = str(len(ids))
+
+    # empty_matrix = numpy.zeros(shape=(n, n))
+
+    return jsonify(mpr)
+
+
+@app.route('/events.json')
+def build_events():
 
     events = events_query()
 
