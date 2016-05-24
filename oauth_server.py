@@ -147,7 +147,7 @@ def calendar():
                                                  maxResults=100,
                                                  singleEvents=True,
                                                  orderBy='startTime'),
-                                                 request_id=calendar_id)
+                  request_id=calendar_id)
 
     # executes batch api call
     batch.execute()
@@ -157,13 +157,23 @@ def calendar():
     seed_calendars(calendarsResult, user_id)
     seed_events(eventsResult)
 
-    credentials.revoke(httplib2.Http())  # for demo purposes
+    calendar_options = []
+    for calendar_obj in calendarsResult['items']:
+        calendar_options.append(calendar_obj['summary'])
 
-    return render_template('calendars.html')
+    # credentials.revoke(httplib2.Http())  # for demo purposes
+
+    return render_template('calendars.html',
+                           calendar_options=calendar_options)
 
 
 @app.route('/mapper.json')
 def build_mapper():
+
+    # selected = request.form.getlist('calendar')
+    print("**selected**")
+    # print selected
+    print("****")
 
     # list of calendar objects
     # TODO: pull from choose calendars page
@@ -177,18 +187,21 @@ def build_mapper():
         mpr[calendar_summary] = {"id": x,
                                  "name": calendar_summary}
         x += 1
+    print("**mpr**")
+    print mpr
+    print("****")
 
-    # print mpr
+#     print mpr
 
-    # ids = set()
+#     ids = set()
 
-    # for event in events:
-    #     for calevent in event.calevents:
-    #         ids.add(calevent.calendar_id)
+#     for event in events:
+#         for calevent in event.calevents:
+#             ids.add(calevent.calendar_id)
 
-    # n = str(len(ids))
+#     n = str(len(ids))
 
-    # empty_matrix = numpy.zeros(shape=(n, n))
+#     empty_matrix = numpy.zeros(shape=(n, n))
 
     return jsonify(mpr)
 
@@ -215,10 +228,33 @@ def build_events():
     return jsonify(chord_data)
 
 
-@app.route('/chord')
+@app.route('/dashboard', methods=['POST'])
 def d3():
 
-    return render_template('meetings.html')
+    # creating json here
+
+    selected = request.form.getlist('calendar')
+    print("**selected**")
+    print selected
+    print("****")
+
+    # list of calendar objects
+    # TODO: pull from choose calendars page
+    # calendar_objs = Calendar.query.all()
+
+    # creates mapper object
+    mpr = {}
+    x = 0
+    for calendar in selected:
+        calendar_summary = (calendar.split("@")[0]).title()
+        mpr[calendar_summary] = {"id": x,
+                                 "name": calendar_summary}
+        x += 1
+
+    mpr = json.dumps(mpr)
+
+    return render_template('meetings.html',
+                           mpr=mpr)
 
 
 @app.route('/weekly.json')
@@ -304,5 +340,3 @@ if __name__ == "__main__":
     # DebugToolbarExtension(app)
 
     app.run()
-
-    # url_for('static', filename="mapper.js")

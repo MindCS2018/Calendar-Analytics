@@ -52,11 +52,18 @@
       // global variables
       // var mapper;
       // var numKeys;
+
+      // global variables
       var emptyMatrix;
+      var mpr = JSON.parse({{mpr|tojson|safe}});  // received JSON as flask variable
+      var numKeys = Object.keys(mpr).length;
+
+      // build empty matrix
+      getMatrix(numKeys);
 
       // get mapper object from flask route
       $.get("/mapper.json", function (data) {
-        var mapper = data;
+           var mapper = data;
 
         // count number of keys
         var numKeys = Object.keys(mapper).length;
@@ -108,6 +115,15 @@
         }
         emptyMatrix = matrix;
       }
+
+
+
+
+
+
+
+
+
 
       // draws the chord diagram
       function drawChords (matrix, mmap) {

@@ -1,8 +1,25 @@
 <!doctype html>
 <html>
+    <head>
+        <script
+        src="https://code.jquery.com/jquery-1.12.4.min.js"
+        integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
+        crossorigin="anonymous"></script>
+    </head>
     <body>
-        <form action="/chart">
-      <input type="submit" value="Go to chart"/>
-    </form>
+
+        <div class="btn-group" data-toggle="buttons">
+            <form action="/dashboard" method="POST">
+            <label class="btn btn-primary active">
+            <ul style="list-style-type:none">
+            {% for calendar in calendar_options %}
+                <li><input type="checkbox" name="calendar" value="{{calendar}}">{{calendar}}
+            {% endfor %}
+            <input type="submit" value="Submit">
+            </ul>
+            </label>
+            </form>
+        </div>
+
     </body>
 </html>
