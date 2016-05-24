@@ -44,86 +44,72 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore.js"></script>
     <script src="{{ url_for('static', filename='mapper.js') }}"></script>
     <script src="https://code.jquery.com/jquery.js"></script>
+
+
+
+
+
+
     <script>
        "use strict"; 
 
-    // Creating own matrix and map
+    // Creating matrix and map
 
       // global variables
-      // var mapper;
-      // var numKeys;
-
-      // global variables
-      var emptyMatrix;
+      var newMatrix;
       var mpr = JSON.parse({{mpr|tojson|safe}});  // received JSON as flask variable
       var numKeys = Object.keys(mpr).length;
-
-      // build empty matrix
-      getMatrix(numKeys);
-
-      // get mapper object from flask route
-      $.get("/mapper.json", function (data) {
-           var mapper = data;
-
-        // count number of keys
-        var numKeys = Object.keys(mapper).length;
-        getMatrix(numKeys);
-
-        // get events object from flask route
-        $.get("/events.json", function(data) {
-            var events = data["data"];
-
-            // given a list of events
-            // get number of attendees per event
-            // if number of attendes is greater than 1
-            // for each attendee in list of attendees
-            // get mapper index assigned to attendee
-            // switch out those numbers in the array
-            // add duration to array
-            // plug duration into matrix at correct indexes
-
-            for (var i=0; i < events.length; i++) {
-              var calendars = events[i]['calendars']
-
-              if (calendars.length > 1) {
-
-                for (var j in calendars) {
-                  calendars[j] = mapper[calendars[j]]['id'];
-                }
-                calendars.push(events[i]['duration']);
-                emptyMatrix[calendars[0]][calendars[1]] += calendars[2]
-                emptyMatrix[calendars[1]][calendars[0]] += calendars[2]
-                
-                // TODO: make work for 2+ calendars
-                // for (var k in calendars) {
-                //   console.log(calendars);
-                //   console.log(calendars[k], events[i]['duration']);
-                //   console.log(emptyMatrix[calendars[k]]);
-                // }
-              } 
-            } drawChords(emptyMatrix, mapper);
-        })
-        
-      });
+      var data = JSON.parse({{chord_data|tojson|safe}}); 
+      var events = data["data"];
 
       // empty matrix
       function getMatrix (numKeys) {
         var matrix = [];
         for(var i=0; i<numKeys; i++) {
-        matrix[i] = new Array(numKeys).fill(0);
-
+          matrix[i] = new Array(numKeys).fill(0);
         }
-        emptyMatrix = matrix;
+        newMatrix = matrix;
       }
 
+      // build empty matrix
+      getMatrix(numKeys);
+
+      
+      // given a list of events
+      // get number of attendees per event
+      // if number of attendes is greater than 1
+      // for each attendee in list of attendees
+      // get mapper index assigned to attendee
+      // switch out those numbers in the array
+      // add duration to array
+      // plug duration into matrix at correct indexes
+
+      for (var i=0; i < events.length; i++) {
+        var calendars = events[i]['calendars']
+
+        if (calendars.length > 1) {
+
+          for (var j in calendars) {
+            console.log(calendars[j]);
+            calendars[j] = mpr[calendars[j]]['id'];
+          }
+          calendars.push(events[i]['duration']);
+          newMatrix[calendars[0]][calendars[1]] += calendars[2]
+          newMatrix[calendars[1]][calendars[0]] += calendars[2]
+          
+          // TODO: make work for 2+ calendars
+          // for (var k in calendars) {
+          //   console.log(calendars);
+          //   console.log(calendars[k], events[i]['duration']);
+          //   console.log(newMatrix[calendars[k]]);
+          // }
+        } 
+      } 
+
+      drawChords(newMatrix, mpr);
 
 
-
-
-
-
-
-
+      
 
       // draws the chord diagram
       function drawChords (matrix, mmap) {
@@ -133,7 +119,8 @@
         // var fill = d3.scale.category20b()
 
         var fill = d3.scale.ordinal()
-            .range(['#d4d7d9','#3c3c3c','#bd7aa9','#848589','#884e7a','#6a657c','#606165','#9999a4','#61475d','#8ca49c',]);
+            .range(['#d4d7d9','#3c3c3c','#bd7aa9','#848589','#884e7a',
+                    '#6a657c','#606165','#9999a4','#61475d','#8ca49c',]);
 
         // constructs a new chord layout
         var chord = d3.layout.chord()

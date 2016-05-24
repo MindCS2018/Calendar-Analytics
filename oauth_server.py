@@ -161,35 +161,35 @@ def calendar():
     for calendar_obj in calendarsResult['items']:
         calendar_options.append(calendar_obj['summary'])
 
-    # credentials.revoke(httplib2.Http())  # for demo purposes
+    credentials.revoke(httplib2.Http())  # for demo purposes
 
     return render_template('calendars.html',
                            calendar_options=calendar_options)
 
 
-@app.route('/mapper.json')
-def build_mapper():
+# @app.route('/mapper.json')
+# def build_mapper():
 
-    # selected = request.form.getlist('calendar')
-    print("**selected**")
-    # print selected
-    print("****")
+#     # selected = request.form.getlist('calendar')
+#     print("**selected**")
+#     # print selected
+#     print("****")
 
-    # list of calendar objects
-    # TODO: pull from choose calendars page
-    calendar_objs = Calendar.query.all()
+#     # list of calendar objects
+#     # TODO: pull from choose calendars page
+#     calendar_objs = Calendar.query.all()
 
-    # creates mapper object
-    mpr = {}
-    x = 0
-    for calendar in calendar_objs:
-        calendar_summary = (calendar.calendar_id.split("@")[0]).title()
-        mpr[calendar_summary] = {"id": x,
-                                 "name": calendar_summary}
-        x += 1
-    print("**mpr**")
-    print mpr
-    print("****")
+#     # creates mapper object
+#     mpr = {}
+#     x = 0
+#     for calendar in calendar_objs:
+#         calendar_summary = (calendar.calendar_id.split("@")[0]).title()
+#         mpr[calendar_summary] = {"id": x,
+#                                  "name": calendar_summary}
+#         x += 1
+#     print("**mpr**")
+#     print mpr
+#     print("****")
 
 #     print mpr
 
@@ -203,7 +203,7 @@ def build_mapper():
 
 #     empty_matrix = numpy.zeros(shape=(n, n))
 
-    return jsonify(mpr)
+    # return jsonify(mpr)
 
 
 # @app.route('/matrix.json')
@@ -218,14 +218,14 @@ def build_mapper():
 #     return jsonify(matrix_data)
 
 
-@app.route('/events.json')
-def build_events():
+# @app.route('/events.json')
+# def build_events():
 
-    events = events_query()
+#     events = events_query()
 
-    chord_data = {"data": [event.serialize() for event in events]}
+#     chord_data = {"data": [event.serialize() for event in events]}
 
-    return jsonify(chord_data)
+#     return jsonify(chord_data)
 
 
 @app.route('/dashboard', methods=['POST'])
@@ -251,56 +251,78 @@ def d3():
                                  "name": calendar_summary}
         x += 1
 
+    # TODO: change query to reflect only events that are
+    # associated with chosen calendar_ids
+
     mpr = json.dumps(mpr)
 
+    # TODO: pull list of events associated with calendar_ids
+
+    # for calendar in selected:
+
+    event_objs = set()
+
+    for cal in selected:
+        for calevent in CalEvent.query.filter_by(calendar_id=cal).all():
+            event_objs.add(calevent.event)
+
+    # event_objs = events_query()
+    event_objs = list(event_objs)
+
+    chord_data = {"data": [event_obj.serialize() for event_obj in event_objs]}
+    chord_data = json.dumps(chord_data)
+
+    # return jsonify(chord_data)
+
     return render_template('meetings.html',
-                           mpr=mpr)
+                           mpr=mpr,
+                           chord_data=chord_data)
 
 
-@app.route('/weekly.json')
-def weekly_data():
-    """Creates data for weekly chart"""
+# @app.route('/weekly.json')
+# def weekly_data():
+#     """Creates data for weekly chart"""
 
-    wfh_next_week = next_week()
+#     wfh_next_week = next_week()
 
-    week = {}
+#     week = {}
 
-    for event in wfh_next_week:
-        day = event.start.weekday()
-        for calevent in event.calevents:
-            week.setdefault(day, set()).add(calevent.calendar_id)
+#     for event in wfh_next_week:
+#         day = event.start.weekday()
+#         for calevent in event.calevents:
+#             week.setdefault(day, set()).add(calevent.calendar_id)
 
-    data = [0, 0, 0, 0, 0, 0, 0]
+#     data = [0, 0, 0, 0, 0, 0, 0]
 
-    for key, value in week.iteritems():
-        data[key] = len(value)
+#     for key, value in week.iteritems():
+#         data[key] = len(value)
 
-    data_dict = {
-        "labels": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-        "datasets": [
-            {
-                "label": "Out of Office",
-                "fillColor": "rgba(151,187,205,0.2)",
-                "strokeColor": "rgba(151,187,205,1)",
-                "pointColor": "rgba(151,187,205,1)",
-                "pointStrokeColor": "#fff",
-                "pointHighlightFill": "#fff",
-                "pointHighlightStroke": "rgba(151,187,205,1)",
-                "data": data
-            },
-            {
-                "label": "Out for Lunch",
-                "fillColor": "rgba(219,186,52,0.4)",
-                "strokeColor": "rgba(220,220,220,1)",
-                "pointColor": "rgba(220,220,220,1)",
-                "pointStrokeColor": "#fff",
-                "pointHighlightFill": "#fff",
-                "pointHighlightStroke": "rgba(151,187,205,1)",
-                "data": [0, 1, 1, 1, 3, 0, 0]
-            },
-        ]
-    }
-    return jsonify(data_dict)
+#     data_dict = {
+#         "labels": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+#         "datasets": [
+#             {
+#                 "label": "Out of Office",
+#                 "fillColor": "rgba(151,187,205,0.2)",
+#                 "strokeColor": "rgba(151,187,205,1)",
+#                 "pointColor": "rgba(151,187,205,1)",
+#                 "pointStrokeColor": "#fff",
+#                 "pointHighlightFill": "#fff",
+#                 "pointHighlightStroke": "rgba(151,187,205,1)",
+#                 "data": data
+#             },
+#             {
+#                 "label": "Out for Lunch",
+#                 "fillColor": "rgba(219,186,52,0.4)",
+#                 "strokeColor": "rgba(220,220,220,1)",
+#                 "pointColor": "rgba(220,220,220,1)",
+#                 "pointStrokeColor": "#fff",
+#                 "pointHighlightFill": "#fff",
+#                 "pointHighlightStroke": "rgba(151,187,205,1)",
+#                 "data": [0, 1, 1, 1, 3, 0, 0]
+#             },
+#         ]
+#     }
+#     return jsonify(data_dict)
 
 
 @app.route('/chart')
