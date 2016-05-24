@@ -21,35 +21,35 @@
         white-space: nowrap;
         pointer-events: none;
       }
+
       #circle circle {
         fill: none;
         pointer-events: all;
       }
+
       path.group {
         fill-opacity: .8;
       }
+
       path.chord {
         fill-opacity: .8;
         stroke: #000;
         stroke-width: .25px;
       }
+
       #circle:hover path.fade {
         display: none;
       }
+
     </style>
   </head>
   <body>
+    <a href="/next">Change calendars</a>
     <div id="tooltip"></div>
     <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore.js"></script>
     <script src="{{ url_for('static', filename='mapper.js') }}"></script>
     <script src="https://code.jquery.com/jquery.js"></script>
-
-
-
-
-
-
     <script>
        "use strict"; 
 
@@ -73,7 +73,6 @@
 
       // build empty matrix
       getMatrix(numKeys);
-
       
       // given a list of events
       // get number of attendees per event
@@ -87,15 +86,22 @@
       for (var i=0; i < events.length; i++) {
         var calendars = events[i]['calendars']
 
-        if (calendars.length > 1) {
+        // and both calendars are in mpr
+
+        if (calendars.length > 1 && calendars[0] in mpr && calendars[1] in mpr) { 
 
           for (var j in calendars) {
-            console.log(calendars[j]);
             calendars[j] = mpr[calendars[j]]['id'];
           }
-          calendars.push(events[i]['duration']);
-          newMatrix[calendars[0]][calendars[1]] += calendars[2]
-          newMatrix[calendars[1]][calendars[0]] += calendars[2]
+
+        calendars.push(events[i]['duration']);
+        newMatrix[calendars[0]][calendars[1]] += calendars[2]
+        newMatrix[calendars[1]][calendars[0]] += calendars[2]
+
+        } 
+      } 
+
+      drawChords(newMatrix, mpr);
           
           // TODO: make work for 2+ calendars
           // for (var k in calendars) {
@@ -103,13 +109,6 @@
           //   console.log(calendars[k], events[i]['duration']);
           //   console.log(newMatrix[calendars[k]]);
           // }
-        } 
-      } 
-
-      drawChords(newMatrix, mpr);
-
-
-      
 
       // draws the chord diagram
       function drawChords (matrix, mmap) {
@@ -238,6 +237,5 @@
         src="https://code.jquery.com/jquery-1.12.4.min.js"
         integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
         crossorigin="anonymous"></script>
-    
   </body>
 </html>

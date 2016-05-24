@@ -108,6 +108,7 @@ def calendar():
     # user_id = profile['names'][0]['metadata']['source']['id']
     cred_dict = json.loads(session['credentials'])
     user_id = cred_dict['id_token']['sub']
+    session["user_id"] = user_id
 
     # calendars api call
     calendarsResult = calendar_service.calendarList().list(
@@ -157,11 +158,26 @@ def calendar():
     seed_calendars(calendarsResult, user_id)
     seed_events(eventsResult)
 
-    calendar_options = []
-    for calendar_obj in calendarsResult['items']:
-        calendar_options.append(calendar_obj['summary'])
-
     credentials.revoke(httplib2.Http())  # for demo purposes
+
+    return redirect("/next")
+
+
+@app.route("/next")
+def next():
+
+    # get list of calendar ids associated with a user from database
+    user_id = session['user_id']
+
+    all_calendars = UserCal.query.filter_by(user_id=user_id).all()
+
+    calendar_options = []
+    for calendar in all_calendars:
+        calendar_options.append(calendar.calendar.summary)
+
+    # calendar_options = []
+    # for calendar_obj in calendarsResult['items']:
+    #     calendar_options.append(calendar_obj['summary'])
 
     return render_template('calendars.html',
                            calendar_options=calendar_options)
