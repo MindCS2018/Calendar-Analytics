@@ -148,6 +148,8 @@ def dashboard():
     # choice of calendars
     selected = request.form.getlist('calendar')
 
+    # call helper function with selected as argument
+
     # creates mapper object
     mpr = {}
     x = 0
@@ -157,15 +159,15 @@ def dashboard():
                                  "name": calendar_summary}
         x += 1
 
-    # creates event object
-    event_objs = set()
+    # creates events object
+    events = set()
 
     for cal in selected:
         for calevent in CalEvent.query.filter_by(calendar_id=cal).all():
-            event_objs.add(calevent.event)
+            events.add(calevent.event)
 
-    event_objs = list(event_objs)
-    chord_data = {"data": [event_obj.serialize() for event_obj in event_objs]}
+    events = list(events)
+    chord_data = {"data": [event.serialize() for event in events]}
 
     mpr = json.dumps(mpr)
     chord_data = json.dumps(chord_data)
