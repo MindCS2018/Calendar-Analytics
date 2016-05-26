@@ -4,48 +4,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="static/style.css">
-    <style>
-
-      /* on hover info for chord diagram*/
-
-      #tooltip {
-        color: black;
-        opacity: 1;
-        background: white;
-        padding: 5px;
-        border: 1px solid lightgrey;
-        border-radius: 5px;
-        position: absolute;
-        z-index: 10;
-        visibility: hidden;
-        white-space: nowrap;
-        pointer-events: none;
-      }
-
-    /*  grid system in css
-      put in div container
-      in div container fluid*/
-
-      #circle circle {
-        fill: none;
-        pointer-events: all;
-      }
-
-      path.group {
-        fill-opacity: .8;
-      }
-
-      path.chord {
-        fill-opacity: .8;
-        stroke: #000;
-        stroke-width: .25px;
-      }
-
-      #circle:hover path.fade {
-        display: none;
-      }
-
-    </style>
   </head>
   <body>
     <a href="/calendars">Change calendars</a><br>
@@ -177,27 +135,23 @@
             moment.relativeTimeThreshold('M', 12);
             var p = d3.format(".1%")
             return ""
-              // +  d.cheesecake + "'s meetings with <br/>"
-              +  d.sname + "'s meetings with " + d.tname + ": " 
-                + (moment.duration((d.svalue), "minutes").humanize()) + "<br/>"
-              + p(d.svalue/d.stotal) + " of " + d.sname + "'s time (" 
-                + (moment.duration((d.stotal), "minutes").humanize()) + ")<br/>"
-              + p(d.svalue/d.mtotal) + " of total (" 
-                + (moment.duration((d.mtotal), "minutes").humanize()) + ")<br/>"
-              + "<br/>"
-              + d.tname + "'s meetings with " + d.sname + ": " 
-                + (moment.duration((d.tvalue), "minutes").humanize()) + "<br/>"
-              + p(d.tvalue/d.ttotal) + " of " + d.tname + "'s time (" 
-                + (moment.duration((d.ttotal), "minutes").humanize()) + ")<br/>"
-              + p(d.tvalue/d.mtotal) + " of total (" + (moment.duration((d.mtotal), "minutes").humanize()) + ")";
+              // +  d.cheesecake + "'s meetings with <br>"
+              +  d.sname + "'s time with " + d.tname + ": " 
+                + (moment.duration((d.svalue), "minutes").humanize()) + "<br>"
+              + p(d.svalue/d.stotal) + " of " + d.sname + "'s time <br>" 
+              + p(d.svalue/d.mtotal) + " of team total" + "<br>"
+              + "<br>"
+              + d.tname + "'s time with " + d.sname + ": " 
+                + (moment.duration((d.tvalue), "minutes").humanize()) + "<br>"
+              + p(d.tvalue/d.ttotal) + " of " + d.tname + "'s time <br>"
+              + p(d.tvalue/d.mtotal) + " of team total";
 
           }
 
           function groupTip (d) {
             var p = d3.format(".1%")
             return ""
-                + d.gname + ": " + (moment.duration((d.gvalue), "minutes").humanize()) + "<br/>"
-                + p(d.gvalue/d.mtotal) + " of total (" + (moment.duration((d.mtotal), "minutes").humanize()) + ")"
+                + d.gname + ": " + p(d.gvalue/d.mtotal) + " of team total"
 
           }
           // TODO: add team total

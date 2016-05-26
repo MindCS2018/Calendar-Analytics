@@ -11,7 +11,6 @@ class User(db.Model):
     user_id = db.Column(db.String(10000), primary_key=True)
     first_name = db.Column(db.String(200), nullable=True)
     last_name = db.Column(db.String(200), nullable=True)
-    full_name = db.Column(db.String(200), nullable=True)
     # user_sync_token = db.Column(db.String(200), nullable=True)
 
 

@@ -7,7 +7,6 @@ def seed_user(profile, user_id):
 
     first_name = profile['names'][0].get("givenName")
     last_name = profile['names'][0].get("familyName")
-    full_name = profile['names'][0].get("displayName")
     # user_sync_token = calendarsResult['nextSyncToken']
     # calendar_etags = calendarsResult['etag']
 
@@ -21,8 +20,7 @@ def seed_user(profile, user_id):
 
         user = User(user_id=user_id,
                     first_name=first_name,
-                    last_name=last_name,
-                    full_name=full_name)
+                    last_name=last_name)
                     # user_sync_token=user_sync_token)
 
         db.session.add(user)

@@ -5,7 +5,7 @@ from flask import flash, redirect, url_for, jsonify
 from jinja2 import StrictUndefined
 import httplib2
 from apiclient.discovery import build
-from oauth2client import client
+from oauth2client.client import OAuth2WebServerFlow, flow_from_clientsecrets, OAuth2Credentials
 from model import connect_to_db, Event, Calendar, User, UserCal, CalEvent
 from datetime import datetime, timedelta
 import logging
@@ -22,26 +22,24 @@ app.jinja_env.undefined = StrictUndefined
 # import pdb; pdb.set_trace()
 
 
-def get_user_id():
-
-    return session['user_id']
-
-
 @app.route('/')
 def login():
-    """Google calendar login"""
+    """Renders login page"""
 
     return render_template("login.html")
 
 
 @app.route("/oauth2callback")
 def oauth2callback():
+    """Authenticates google user and authorizes app"""
 
     logging.basicConfig(filename='debug.log', level=logging.WARNING)
 
-    flow = client.flow_from_clientsecrets('client_secret.json',
-                                          scope='https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/plus.login',
-                                          redirect_uri=url_for('oauth2callback', _external=True))
+    flow = flow_from_clientsecrets(
+                  'client_secret.json',
+                  scope='https://www.googleapis.com/auth/calendar.readonly \
+                  https://www.googleapis.com/auth/plus.login',
+                  redirect_uri=url_for('oauth2callback', _external=True))
 
     flow.params['access_type'] = 'online'
     flow.params['approval_prompt'] = 'auto'
@@ -52,33 +50,58 @@ def oauth2callback():
 
     else:
         auth_code = request.args.get('code')
-        credentials = flow.step2_exchange(auth_code)
+        credentials = flow.step2_exchange(auth_code)  # creates credentials object
         session['credentials'] = credentials.to_json()
-        return redirect(url_for('oauth'))
+        return redirect(url_for('oauth2'))
 
 
-@app.route('/oauth')
-def oauth():
+def get_service_objects(http_auth):
+    """Builds google API service objects"""
+
+    people_service = build('people', 'v1', http_auth)
+    calendar_service = build('calendar', 'v3', http_auth)
+    event_service = build('calendar', 'v3', http_auth)
+
+    return people_service, calendar_service, event_service
+
+
+def pull_credentials():
+    """Pulls credentials out of session"""
+
+    return OAuth2Credentials.from_json(session['credentials'])
+
+
+def create_user_id():
+    """Adds google id_token to session"""
+
+    cred_dict = json.loads(session['credentials'])
+    user_id = cred_dict['id_token']['sub']
+    session['sub'] = user_id
+
+
+def get_user_id():
+    """Returns user_id"""
+
+    return session['sub']
+
+
+@app.route('/oauth2')
+def oauth2():
 
     if 'credentials' not in session:
         return redirect(url_for('oauth2callback'))
-    credentials = client.OAuth2Credentials.from_json(session['credentials'])
+    credentials = pull_credentials()
 
     if credentials.access_token_expired:
         return redirect(url_for('oauth2callback'))
     else:
-        # creates api service objects
         http_auth = credentials.authorize(httplib2.Http())
-        people_service = build('people', 'v1', http_auth)
-        calendar_service = build('calendar', 'v3', http_auth)
-        event_service = build('calendar', 'v3', http_auth)
+        people_service, calendar_service, event_service = get_service_objects(http_auth)
+
+    create_user_id()
 
     # profile api call
     profile = people_service.people().get(resourceName='people/me').execute()
-
-    cred_dict = json.loads(session['credentials'])
-    user_id = cred_dict['id_token']['sub']
-    session["user_id"] = user_id
 
     # calendars api call
     calendarsResult = calendar_service.calendarList().list(
@@ -123,18 +146,19 @@ def oauth():
     # executes batch api call
     batch.execute()
 
+    user_id = get_user_id()
+
     # database seed
     seed_user(profile, user_id)
     seed_calendars(calendarsResult, user_id)
     seed_events(eventsResult)
-
-    credentials.revoke(httplib2.Http())  # for demo purposes
 
     return redirect("/calendars")
 
 
 @app.route("/calendars")
 def calendars():
+    """"""
 
     user_id = get_user_id()
 
@@ -148,7 +172,9 @@ def calendars():
                            calendar_options=calendar_options)
 
 
-def getMapper(selected):
+def get_mapper(selected):
+    """Recives list of selected calendars for visualization,
+       returns mapper object."""
 
     mpr = {}
     x = 0
@@ -162,23 +188,19 @@ def getMapper(selected):
     return mpr
 
 
-def getNodes(mpr):
+def get_matrix(mpr):
+    """Calculates number of nodes from mapper object,
+       returns matrix of all zeros."""
 
     nodes = len(mpr.keys())
-
-    return nodes
-
-
-def getMatrix(mpr):
-
-    nodes = getNodes(mpr)
 
     matrix = [[0] * nodes for i in range(nodes)]
 
     return matrix
 
 
-def getEvents(selected):
+def get_events(selected):
+    """"""
 
     events = set()
 
@@ -192,7 +214,8 @@ def getEvents(selected):
     return events
 
 
-def populateMatrix(events, mpr, matrix):
+def populate_matrix(events, mpr, matrix):
+    """"""
 
     for event in events:
         attendees = event['calendars']
@@ -210,17 +233,18 @@ def populateMatrix(events, mpr, matrix):
 
 @app.route('/dashboard', methods=['POST'])
 def dashboard():
+    """"""
 
     # list of selected calendars
     selected = request.form.getlist('calendar')
 
     # builds matrix
-    mpr = getMapper(selected)
-    events = getEvents(selected)
-    matrix = getMatrix(mpr)
-    emptyMatrix = getMatrix(mpr)  # to test if final matrix is empty
+    mpr = get_mapper(selected)
+    events = get_events(selected)
+    matrix = get_matrix(mpr)
+    emptyMatrix = get_matrix(mpr)  # to test if final matrix is empty
 
-    meetingsMatrix = populateMatrix(events, mpr, matrix)
+    meetingsMatrix = populate_matrix(events, mpr, matrix)
 
     mpr = json.dumps(mpr)
     meetingsMatrix = {"data": meetingsMatrix}
@@ -233,7 +257,12 @@ def dashboard():
 
 @app.route('/logout')
 def logout():
-    """Logout"""
+    """Revokes oauth credentials on logout,
+       and deletes them from the session"""
+
+    credentials = pull_credentials()
+
+    credentials.revoke(httplib2.Http())  # for demo purposes
 
     del session['credentials']
 

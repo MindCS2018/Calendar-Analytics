@@ -1,7 +1,7 @@
 //  Chord reader
 function chordRdr (matrix, mpr) {
   return function (d) {
-  console.log(d);
+  // console.log(d);
 
     // empty objects
     var i,j,s,t,g,m = {};
