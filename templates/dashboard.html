@@ -61,24 +61,33 @@
 
     // Creating matrix and map
 
+      // $.ajax({
+      //   dataType: "json",
+      //   url: "/matri"
+      // })
+
+      // $.getJSON("/matrix.json", function(d) {
+      //   console.log("got it!");
+      //   console.log(d);
+      // })
+
       // global variables
-      var mpr = JSON.parse({{mpr|tojson|safe}});  // received JSON as flask variable
-      var numKeys = Object.keys(mpr).length;
-      var data = JSON.parse({{chord_data|tojson|safe}}); 
-      var events = data["data"];
+      var mpr = JSON.parse({{mpr|tojson|safe}});  // received JSON as flask
+      var matrix_data = JSON.parse({{matrix_data|tojson|safe}});
+      var newMatrix = matrix_data["data"];
 
       // empty matrix
-      function getMatrix (numKeys) {
-        var matrix = [];
-        for(var i=0; i<numKeys; i++) {
-          matrix[i] = new Array(numKeys).fill(0);
-        }
-        return matrix;
-      }
+      // function getMatrix (numKeys) {
+      //   var matrix = [];
+      //   for(var i=0; i<numKeys; i++) {
+      //     matrix[i] = new Array(numKeys).fill(0);
+      //   }
+      //   return matrix;
+      // }
 
       // build empty matrices
-      var newMatrix = getMatrix(numKeys);
-      var emptyMatrix = getMatrix(numKeys);
+      // var newMatrix = getMatrix(numKeys);
+      // var emptyMatrix = getMatrix(numKeys);
       
       // given a list of events
       // get number of attendees per event
@@ -89,30 +98,30 @@
       // add duration to array
       // plug duration into matrix at correct indexes
 
-      for (var i=0; i < events.length; i++) {
-        var calendars = events[i]['calendars']
+      // for (var i=0; i < events.length; i++) {
+      //   var calendars = events[i]['calendars']
 
-        // TODO: allow for greater than 2 person events
-        if (calendars.length > 1 && calendars[0] in mpr && calendars[1] in mpr) { 
+      //   // TODO: allow for greater than 2 person events
+      //   if (calendars.length > 1 && calendars[0] in mpr && calendars[1] in mpr) { 
 
-          for (var j in calendars) {
-            calendars[j] = mpr[calendars[j]]['id'];
-          }
+      //     for (var j in calendars) {
+      //       calendars[j] = mpr[calendars[j]]['id'];
+      //     }
 
-        calendars.push(events[i]['duration']);
-        newMatrix[calendars[0]][calendars[1]] += calendars[2]
-        newMatrix[calendars[1]][calendars[0]] += calendars[2]
+      //   calendars.push(events[i]['duration']);
+      //   newMatrix[calendars[0]][calendars[1]] += calendars[2]
+      //   newMatrix[calendars[1]][calendars[0]] += calendars[2]
 
-        } 
-      } 
+      //   } 
+      // } 
 
-      console.log(newMatrix);
+      // console.log(newMatrix);
 
-      if (_.isEqual(newMatrix, emptyMatrix)) {
-        alert("no meetings");
-      } else {
-        drawChords(newMatrix, mpr);
-      }
+      // if (_.isEqual(newMatrix, emptyMatrix)) {
+      //   alert("no meetings");
+      // } else {
+      drawChords(newMatrix, mpr);
+      // }
 
           // for (var k in calendars) {
           //   console.log(calendars);
@@ -122,7 +131,7 @@
 
       // draws the chord diagram
       function drawChords (newMatrix, mpr) {
-        var w = 680, h = 500, r1 = h / 2, r0 = r1 - 110;
+        var w = 720, h = 540, r1 = h / 2, r0 = r1 - 110;
 
         // sets color palette 
         // var fill = d3.scale.category20b()
@@ -138,14 +147,14 @@
             .sortChords(d3.descending);
 
         var arc = d3.svg.arc()
-            .innerRadius(r0)
-            .outerRadius(r0 + 20);
+            .innerRadius(r0 + 15)
+            .outerRadius(r0 + 7);
 
         // { 'megan:ryan': ['event 1', 'event 2']}
 
         // makes diagram responsive
         var svg = d3.select("body").append("svg:svg")
-            .attr("viewBox","0 0 880 700")
+            .attr("viewBox","0 0 780 600")
             // different types of xMidYMid: google svg meet
             .attr("preserveAspectRatio","xMidYMid meet")
             .append("svg:g")
@@ -180,7 +189,7 @@
             .each(function(d) { d.angle = (d.startAngle + d.endAngle) / 2; })
             .attr("dy", ".35em")
             .style("font-family", "helvetica, arial, sans-serif")
-            .style("font-size", "10px")
+            .style("font-size", "11px")
             .attr("text-anchor", function(d) { return d.angle > Math.PI ? "end" : null; })
 
             // rotates node labels
@@ -212,30 +221,35 @@
           // use moment.js for datetime conversions!
           // hover text
           function chordTip (d) {
+            moment.relativeTimeThreshold('s', 60);
+            moment.relativeTimeThreshold('m', 60);
+            moment.relativeTimeThreshold('h', 24);
+            moment.relativeTimeThreshold('d', 30);
+            moment.relativeTimeThreshold('M', 12);
             var p = d3.format(".1%")
-            return "Meeting Info:<br/><br/>"
-              +  d.cheesecake + "'s meetings with <br/>"
+            return ""
+              // +  d.cheesecake + "'s meetings with <br/>"
               +  d.sname + "'s meetings with " + d.tname + ": " 
                 + (moment.duration((d.svalue), "minutes").humanize()) + "<br/>"
-              + p(d.svalue/d.stotal) + " of " + d.sname + "'s Total Time (" 
+              + p(d.svalue/d.stotal) + " of " + d.sname + "'s time (" 
                 + (moment.duration((d.stotal), "minutes").humanize()) + ")<br/>"
-              + p(d.svalue/d.mtotal) + " of Team Total (" 
+              + p(d.svalue/d.mtotal) + " of total (" 
                 + (moment.duration((d.mtotal), "minutes").humanize()) + ")<br/>"
               + "<br/>"
               + d.tname + "'s meetings with " + d.sname + ": " 
                 + (moment.duration((d.tvalue), "minutes").humanize()) + "<br/>"
-              + p(d.tvalue/d.ttotal) + " of " + d.tname + "'s Total Time (" 
+              + p(d.tvalue/d.ttotal) + " of " + d.tname + "'s time (" 
                 + (moment.duration((d.ttotal), "minutes").humanize()) + ")<br/>"
-              + p(d.tvalue/d.mtotal) + " of Team Total (" 
-                + (moment.duration((d.mtotal), "minutes").humanize()) + ")";
+              + p(d.tvalue/d.mtotal) + " of total (" + (moment.duration((d.mtotal), "minutes").humanize()) + ")";
+
           }
 
           function groupTip (d) {
             var p = d3.format(".1%")
-            return "Person Info:<br/><br/>"
+            return ""
                 + d.gname + ": " + (moment.duration((d.gvalue), "minutes").humanize()) + "<br/>"
-                + p(d.gvalue/d.mtotal) + " of Team Total (" + 
-                   + ")"
+                + p(d.gvalue/d.mtotal) + " of total (" + (moment.duration((d.mtotal), "minutes").humanize()) + ")"
+
           }
           // TODO: add team total
 

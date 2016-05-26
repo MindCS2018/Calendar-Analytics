@@ -12,7 +12,7 @@ function chordRdr (matrix, mpr) {
       j = d.target.index;
       s = _.where(mpr, {id: i });
       t = _.where(mpr, {id: j });
-      m.cheesecake = "hello";
+      // m.cheesecake = "hello";
       m.sname = s[0].name;
       m.sdata = d.source.value;
       m.svalue = +d.source.value;

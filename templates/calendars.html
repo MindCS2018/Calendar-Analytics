@@ -10,7 +10,6 @@
 
         <div class="btn-group" data-toggle="buttons">
             <form action="/dashboard" method="POST">
-            <label class="btn btn-primary active">
             <ul style="list-style-type:none">
             {% for calendar in calendar_options %}
                 <li><input type="checkbox" name="calendar" value="{{calendar}}">{{calendar}}
@@ -18,7 +17,6 @@
             <br>
             <input type="submit" value="Submit">
             </ul>
-            </label>
             </form>
         </div>
 
