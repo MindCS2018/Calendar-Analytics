@@ -146,14 +146,19 @@ def oauth2():
     # executes batch api call
     batch.execute()
 
+    # database seed
+    seed_db(profile, calendarsResult, eventsResult)
+
+    return redirect("/calendars")
+
+
+def seed_db(profile, calendarsResult, eventsResult):
+
     user_id = get_user_id()
 
-    # database seed
     seed_user(profile, user_id)
     seed_calendars(calendarsResult, user_id)
     seed_events(eventsResult)
-
-    return redirect("/calendars")
 
 
 @app.route("/calendars")
@@ -203,12 +208,19 @@ def get_events(selected):
     """"""
 
     events = set()
+    # boom = set()
+
+    # can i query for event date here?
 
     for cal in selected:
         for calevent in CalEvent.query.filter_by(calendar_id=cal).all():
             events.add(calevent.event)
+            # boom.add(calevent.event.start)
 
     events = list(events)
+    # boom = list(boom)
+    # print("boom**")
+    # print boom
     events = [event.serialize() for event in events]
 
     return events
@@ -257,12 +269,12 @@ def dashboard():
 
 @app.route('/logout')
 def logout():
-    """Revokes oauth credentials on logout,
+    """On logout, revokes oauth credentials,
        and deletes them from the session"""
 
     credentials = pull_credentials()
 
-    credentials.revoke(httplib2.Http())  # for demo purposes
+    credentials.revoke(httplib2.Http())
 
     del session['credentials']
 
