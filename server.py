@@ -55,14 +55,29 @@ def oauth2callback():
         return redirect(url_for('oauth2'))
 
 
-def get_service_objects(http_auth):
-    """Builds google API service objects"""
+@app.route('/oauth2')
+def oauth2():
 
-    people_service = build('people', 'v1', http_auth)
-    calendar_service = build('calendar', 'v3', http_auth)
-    event_service = build('calendar', 'v3', http_auth)
+    if 'credentials' not in session:
+        return redirect(url_for('oauth2callback'))
+    credentials = pull_credentials()
 
-    return people_service, calendar_service, event_service
+    if credentials.access_token_expired:
+        return redirect(url_for('oauth2callback'))
+    else:
+        http_auth = credentials.authorize(httplib2.Http())
+        people_service, calendar_service, event_service = get_service_objects(http_auth)
+
+    create_user_id()
+
+    profile_result = profile_api_call(people_service)
+    calendars_result = calendar_api_call(calendar_service)
+    events_result = event_api_call(event_service, calendar_service, calendars_result)
+
+    # database seed
+    seed_db(profile_result, calendars_result, events_result)
+
+    return redirect("/calendars")
 
 
 def pull_credentials():
@@ -79,86 +94,87 @@ def create_user_id():
     session['sub'] = user_id
 
 
+def get_service_objects(http_auth):
+    """Builds google API service objects"""
+
+    people_service = build('people', 'v1', http_auth)
+    calendar_service = build('calendar', 'v3', http_auth)
+    event_service = build('calendar', 'v3', http_auth)
+
+    return people_service, calendar_service, event_service
+
+
+def get_dates():
+    """Datetime variables for events API call"""
+
+    now = datetime.utcnow().isoformat() + 'Z'
+    three_months = datetime.now() + timedelta(weeks=12)
+    three_months = three_months.isoformat() + 'Z'
+
+    return now, three_months
+
+
+def calendar_api_call(calendar_service):
+    """Executes google calendar api call"""
+
+    return calendar_service.calendarList().list(
+           fields='etag, items, items/etag, items/id, items/primary, \
+           items/selected, items/timeZone, items/summary').execute()
+
+
+def profile_api_call(people_service):
+    """Executes google people api call"""
+
+    return people_service.people().get(resourceName='people/me').execute()
+
+
+def event_api_call(event_service, calendar_service, calendars_result):
+    """Executes one batched google calendar api call,
+    returns event information for each shared calendar"""
+
+    events_result = {}
+
+    def batched_events(request_id, response, exception):  # events batch callback
+        if exception is not None:
+            print "batching error"
+        else:
+            events_result[request_id] = response
+
+    batch = event_service.new_batch_http_request(callback=batched_events)
+
+    now, three_months = get_dates()
+
+    calendars = calendars_result.get('items', [])  # list of calendar objects
+    id_list = [calendar['id'] for calendar in calendars]
+
+    for calendar_id in id_list:  # API request for events in each calendar
+
+        batch.add(event_service.events().list(calendarId=calendar_id,
+                                              timeMin=now,
+                                              timeMax=three_months,
+                                              maxResults=100,
+                                              singleEvents=True,
+                                              orderBy='startTime'),
+                  request_id=calendar_id)
+
+    batch.execute()  # executes batch api call
+
+    return events_result
+
+
 def get_user_id():
     """Returns user_id"""
 
     return session['sub']
 
 
-@app.route('/oauth2')
-def oauth2():
-
-    if 'credentials' not in session:
-        return redirect(url_for('oauth2callback'))
-    credentials = pull_credentials()
-
-    if credentials.access_token_expired:
-        return redirect(url_for('oauth2callback'))
-    else:
-        http_auth = credentials.authorize(httplib2.Http())
-        people_service, calendar_service, event_service = get_service_objects(http_auth)
-
-    create_user_id()
-
-    # profile api call
-    profile = people_service.people().get(resourceName='people/me').execute()
-
-    # calendars api call
-    calendarsResult = calendar_service.calendarList().list(
-        fields='etag, items, items/etag, items/id, items/primary, \
-        items/selected, items/timeZone, items/summary').execute()
-
-    # empty dictionary for events api call
-    eventsResult = {}
-
-    # callback from events batch needs to be created before batch request
-    def batched_events(request_id, response, exception):
-        if exception is not None:
-            print "batching error"
-        else:
-            eventsResult[request_id] = response
-
-    # batch request
-    batch = event_service.new_batch_http_request(callback=batched_events)
-
-    # datetime variables for event API calls
-    now = datetime.utcnow().isoformat() + 'Z'
-    three_months = datetime.now() + timedelta(weeks=12)
-    three_months = three_months.isoformat() + 'Z'
-
-    # list of calendar dictionaries
-    calendars = calendarsResult.get('items', [])
-
-    # creates list of calendar_ids to iterate through
-    id_list = [calendar['id'] for calendar in calendars]
-
-    # API request for events in each calendar
-    for calendar_id in id_list:
-
-        batch.add(calendar_service.events().list(calendarId=calendar_id,
-                                                 timeMin=now,
-                                                 timeMax=three_months,
-                                                 maxResults=100,
-                                                 singleEvents=True,
-                                                 orderBy='startTime'),
-                  request_id=calendar_id)
-
-    # executes batch api call
-    batch.execute()
-
-    # database seed
-    seed_db(profile, calendarsResult, eventsResult)
-
-    return redirect("/calendars")
-
-
-def seed_db(profile, calendarsResult, eventsResult):
+def seed_db(profile_result, calendars_result, events_result):
 
     user_id = get_user_id()
 
-    seed_user(profile, user_id)
-    seed_calendars(calendarsResult, user_id)
-    seed_events(eventsResult)
+    seed_user(profile_result, user_id)
+    seed_calendars(calendars_result, user_id)
+    seed_events(events_result)
 
 
 @app.route("/calendars")
@@ -175,72 +191,6 @@ def calendars():
 
     return render_template('calendars.html',
                            calendar_options=calendar_options)
-
-
-def get_mapper(selected):
-    """Recives list of selected calendars for visualization,
-       returns mapper object."""
-
-    mpr = {}
-    x = 0
-
-    for calendar in selected:
-        calendar_summary = (calendar.split("@")[0]).title()
-        mpr[calendar_summary] = {"id": x,
-                                 "name": calendar_summary}
-        x += 1
-
-    return mpr
-
-
-def get_matrix(mpr):
-    """Calculates number of nodes from mapper object,
-       returns matrix of all zeros."""
-
-    nodes = len(mpr.keys())
-
-    matrix = [[0] * nodes for i in range(nodes)]
-
-    return matrix
-
-
-def get_events(selected):
-    """"""
-
-    events = set()
-    # boom = set()
-
-    # can i query for event date here?
-
-    for cal in selected:
-        for calevent in CalEvent.query.filter_by(calendar_id=cal).all():
-            events.add(calevent.event)
-            # boom.add(calevent.event.start)
-
-    events = list(events)
-    # boom = list(boom)
-    # print("boom**")
-    # print boom
-    events = [event.serialize() for event in events]
-
-    return events
-
-
-def populate_matrix(events, mpr, matrix):
-    """"""
-
-    for event in events:
-        attendees = event['calendars']
-        for item in itertools.combinations(attendees, 2):
-            if item[0] in mpr and item[1] in mpr:
-                item = list(item)
-                item[0] = mpr[item[0]]['id']
-                item[1] = mpr[item[1]]['id']
-                item.append(event['duration'])
-                matrix[item[0]][item[1]] += item[2]
-                matrix[item[1]][item[0]] += item[2]
-
-    return matrix
 
 
 @app.route('/dashboard', methods=['POST'])
@@ -265,6 +215,72 @@ def dashboard():
     return render_template('dashboard.html',
                            mpr=mpr,
                            meetingsMatrix=meetingsMatrix)
+
+
+def get_mapper(selected):
+    """Recives list of selected calendars for visualization,
+       returns mapper object."""
+
+    mpr = {}
+    x = 0
+
+    for calendar in selected:
+        calendar_summary = (calendar.split("@")[0]).title()
+        mpr[calendar_summary] = {"id": x,
+                                 "name": calendar_summary}
+        x += 1
+
+    return mpr
+
+
+def get_events(selected):
+    """"""
+
+    events = set()
+    # boom = set()
+
+    # can i query for event date here?
+
+    for cal in selected:
+        for calevent in CalEvent.query.filter_by(calendar_id=cal).all():
+            events.add(calevent.event)
+            # boom.add(calevent.event.start)
+
+    events = list(events)
+    # boom = list(boom)
+    # print("boom**")
+    # print boom
+    events = [event.serialize() for event in events]
+
+    return events
+
+
+def get_matrix(mpr):
+    """Calculates number of nodes from mapper object,
+       returns matrix of all zeros."""
+
+    nodes = len(mpr.keys())
+
+    matrix = [[0] * nodes for i in range(nodes)]
+
+    return matrix
+
+
+def populate_matrix(events, mpr, matrix):
+    """"""
+
+    for event in events:
+        attendees = event['calendars']
+        for item in itertools.combinations(attendees, 2):
+            if item[0] in mpr and item[1] in mpr:
+                item = list(item)
+                item[0] = mpr[item[0]]['id']
+                item[1] = mpr[item[1]]['id']
+                item.append(event['duration'])
+                matrix[item[0]][item[1]] += item[2]
+                matrix[item[1]][item[0]] += item[2]
+
+    return matrix
 
 
 @app.route('/logout')
