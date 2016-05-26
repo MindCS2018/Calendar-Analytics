@@ -7,15 +7,24 @@
         crossorigin="anonymous"></script>
     </head>
     <body>
+        <script>
+            function toggle(source) {
+              checkboxes = document.getElementsByName('calendar');
+              for(var i=0, n=checkboxes.length;i<n;i++) {
+                checkboxes[i].checked = source.checked;
+              }
+            }
+        </script>
 
         <div class="btn-group" data-toggle="buttons">
             <form action="/dashboard" method="POST">
             <ul style="list-style-type:none">
+                <input type="checkbox" onClick="toggle(this)" /> Select all<br><br>
             {% for calendar in calendar_options %}
-                <li><input type="checkbox" name="calendar" value="{{calendar}}">{{calendar}}
+                <li><input type="checkbox" name="calendar" value="{{calendar}}"> {{calendar}}
             {% endfor %}
-            <br>
-            <input type="submit" value="Submit">
+                <br><br>
+                <input type="submit" value="Submit">
             </ul>
             </form>
         </div>
