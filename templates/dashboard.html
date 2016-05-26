@@ -73,64 +73,13 @@
 
       // global variables
       var mpr = JSON.parse({{mpr|tojson|safe}});  // received JSON as flask
-      var matrix_data = JSON.parse({{matrix_data|tojson|safe}});
-      var newMatrix = matrix_data["data"];
+      var matrix = JSON.parse({{meetingsMatrix|tojson|safe}});
+      var meetingsMatrix = matrix["data"];
 
-      // empty matrix
-      // function getMatrix (numKeys) {
-      //   var matrix = [];
-      //   for(var i=0; i<numKeys; i++) {
-      //     matrix[i] = new Array(numKeys).fill(0);
-      //   }
-      //   return matrix;
-      // }
-
-      // build empty matrices
-      // var newMatrix = getMatrix(numKeys);
-      // var emptyMatrix = getMatrix(numKeys);
-      
-      // given a list of events
-      // get number of attendees per event
-      // if number of attendes is greater than 1
-      // for each attendee in list of attendees
-      // get mapper index assigned to attendee
-      // switch out those numbers in the array
-      // add duration to array
-      // plug duration into matrix at correct indexes
-
-      // for (var i=0; i < events.length; i++) {
-      //   var calendars = events[i]['calendars']
-
-      //   // TODO: allow for greater than 2 person events
-      //   if (calendars.length > 1 && calendars[0] in mpr && calendars[1] in mpr) { 
-
-      //     for (var j in calendars) {
-      //       calendars[j] = mpr[calendars[j]]['id'];
-      //     }
-
-      //   calendars.push(events[i]['duration']);
-      //   newMatrix[calendars[0]][calendars[1]] += calendars[2]
-      //   newMatrix[calendars[1]][calendars[0]] += calendars[2]
-
-      //   } 
-      // } 
-
-      // console.log(newMatrix);
-
-      // if (_.isEqual(newMatrix, emptyMatrix)) {
-      //   alert("no meetings");
-      // } else {
-      drawChords(newMatrix, mpr);
-      // }
-
-          // for (var k in calendars) {
-          //   console.log(calendars);
-          //   console.log(calendars[k], events[i]['duration']);
-          //   console.log(newMatrix[calendars[k]]);
-          // }
+      drawChords(meetingsMatrix, mpr);
 
       // draws the chord diagram
-      function drawChords (newMatrix, mpr) {
+      function drawChords (matrix, mpr) {
         var w = 720, h = 540, r1 = h / 2, r0 = r1 - 110;
 
         // sets color palette 
@@ -165,9 +114,9 @@
                 .attr("r", r0 + 20);
                 
 
-        var rdr = chordRdr(newMatrix, mpr);
-        console.dir(rdr);
-        chord.matrix(newMatrix);
+        var rdr = chordRdr(matrix, mpr);
+        // console.dir(rdr);
+        chord.matrix(matrix);
 
         // mousover and mouseout for tooltip
         var g = svg.selectAll("g.group")
@@ -252,8 +201,6 @@
 
           }
           // TODO: add team total
-
-          // (moment.duration((d.mtotal), "minutes").humanize())
 
           function mouseover(d, i) {
             d3.select("#tooltip")

@@ -18,6 +18,7 @@ app = Flask(__name__)
 app.secret_key = os.environ["FLASK_APP_KEY"]
 app.jinja_env.undefined = StrictUndefined
 
+
 # import pdb; pdb.set_trace()
 
 
@@ -135,29 +136,23 @@ def oauth():
 @app.route("/calendars")
 def calendars():
 
-    user_id = session['user_id']
+    user_id = get_user_id()
 
-    all_calendars = UserCal.query.filter_by(user_id=user_id).all()
+    calendars = UserCal.query.filter_by(user_id=user_id).all()
 
     calendar_options = []
-    for calendar in all_calendars:
-        calendar_options.append(calendar.calendar.summary)
+    for cal in calendars:
+        calendar_options.append(cal.calendar.summary)
 
     return render_template('calendars.html',
                            calendar_options=calendar_options)
-
-
-def getMatrix(nodes):
-
-    matrix = [[0] * nodes for i in range(nodes)]
-
-    return matrix
 
 
 def getMapper(selected):
 
     mpr = {}
     x = 0
+
     for calendar in selected:
         calendar_summary = (calendar.split("@")[0]).title()
         mpr[calendar_summary] = {"id": x,
@@ -165,6 +160,22 @@ def getMapper(selected):
         x += 1
 
     return mpr
+
+
+def getNodes(mpr):
+
+    nodes = len(mpr.keys())
+
+    return nodes
+
+
+def getMatrix(mpr):
+
+    nodes = getNodes(mpr)
+
+    matrix = [[0] * nodes for i in range(nodes)]
+
+    return matrix
 
 
 def getEvents(selected):
@@ -176,17 +187,9 @@ def getEvents(selected):
             events.add(calevent.event)
 
     events = list(events)
-    # chord_data = {"data": [event.serialize() for event in events]}
     events = [event.serialize() for event in events]
 
     return events
-
-
-def getNodes(mpr):
-
-    nodes = len(mpr.keys())
-
-    return nodes
 
 
 def populateMatrix(events, mpr, matrix):
@@ -194,12 +197,13 @@ def populateMatrix(events, mpr, matrix):
     for event in events:
         attendees = event['calendars']
         for item in itertools.combinations(attendees, 2):
-            item = list(item)
-            item[0] = mpr[item[0]]['id']
-            item[1] = mpr[item[1]]['id']
-            item.append(event['duration'])
-            matrix[item[0]][item[1]] += item[2]
-            matrix[item[1]][item[0]] += item[2]
+            if item[0] in mpr and item[1] in mpr:
+                item = list(item)
+                item[0] = mpr[item[0]]['id']
+                item[1] = mpr[item[1]]['id']
+                item.append(event['duration'])
+                matrix[item[0]][item[1]] += item[2]
+                matrix[item[1]][item[0]] += item[2]
 
     return matrix
 
@@ -207,49 +211,24 @@ def populateMatrix(events, mpr, matrix):
 @app.route('/dashboard', methods=['POST'])
 def dashboard():
 
-    # choice of calendars
+    # list of selected calendars
     selected = request.form.getlist('calendar')
 
-    # creates mapper object
+    # builds matrix
     mpr = getMapper(selected)
-
-    # creates events object
     events = getEvents(selected)
+    matrix = getMatrix(mpr)
+    emptyMatrix = getMatrix(mpr)  # to test if final matrix is empty
 
-    # create matrices
-    nodes = getNodes(mpr)
-    matrix = getMatrix(nodes)
-    emptyMatrix = getMatrix(nodes)  # to test if final matrix is empty
-
-    #populate matrix
-    populateMatrix(events, mpr, matrix)
+    meetingsMatrix = populateMatrix(events, mpr, matrix)
 
     mpr = json.dumps(mpr)
-    # chord_data = json.dumps(chord_data)
-
-    print type(matrix)
-    print matrix
-
-    matrix = {"data": matrix}
-    matrix_data = json.dumps(matrix)
+    meetingsMatrix = {"data": meetingsMatrix}
+    meetingsMatrix = json.dumps(meetingsMatrix)
 
     return render_template('dashboard.html',
                            mpr=mpr,
-                           # chord_data=chord_data,
-                           # events=events,
-                           matrix_data=matrix_data)
-
-
-# @app.route('/matrix.json')
-# def matrix():
-
-#     nodes = 8
-
-#     matrix = [[0] * nodes for i in range(nodes)]
-
-#     emptyMatrix = {'data': matrix}
-
-#     return jsonify(emptyMatrix)
+                           meetingsMatrix=meetingsMatrix)
 
 
 @app.route('/logout')
