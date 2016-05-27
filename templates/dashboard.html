@@ -4,10 +4,35 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="static/style.css">
+    <title>Calendar Analytics</title>
   </head>
   <body>
-    <a href="/calendars">Change calendars</a><br>
-    <a href="/logout">Logout</a>
+      <script
+        src="https://code.jquery.com/jquery-1.12.4.min.js"
+        integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
+        crossorigin="anonymous">
+      </script>
+      <script>
+          function toggle(source) {
+            checkboxes = document.getElementsByName('calendar');
+            for(var i=0, n=checkboxes.length;i<n;i++) {
+              console.log(checkboxes[i]);
+              checkboxes[i].checked = source.checked;
+            }
+          }
+      </script>
+      <div class="btn-group" data-toggle="buttons">
+          <form action="/dashboard" method="POST">
+          <ul style="list-style-type:none">
+              <input type="checkbox" onClick="toggle(this)"/> Select all<br><br>
+          {% for calendar in calendar_options %}
+              <li><input type="checkbox" name="calendar" value="{{calendar}}" onClick="bang()"> {{calendar}}</input>
+          {% endfor %}
+              <br><br>
+              <input type="submit" value="Submit">
+          </ul>
+          </form>
+      </div>
     <div id="tooltip"></div>
     <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore.js"></script>
@@ -18,23 +43,21 @@
        "use strict"; 
 
     // Creating matrix and map
+  
+      var selected_calendars = JSON.parse({{selected_calendars|tojson|safe}});
+      var selected = selected_calendars['selected'];
+      console.log(selected);
+        for (var i = 0; i< selected.length; i++){
+          document.querySelectorAll('input[value="' + selected[i]+'"]')[0].setAttribute("checked","checked");
+        };
 
-      // $.ajax({
-      //   dataType: "json",
-      //   url: "/matri"
-      // })
-
-      // $.getJSON("/matrix.json", function(d) {
-      //   console.log("got it!");
-      //   console.log(d);
-      // })
-
-      // global variables
-      var mpr = JSON.parse({{mpr|tojson|safe}});  // received JSON as flask
-      var matrix = JSON.parse({{meetingsMatrix|tojson|safe}});
-      var meetingsMatrix = matrix["data"];
-
-      drawChords(meetingsMatrix, mpr);
+        //
+      // event listener on page load
+      $.get("/chord_diagram.json", function(data) {
+        var mpr = data['mpr'];
+        var meetingsMatrix = data['meetingsMatrix'];
+        drawChords(meetingsMatrix, mpr);
+      });
 
       // draws the chord diagram
       function drawChords (matrix, mpr) {
@@ -169,9 +192,9 @@
           }
       }
     </script>
-    <script
-        src="https://code.jquery.com/jquery-1.12.4.min.js"
-        integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
-        crossorigin="anonymous"></script>
+
+    <a href="/calendars">Back</a><br>
+    <a href="/logout">Logout</a>
+     
   </body>
 </html>

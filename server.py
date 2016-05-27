@@ -72,7 +72,9 @@ def oauth2():
 
     profile_result = profile_api_call(people_service)
     calendars_result = calendar_api_call(calendar_service)
-    events_result = event_api_call(event_service, calendar_service, calendars_result)
+    events_result = event_api_call(event_service,
+                                   calendar_service,
+                                   calendars_result)
 
     # database seed
     seed_db(profile_result, calendars_result, events_result)
@@ -181,6 +183,14 @@ def seed_db(profile_result, calendars_result, events_result):
 def calendars():
     """"""
 
+    calendar_options = get_calendar_options()
+
+    return render_template('calendars.html',
+                           calendar_options=calendar_options)
+
+
+def get_calendar_options():
+
     user_id = get_user_id()
 
     calendars = UserCal.query.filter_by(user_id=user_id).all()
@@ -189,20 +199,45 @@ def calendars():
     for cal in calendars:
         calendar_options.append(cal.calendar.summary)
 
-    return render_template('calendars.html',
-                           calendar_options=calendar_options)
+    return calendar_options
+
+
+@app.route('/chord_diagram.json')
+def chord_diagram():
+
+    # receive from ajax request
+    selected_calendars = ['megan@lunchdragon.com',
+                          'don@lunchdragon.com',
+                          'lisa@lunchdragon.com',
+                          'andrew@lunchdragon.com',
+                          'jemma@lunchdragon.com']
+
+    mpr = get_mapper(selected_calendars)
+    events = get_events(selected_calendars)
+    matrix = get_matrix(mpr)
+    emptyMatrix = get_matrix(mpr)  # to test if final matrix is empty
+
+    meetingsMatrix = populate_matrix(events, mpr, matrix)
+
+    data = {"mpr": mpr, "meetingsMatrix": meetingsMatrix}
+
+    return jsonify(data)
 
 
 @app.route('/dashboard', methods=['POST'])
 def dashboard():
     """"""
 
+    calendar_options = get_calendar_options()
+
     # list of selected calendars
-    selected = request.form.getlist('calendar')
+    # selected_calendars = request.form.getlist('calendar')
+
+    selected_calendars = request.form.getlist('calendar')
 
     # builds matrix
-    mpr = get_mapper(selected)
-    events = get_events(selected)
+    mpr = get_mapper(selected_calendars)
+    events = get_events(selected_calendars)
     matrix = get_matrix(mpr)
     emptyMatrix = get_matrix(mpr)  # to test if final matrix is empty
 
@@ -212,19 +247,22 @@ def dashboard():
     meetingsMatrix = {"data": meetingsMatrix}
     meetingsMatrix = json.dumps(meetingsMatrix)
 
+    selected_calendars = {"selected": selected_calendars}
+    selected_calendars = json.dumps(selected_calendars)
+
     return render_template('dashboard.html',
-                           mpr=mpr,
-                           meetingsMatrix=meetingsMatrix)
+                           calendar_options=calendar_options,
+                           selected_calendars=selected_calendars)
 
 
-def get_mapper(selected):
+def get_mapper(selected_calendars):
     """Recives list of selected calendars for visualization,
        returns mapper object."""
 
     mpr = {}
     x = 0
 
-    for calendar in selected:
+    for calendar in selected_calendars:
         calendar_summary = (calendar.split("@")[0]).title()
         mpr[calendar_summary] = {"id": x,
                                  "name": calendar_summary}
@@ -233,26 +271,20 @@ def get_mapper(selected):
     return mpr
 
 
-def get_events(selected):
+def get_events(selected_calendars):
     """"""
 
     events = set()
-    # boom = set()
 
-    # can i query for event date here?
-
-    for cal in selected:
+    for cal in selected_calendars:
         for calevent in CalEvent.query.filter_by(calendar_id=cal).all():
             events.add(calevent.event)
-            # boom.add(calevent.event.start)
+
+    # join
 
     events = list(events)
-    # boom = list(boom)
-    # print("boom**")
-    # print boom
-    events = [event.serialize() for event in events]
 
-    return events
+    return [event.serialize() for event in events]
 
 
 def get_matrix(mpr):
@@ -261,9 +293,7 @@ def get_matrix(mpr):
 
     nodes = len(mpr.keys())
 
-    matrix = [[0] * nodes for i in range(nodes)]
-
-    return matrix
+    return [[0] * nodes for i in range(nodes)]
 
 
 def populate_matrix(events, mpr, matrix):

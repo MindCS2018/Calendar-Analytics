@@ -16,11 +16,11 @@ function chordRdr (matrix, mpr) {
       mapper.sourceName = sourceNode[0].name;
       mapper.sourceData = d.source.value;
       mapper.sourceValue = +d.source.value;
-      mapper.stotal = _.reduce(matrix[i], function (k, n) { return k + n; }, 0);
+      mapper.sourceTotal = _.reduce(matrix[i], function (k, n) { return k + n; }, 0);
       mapper.targetName = targetNode[0].name;
       mapper.targetData = d.target.value;
       mapper.targetValue = +d.target.value;
-      mapper.ttotal = _.reduce(matrix[j], function (k, n) { return k + n; }, 0);
+      mapper.targetTotal = _.reduce(matrix[j], function (k, n) { return k + n; }, 0);
     } else {
       g = _.where(mpr, {id: d.index });
       mapper.gname = g[0].name;

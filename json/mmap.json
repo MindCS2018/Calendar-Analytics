@@ -1,0 +1,8 @@
+mmap = {
+      "Don": {"id":0, "name":"Don"}, 
+      "Megan": {"id":1, "name":"Megan"}, 
+      "Andrew": {"id":2, "name":"Andrew"}, 
+      "Hannah": {"id":3, "name":"Hannah"}
+    }
+
+matrix = [[],[],[],[]]
