@@ -16,10 +16,49 @@ function sendSelected() {
           function(data) {
           var mpr = data['mpr'];
           var meetingsMatrix = data['meetingsMatrix'];
-          drawChords(meetingsMatrix, mpr);
+          var emptyMatrix = data['emptyMatrix'];
+          buildMatrix(meetingsMatrix, emptyMatrix, mpr, selectedCals);
           }
   );
 }
+
+$(function() {
+    $( ".datepicker" ).datepicker();
+  });
+
+$( "#startdate" ).change(
+  function () {
+  var startdate = $( "#startdate" ).val();
+  var forminput = { "startdate": startdate};
+  $.get("/receive_dates",
+        forminput,
+        function () { console.log("hello"); }
+        );
+} );
+
+$( "#enddate" ).change(
+  function () {
+  var enddate = $( "#enddate" ).val();
+  console.log(enddate);
+});
+
+
+// builds matrix or gives message, depending on number of calendars selected
+function buildMatrix (meetingsMatrix, emptyMatrix, mpr, selectedCals) {
+
+  if (selectedCals.length === 0) {
+    $(".diagram").html("<p class='diagram-message'>Choose calendars</p>");
+  } else if (selectedCals.length === 1){
+    $(".diagram").html("<p class='diagram-message'>One calendar message</p>");
+  } else if (_.isEqual(meetingsMatrix, emptyMatrix)) {
+    $(".diagram").html("<p class='diagram-message'>No meetings between these calendars</p>");
+  } else {
+    drawChords(meetingsMatrix, mpr);
+  }
+}
+
+
+$(".diagram").html("<p class='open-message'>Choose calendars</p>");
 
 
 /////////////////////////////////////////////////////////////////////
@@ -126,9 +165,9 @@ function drawChords (matrix, mpr) {
               + p(d.sourceValue/d.sourceTotal) + " of " + d.sourceName + "'s time <br>"
               + p(d.sourceValue/d.mtotal) + " of team total" + "<br>"
               + "<br>"
-              + d.targetName + "'s time with " + d.sourceName + ": " 
+              + d.targetName + "'s time with " + d.sourceName + ": "
                 + (moment.duration((d.targetValue), "minutes").humanize()) + "<br>"
-              + p(d.targetValue/d.targetTotal) + " of " + d.tname + "'s time <br>"
+              + p(d.targetValue/d.targetTotal) + " of " + d.targetName + "'s time <br>"
               + p(d.targetValue/d.mtotal) + " of team total";
 
           }

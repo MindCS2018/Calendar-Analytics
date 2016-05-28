@@ -205,7 +205,7 @@ def chord_diagram():
 
     meetingsMatrix = populate_matrix(events, mpr, matrix)
 
-    data = {"mpr": mpr, "meetingsMatrix": meetingsMatrix}
+    data = {"mpr": mpr, "meetingsMatrix": meetingsMatrix, "emptyMatrix": emptyMatrix}
 
     return jsonify(data)
 
@@ -236,6 +236,14 @@ def get_mapper(selected_calendars):
     return mpr
 
 
+@app.route("/receive_dates")
+def receive_dates():
+
+    startdate = request.args.get("startdate")
+    print startdate
+    return "hello"
+
+
 def get_events(selected_calendars):
     """"""
 
@@ -249,11 +257,11 @@ def get_events(selected_calendars):
 
     # print cals
 
-    # evts = db.session.query(CalEvent, Event).join(Event).all()
+    evts = db.session.query(CalEvent, Event).join(Event).all()
 
-    # for calevent, event in evts:
-    #     if calevent.calendar_id == "megan@lunchdragon.com" and event.start > datetime(2016, 5, 27):
-    #         print event
+    for calevent, event in evts:
+        if calevent.calendar_id == "megan@lunchdragon.com" and event.start > datetime(2016, 5, 27):
+            print event
 
     events = list(events)
 
@@ -308,4 +316,4 @@ if __name__ == "__main__":
 
     # DebugToolbarExtension(app)
 
-    # app.run()
+    app.run()

@@ -6,9 +6,15 @@
     <link rel="stylesheet" href="static/style.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery.js"></script>
+     <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
     <title>Calendar Analytics</title>
   </head>
+
   <body>
+      <a href="/logout">Logout</a>
       <div class="checkbox" data-toggle="buttons">
           <form id="selected-calendars" action="/dashboard">
           <ul style="list-style-type:none">
@@ -19,20 +25,15 @@
               <br><br>
           </ul>
           </form>
+        <p>Start Date: <input type="text" class="datepicker" id="startdate"></p>
+        <p>End Date: <input type="text" class="datepicker" id="enddate"></p>
       </div>
       <div id="tooltip"></div>
       <div class="diagram"></div>
-      <a href="/calendars">Back</a><br>
-      <a href="/logout">Logout</a>
       <script src="../static/diagram.js"></script>
       <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore.js"></script>
-      <script src="https://code.jquery.com/jquery.js"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.js"></script>
-      <script
-          src="https://code.jquery.com/jquery-1.12.4.min.js"
-          integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
-          crossorigin="anonymous">
-      </script>
   </body>
+
 </html>
