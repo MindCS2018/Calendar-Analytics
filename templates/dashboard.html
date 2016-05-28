@@ -12,7 +12,7 @@
       <div class="checkbox" data-toggle="buttons">
           <form id="selected-calendars" action="/dashboard">
           <ul style="list-style-type:none">
-              <input type="checkbox" onClick="toggle(this)"/> Select all<br><br>
+              <input type="checkbox" onClick="toggle(this)"/> select all<br>
           {% for calendar in calendar_options %}
               <li><input type="checkbox" name="calendar" value="{{calendar}}" onClick="sendSelected()"> {{calendar}}</input>
           {% endfor %}

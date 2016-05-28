@@ -6,7 +6,7 @@ from jinja2 import StrictUndefined
 import httplib2
 from apiclient.discovery import build
 from oauth2client.client import OAuth2WebServerFlow, flow_from_clientsecrets, OAuth2Credentials
-from model import connect_to_db, Event, Calendar, User, UserCal, CalEvent
+from model import connect_to_db, Event, Calendar, User, UserCal, CalEvent, db
 from datetime import datetime, timedelta
 import logging
 from seed import seed_user, seed_calendars, seed_events
@@ -179,16 +179,6 @@ def seed_db(profile_result, calendars_result, events_result):
     seed_events(events_result)
 
 
-# @app.route("/calendars")
-# def calendars():
-#     """"""
-
-#     calendar_options = get_calendar_options()
-
-#     return render_template('calendars.html',
-#                            calendar_options=calendar_options)
-
-
 def get_calendar_options():
 
     user_id = get_user_id()
@@ -206,10 +196,7 @@ def get_calendar_options():
 def chord_diagram():
 
     # receive from ajax request
-
-    print "got here!"
     selected_calendars = request.args.getlist('calendar')
-    print selected_calendars
 
     mpr = get_mapper(selected_calendars)
     events = get_events(selected_calendars)
@@ -221,7 +208,6 @@ def chord_diagram():
     data = {"mpr": mpr, "meetingsMatrix": meetingsMatrix}
 
     return jsonify(data)
-    # return "hello"
 
 
 @app.route('/dashboard')
@@ -259,7 +245,15 @@ def get_events(selected_calendars):
         for calevent in CalEvent.query.filter_by(calendar_id=cal).all():
             events.add(calevent.event)
 
-    # join
+    # cals = CalEvent.query.options(db.joinedload('event')).all()
+
+    # print cals
+
+    # evts = db.session.query(CalEvent, Event).join(Event).all()
+
+    # for calevent, event in evts:
+    #     if calevent.calendar_id == "megan@lunchdragon.com" and event.start > datetime(2016, 5, 27):
+    #         print event
 
     events = list(events)
 
@@ -314,4 +308,4 @@ if __name__ == "__main__":
 
     # DebugToolbarExtension(app)
 
-    app.run()
+    # app.run()
