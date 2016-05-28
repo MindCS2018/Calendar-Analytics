@@ -2,7 +2,6 @@
 function toggle(source) {
           checkboxes = document.getElementsByName('calendar');
           for(var i=0, n=checkboxes.length;i<n;i++) {
-            console.log(checkboxes[i]);
             checkboxes[i].checked = source.checked;
           }
           sendSelected();
@@ -21,6 +20,12 @@ function sendSelected() {
           }
   );
 }
+
+
+/////////////////////////////////////////////////////////////////////
+// d3 chord diagram based on examples from http://www.delimited.io //
+/////////////////////////////////////////////////////////////////////
+
 
 // draws chord diagram
 function drawChords (matrix, mpr) {
@@ -155,7 +160,6 @@ function drawChords (matrix, mpr) {
 
       if (d.source) {
         i = d.source.index;
-        console.log(i);
         j = d.target.index;
         sourceNode = _.where(mpr, {id: i });
         targetNode = _.where(mpr, {id: j });
