@@ -20,16 +20,16 @@
               checkboxes[i].checked = source.checked;
             }
           }
+
       </script>
       <div class="btn-group" data-toggle="buttons">
-          <form action="/dashboard" method="POST">
+          <form id="selected-calendars" action="/dashboard">
           <ul style="list-style-type:none">
               <input type="checkbox" onClick="toggle(this)"/> Select all<br><br>
           {% for calendar in calendar_options %}
-              <li><input type="checkbox" name="calendar" value="{{calendar}}" onClick="bang()"> {{calendar}}</input>
+              <li><input type="checkbox" name="calendar" value="{{calendar}}" onClick="sendSelected()"> {{calendar}}</input>
           {% endfor %}
               <br><br>
-              <input type="submit" value="Submit">
           </ul>
           </form>
       </div>
@@ -43,21 +43,24 @@
        "use strict"; 
 
     // Creating matrix and map
-  
-      var selected_calendars = JSON.parse({{selected_calendars|tojson|safe}});
-      var selected = selected_calendars['selected'];
-      console.log(selected);
-        for (var i = 0; i< selected.length; i++){
-          document.querySelectorAll('input[value="' + selected[i]+'"]')[0].setAttribute("checked","checked");
-        };
 
-        //
-      // event listener on page load
-      $.get("/chord_diagram.json", function(data) {
-        var mpr = data['mpr'];
-        var meetingsMatrix = data['meetingsMatrix'];
-        drawChords(meetingsMatrix, mpr);
-      });
+
+      function sendSelected() {
+        var selectedCals = $("#selected-calendars input").serializeArray()
+
+        console.log(selectedCals)
+
+
+        $.get("/chord_diagram.json",  
+                selectedCals, 
+
+                function(data) {
+                var mpr = data['mpr'];
+                var meetingsMatrix = data['meetingsMatrix'];
+                drawChords(meetingsMatrix, mpr);
+                }
+        ); 
+      }   
 
       // draws the chord diagram
       function drawChords (matrix, mpr) {

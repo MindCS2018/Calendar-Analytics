@@ -79,7 +79,7 @@ def oauth2():
     # database seed
     seed_db(profile_result, calendars_result, events_result)
 
-    return redirect("/calendars")
+    return redirect("/dashboard")
 
 
 def pull_credentials():
@@ -179,14 +179,14 @@ def seed_db(profile_result, calendars_result, events_result):
     seed_events(events_result)
 
 
-@app.route("/calendars")
-def calendars():
-    """"""
+# @app.route("/calendars")
+# def calendars():
+#     """"""
 
-    calendar_options = get_calendar_options()
+#     calendar_options = get_calendar_options()
 
-    return render_template('calendars.html',
-                           calendar_options=calendar_options)
+#     return render_template('calendars.html',
+#                            calendar_options=calendar_options)
 
 
 def get_calendar_options():
@@ -206,11 +206,14 @@ def get_calendar_options():
 def chord_diagram():
 
     # receive from ajax request
-    selected_calendars = ['megan@lunchdragon.com',
-                          'don@lunchdragon.com',
-                          'lisa@lunchdragon.com',
-                          'andrew@lunchdragon.com',
-                          'jemma@lunchdragon.com']
+
+    print "got here!"
+    selected = request.args.getlist('calendar')
+    print selected
+
+    selected_calendars = []
+    for calendar in selected:
+        selected_calendars.append(calendar['value'])
 
     mpr = get_mapper(selected_calendars)
     events = get_events(selected_calendars)
@@ -224,35 +227,14 @@ def chord_diagram():
     return jsonify(data)
 
 
-@app.route('/dashboard', methods=['POST'])
+@app.route('/dashboard')
 def dashboard():
     """"""
 
     calendar_options = get_calendar_options()
 
-    # list of selected calendars
-    # selected_calendars = request.form.getlist('calendar')
-
-    selected_calendars = request.form.getlist('calendar')
-
-    # builds matrix
-    mpr = get_mapper(selected_calendars)
-    events = get_events(selected_calendars)
-    matrix = get_matrix(mpr)
-    emptyMatrix = get_matrix(mpr)  # to test if final matrix is empty
-
-    meetingsMatrix = populate_matrix(events, mpr, matrix)
-
-    mpr = json.dumps(mpr)
-    meetingsMatrix = {"data": meetingsMatrix}
-    meetingsMatrix = json.dumps(meetingsMatrix)
-
-    selected_calendars = {"selected": selected_calendars}
-    selected_calendars = json.dumps(selected_calendars)
-
     return render_template('dashboard.html',
-                           calendar_options=calendar_options,
-                           selected_calendars=selected_calendars)
+                           calendar_options=calendar_options)
 
 
 def get_mapper(selected_calendars):
