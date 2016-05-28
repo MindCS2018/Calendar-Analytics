@@ -208,12 +208,8 @@ def chord_diagram():
     # receive from ajax request
 
     print "got here!"
-    selected = request.args.getlist('calendar')
-    print selected
-
-    selected_calendars = []
-    for calendar in selected:
-        selected_calendars.append(calendar['value'])
+    selected_calendars = request.args.getlist('calendar')
+    print selected_calendars
 
     mpr = get_mapper(selected_calendars)
     events = get_events(selected_calendars)
@@ -225,6 +221,7 @@ def chord_diagram():
     data = {"mpr": mpr, "meetingsMatrix": meetingsMatrix}
 
     return jsonify(data)
+    # return "hello"
 
 
 @app.route('/dashboard')
