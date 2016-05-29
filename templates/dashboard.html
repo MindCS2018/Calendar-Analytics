@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %} 
+
+<a href="/logout">Logout</a>
+<div class="checkbox" data-toggle="buttons">
+    <form id="selected-calendars" action="/dashboard">
+    <ul style="list-style-type:none">
+        <input type="checkbox" onClick="toggle(this)"/> select all<br>
+    {% for calendar in calendar_options %}
+        <li><input type="checkbox" name="calendar" value="{{calendar}}" onClick="sendSelected()"> {{calendar}}</input>
+    {% endfor %}
+        <br><br>
+    </ul>
+    </form>
+</div>
+<div class="dates">
+  <p>Start <input type="text" class="datepicker" id="startdate">
+     End <input type="text" class="datepicker" id="enddate"></p>
+</div>
+<div id="tooltip"></div>
+<div class="diagram"></div>
+      
+{% endblock %}

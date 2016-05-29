@@ -18,9 +18,49 @@ body {
     padding-top:40px;
     padding-left:40px;
     font-family: 'Raleway', sans-serif;
+    /*background-color: #3e3d3f; */
 }
 
 h2 {
     text-align: center;
     margin-bottom: 2em;
 }
+
+  /* on hover info for chord diagram*/
+
+#tooltip {
+    color: black;
+    opacity: 1;
+    background: white;
+    padding: 5px;
+    border: 1px solid lightgrey;
+    border-radius: 5px;
+    position: absolute;
+    z-index: 10;
+    visibility: hidden;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+/*  grid system in css
+  put in div container
+  in div container fluid*/
+
+#circle circle {
+    fill: none;
+    pointer-events: all;
+  }
+
+path.group {
+    fill-opacity: .8;
+  }
+
+path.chord {
+    fill-opacity: .8;
+    stroke: #000;
+    stroke-width: .25px;
+  }
+
+#circle:hover path.fade {
+    display: none;
+  }

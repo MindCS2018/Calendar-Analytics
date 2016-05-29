@@ -1,27 +1,14 @@
 <!doctype html>
 <html>
     <head>
+        <meta name="google-signin-client_id" 
+              content="607236860513-esmluht9bgt7bvdeu8i685a67414pg37.apps.googleusercontent.com">
         <link href="/static/style.css" rel="stylesheet"></link>
         <link href="http://fonts.googleapis.com/css?family=Raleway" rel="stylesheet" type="text/css">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.js"></script>
         <script src="https://code.jquery.com/jquery.js"></script>
     </head>
     <body>
-        <div>
-           {% for event_obj in wfh_next_week %}
-                <br>Event: {{ event_obj.summary }}
-                <br>Start time: {{ event_obj.start }}
-                <br>End time: {{ event_obj.end }}
-                <br># of Attendees: {{ event_obj.calevents | length }}<br>
-           {% endfor %}
-        </div>
-<!--         <div>
-           {% for event_obj in wfh_next_week %} -->
-              <!--   {% for calevent in event_obj.calevents %}
-                    <br>Attendee: {{ calevent.calendar_id }} -->
-             <!--    {% endfor %} -->
-      <!--      {% endfor %}
-        </div> -->
         <div class="week-chart">
             <canvas id="lineChart" width="400" height="200"></canvas>
             <div id="lineLegend" class="chart-legend"></div>
@@ -42,6 +29,13 @@
 
               $("#lineLegend").html(myLineChart.generateLegend());
             });
+
+            $("#lineChart").click(function(e) {
+               console.log("pushed button!")
+               window.location.assign("/breakdown")
+            });
+
         </script>
+        <script src="https://apis.google.com/js/platform.js" async defer></script>  
     </body>
 </html>
