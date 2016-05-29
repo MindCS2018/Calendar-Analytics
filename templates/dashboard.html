@@ -1,39 +1,23 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="static/style.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery.js"></script>
-     <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
-    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
-    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
-    <title>Calendar Analytics</title>
-  </head>
+{% extends 'base.html' %}
+{% block content %} 
 
-  <body>
-      <a href="/logout">Logout</a>
-      <div class="checkbox" data-toggle="buttons">
-          <form id="selected-calendars" action="/dashboard">
-          <ul style="list-style-type:none">
-              <input type="checkbox" onClick="toggle(this)"/> select all<br>
-          {% for calendar in calendar_options %}
-              <li><input type="checkbox" name="calendar" value="{{calendar}}" onClick="sendSelected()"> {{calendar}}</input>
-          {% endfor %}
-              <br><br>
-          </ul>
-          </form>
-        <p>Start Date: <input type="text" class="datepicker" id="startdate"></p>
-        <p>End Date: <input type="text" class="datepicker" id="enddate"></p>
-      </div>
-      <div id="tooltip"></div>
-      <div class="diagram"></div>
-      <script src="../static/diagram.js"></script>
-      <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore.js"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.js"></script>
-  </body>
-
-</html>
+<a href="/logout">Logout</a>
+<div class="checkbox" data-toggle="buttons">
+    <form id="selected-calendars" action="/dashboard">
+    <ul style="list-style-type:none">
+        <input type="checkbox" onClick="toggle(this)"/> select all<br>
+    {% for calendar in calendar_options %}
+        <li><input type="checkbox" name="calendar" value="{{calendar}}" onClick="sendSelected()"> {{calendar}}</input>
+    {% endfor %}
+        <br><br>
+    </ul>
+    </form>
+</div>
+<div class="dates">
+  <p>Start <input type="text" class="datepicker" id="startdate">
+     End <input type="text" class="datepicker" id="enddate"></p>
+</div>
+<div id="tooltip"></div>
+<div class="diagram"></div>
+      
+{% endblock %}

@@ -11,8 +11,13 @@ function toggle(source) {
 function sendSelected() {
 
   var selectedCals = $("#selected-calendars input").serializeArray();
+  var startdate = $( "#startdate" ).val();
+  var enddate = $( "#enddate" ).val();
 
-  $.get("/chord_diagram.json", selectedCals,
+  selectedCals.push({name: "startdate", value: startdate});
+  selectedCals.push({name: "enddate", value: enddate});
+
+  $.get("/chord-diagram.json", selectedCals,
           function(data) {
           var mpr = data['mpr'];
           var meetingsMatrix = data['meetingsMatrix'];
@@ -22,25 +27,17 @@ function sendSelected() {
   );
 }
 
+// settings for date picker
 $(function() {
     $( ".datepicker" ).datepicker();
-  });
-
-$( "#startdate" ).change(
-  function () {
-  var startdate = $( "#startdate" ).val();
-  var forminput = { "startdate": startdate};
-  $.get("/receive_dates",
-        forminput,
-        function () { console.log("hello"); }
-        );
-} );
-
-$( "#enddate" ).change(
-  function () {
-  var enddate = $( "#enddate" ).val();
-  console.log(enddate);
+    $( "#startdate" ).datepicker( "setDate", "+0d" );
+    $( "#enddate" ).datepicker( "setDate", "+2w" );
 });
+
+
+$( ".datepicker" ).change(
+  function () { sendSelected(); }
+);
 
 
 // builds matrix or gives message, depending on number of calendars selected

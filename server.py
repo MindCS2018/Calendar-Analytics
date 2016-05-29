@@ -7,7 +7,8 @@ import httplib2
 from apiclient.discovery import build
 from oauth2client.client import OAuth2WebServerFlow, flow_from_clientsecrets, OAuth2Credentials
 from model import connect_to_db, Event, Calendar, User, UserCal, CalEvent, db
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
+from dateutil.relativedelta import relativedelta
 import logging
 from seed import seed_user, seed_calendars, seed_events
 import json
@@ -192,14 +193,22 @@ def get_calendar_options():
     return calendar_options
 
 
-@app.route('/chord_diagram.json')
+@app.route('/chord-diagram.json')
 def chord_diagram():
+
+    # now = datetime.now()
+    # next_month = now + relativedelta(months=1)
+
+    # startdate = request.args.get("startdate", "05/01/2016")
+    # enddate = request.args.get("enddate", "08/01/2016")
 
     # receive from ajax request
     selected_calendars = request.args.getlist('calendar')
+    startdate = request.args.get('startdate')
+    enddate = request.args.get('enddate')
 
     mpr = get_mapper(selected_calendars)
-    events = get_events(selected_calendars)
+    events = get_events(selected_calendars, startdate, enddate)
     matrix = get_matrix(mpr)
     emptyMatrix = get_matrix(mpr)  # to test if final matrix is empty
 
@@ -236,32 +245,20 @@ def get_mapper(selected_calendars):
     return mpr
 
 
-@app.route("/receive_dates")
-def receive_dates():
-
-    startdate = request.args.get("startdate")
-    print startdate
-    return "hello"
-
-
-def get_events(selected_calendars):
+def get_events(selected_calendars, startdate, enddate):
     """"""
+
+    start = datetime.strptime(startdate, "%m/%d/%Y")
+    end = datetime.strptime(enddate, "%m/%d/%Y")
 
     events = set()
 
-    for cal in selected_calendars:
-        for calevent in CalEvent.query.filter_by(calendar_id=cal).all():
-            events.add(calevent.event)
-
-    # cals = CalEvent.query.options(db.joinedload('event')).all()
-
-    # print cals
-
     evts = db.session.query(CalEvent, Event).join(Event).all()
 
-    for calevent, event in evts:
-        if calevent.calendar_id == "megan@lunchdragon.com" and event.start > datetime(2016, 5, 27):
-            print event
+    for cal in selected_calendars:
+        for calevent, event in evts:
+            if calevent.calendar_id == cal and event.start > start and event.end < end:
+                events.add(event)
 
     events = list(events)
 
