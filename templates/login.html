@@ -1,11 +1,9 @@
-<!doctype html>
-<html>
-    <head>
-    </head>
-    <body>
+{% extends 'base.html' %}
+{% block content %} 
+
         <form action="/oauth2callback">
           <input type="submit" value="Sign in with google"/>
         </form>
-    </body>
-</html>
+
+{% endblock %}
 
