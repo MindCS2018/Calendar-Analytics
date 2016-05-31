@@ -5,19 +5,26 @@
 <div class="checkbox" data-toggle="buttons">
     <form id="selected-calendars" action="/dashboard">
     <ul style="list-style-type:none">
-        <input type="checkbox" onClick="toggle(this)"/> select all<br>
+        <input type="checkbox" onClick="selectAll(this)"/> select all<br>
     {% for calendar in calendar_options %}
         <li><input type="checkbox" name="calendar" value="{{calendar}}" onClick="sendSelected()"> {{calendar}}</input>
     {% endfor %}
-        <br><br>
+        <br>
     </ul>
     </form>
 </div>
+<div id="drop-chart">
+    <select id="dropdown">
+        <option value="polar">Polar Chart</option>
+        <option value="chord">Chord Diagram</option>
+    </select>
+</div><br>
 <div class="dates">
-  <p>Start <input type="text" class="datepicker" id="startdate">
+  <p>Start <input type="text" class="datepicker" id="startdate"><br>
      End <input type="text" class="datepicker" id="enddate"></p>
 </div>
 <div id="tooltip"></div>
 <div class="diagram"></div>
-      
+<div id="chart"></div>
+
 {% endblock %}

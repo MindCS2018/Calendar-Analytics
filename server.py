@@ -15,7 +15,7 @@ import json
 import itertools
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static')
 app.secret_key = os.environ["FLASK_APP_KEY"]
 app.jinja_env.undefined = StrictUndefined
 
@@ -229,6 +229,21 @@ def dashboard():
                            calendar_options=calendar_options)
 
 
+@app.route('/polar.json')
+def polar():
+    """"""
+
+    selected_calendar = request.args.get('calendar')
+    startdate = request.args.get('startdate')
+    enddate = request.args.get('enddate')
+
+    print selected_calendar, startdate, enddate
+
+    data = {"data": [11, 16, 7, 3, 14]}
+
+    return jsonify(data)
+
+
 def get_mapper(selected_calendars):
     """Recives list of selected calendars for visualization,
        returns mapper object."""
@@ -291,6 +306,18 @@ def populate_matrix(events, mpr, matrix):
     return matrix
 
 
+@app.route("/labels")
+def index():
+
+    return render_template("labels.html")
+
+
+@app.route("/nolabels")
+def nolabels():
+
+    return render_template("nolabels.html")
+
+
 @app.route('/logout')
 def logout():
     """On logout, revokes oauth credentials,
@@ -314,3 +341,5 @@ if __name__ == "__main__":
     # DebugToolbarExtension(app)
 
     app.run()
+
+    url_for('static', filename='flare.json')

@@ -1,31 +1,11 @@
-// creates toggle button
-function toggle(source) {
+// creates select all button
+function selectAll(source) {
           checkboxes = document.getElementsByName('calendar');
           for(var i=0, n=checkboxes.length;i<n;i++) {
             checkboxes[i].checked = source.checked;
           }
-          sendSelected();
+          sendFilters();
         }
-
-// sends checkbox data to server, receives json to render chord diagram
-function sendSelected() {
-
-  var selectedCals = $("#selected-calendars input").serializeArray();
-  var startdate = $( "#startdate" ).val();
-  var enddate = $( "#enddate" ).val();
-
-  selectedCals.push({name: "startdate", value: startdate});
-  selectedCals.push({name: "enddate", value: enddate});
-
-  $.get("/chord-diagram.json", selectedCals,
-          function(data) {
-          var mpr = data['mpr'];
-          var meetingsMatrix = data['meetingsMatrix'];
-          var emptyMatrix = data['emptyMatrix'];
-          buildMatrix(meetingsMatrix, emptyMatrix, mpr, selectedCals);
-          }
-  );
-}
 
 // settings for date picker
 $(function() {
@@ -34,26 +14,108 @@ $(function() {
     $( "#enddate" ).datepicker( "setDate", "+2w" );
 });
 
+// returns object with selected calendars and dates
+function getFilters() {
 
-$( ".datepicker" ).change(
-  function () { sendSelected(); }
-);
+  var filters = $("#selected-calendars input").serializeArray();
+  var startdate = $("#startdate").val();
+  var enddate = $("#enddate").val();
 
+  filters.push({name: "startdate", value: startdate});
+  filters.push({name: "enddate", value: enddate});
 
-// builds matrix or gives message, depending on number of calendars selected
-function buildMatrix (meetingsMatrix, emptyMatrix, mpr, selectedCals) {
-
-  if (selectedCals.length === 0) {
-    $(".diagram").html("<p class='diagram-message'>Choose calendars</p>");
-  } else if (selectedCals.length === 1){
-    $(".diagram").html("<p class='diagram-message'>One calendar message</p>");
-  } else if (_.isEqual(meetingsMatrix, emptyMatrix)) {
-    $(".diagram").html("<p class='diagram-message'>No meetings between these calendars</p>");
-  } else {
-    drawChords(meetingsMatrix, mpr);
-  }
+  return filters;
 }
 
+// sends checkbox data to server, receives json to render chord diagram
+function sendFilters() {
+
+  var filters = getFilters();
+
+  $.get("/chord-diagram.json", filters,
+          function(data) {
+          var mpr = data['mpr'];
+          var meetingsMatrix = data['meetingsMatrix'];
+          var emptyMatrix = data['emptyMatrix'];
+          buildCharts(meetingsMatrix, emptyMatrix, mpr, filters);
+          }
+  );
+}
+
+$( ".datepicker" ).change(
+  function () { sendFilters(); }
+);
+
+$( "#dropdown" ).change(
+  function () { sendFilters(); }
+);
+
+function buildPolar(response) {
+
+  var data = response['data'];
+  $(".diagram").empty();
+  $("#chart").empty();
+  $("#chart").html('<canvas id="myChart" width="500" height="500"></canvas>');
+
+  var myChart = new Chart(document.getElementById("myChart"), {
+    type: 'polarArea',
+    data: {
+      datasets: [{
+        data: data,
+        backgroundColor: [ '#d4d7d9', '#bd7aa9', '#884e7a', '#606165', '#61475d'],
+        label: 'My dataset' // for legend
+      }],
+      labels: ["Red", "Green", "Yellow", "Grey", "Blue"]},
+    options: {responsive: false, elements: {arc: {borderColor: "#fff"}}}
+  });
+}
+
+// polar chart
+function sendPolarData() {
+
+  var filters = getFilters();
+  
+  $.get("/polar.json", filters, function(response) {
+    buildPolar(response);
+  });
+}
+
+// builds chart or provides message
+// depending on number of calendars selected
+function buildCharts (meetingsMatrix, emptyMatrix, mpr, filters, data) {
+
+  var chartType = $("#dropdown").val();
+  var selectedCals = filters.slice(0,-2).length;
+  var message = $(".diagram");
+
+  // zero calendars selected, display message
+  if (selectedCals === 0) {
+      message.html("<p class='diagram-message'>Choose calendars</p>");
+      $("#chart").empty();
+
+  // one calendar selected
+  } else if (selectedCals == 1) {
+      if (chartType == "polar") {
+        polarChart(data);
+      } else if (chartType == "chord") {
+        $(".diagram").html("<p class='diagram-message'>Choose additional calendars</p>");
+        $("#chart").empty();
+      }
+
+  // more than one calendars are selected
+  } else if (selectedCals > 1) {
+    if (chartType == "chord") {
+      if (_.isEqual(meetingsMatrix, emptyMatrix)) {
+        $("#chart").empty();
+        $(".diagram").html("<p class='diagram-message'>No meetings between these calendars</p>");
+      } else {
+      drawChords(meetingsMatrix, mpr);
+    }} else if (chartType == "polar") {
+        $(".diagram").html("<p class='diagram-message'>Choose only one calendar</p>");
+        $("#chart").empty();
+    }
+  }
+}
 
 $(".diagram").html("<p class='open-message'>Choose calendars</p>");
 
@@ -68,6 +130,7 @@ function drawChords (matrix, mpr) {
   var w = 720, h = 540, r1 = h / 2, r0 = r1 - 110;
 
   $(".diagram").empty();
+  $("#chart").empty();
 
   // sets color palette 
   // var fill = d3.scale.category20b()
@@ -87,8 +150,6 @@ function drawChords (matrix, mpr) {
       .outerRadius(r0 + 7);
 
   // TODO: { 'megan:ryan': ['event 1', 'event 2']}
-
-
   var svg = d3.select(".diagram").append("svg:svg")
       .attr("viewBox","0 0 780 600")
       .attr("preserveAspectRatio","xMidYMid meet")  // makes diagram responsive
@@ -187,7 +248,7 @@ function drawChords (matrix, mpr) {
     });
   }
 
-  //  Chord reader
+  // Chord reader
   function chordRdr (matrix, mpr) {
     return function (d) {
 
