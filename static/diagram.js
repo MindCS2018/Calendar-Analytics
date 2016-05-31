@@ -96,7 +96,7 @@ function buildCharts (meetingsMatrix, emptyMatrix, mpr, filters, data) {
   // one calendar selected
   } else if (selectedCals == 1) {
       if (chartType == "polar") {
-        polarChart(data);
+        sendPolarData();
       } else if (chartType == "chord") {
         $(".diagram").html("<p class='diagram-message'>Choose additional calendars</p>");
         $("#chart").empty();
@@ -111,7 +111,7 @@ function buildCharts (meetingsMatrix, emptyMatrix, mpr, filters, data) {
       } else {
       drawChords(meetingsMatrix, mpr);
     }} else if (chartType == "polar") {
-        $(".diagram").html("<p class='diagram-message'>Choose only one calendar</p>");
+        $(".diagram").html("<p class='diagram-message'>One calendar only</p>");
         $("#chart").empty();
     }
   }

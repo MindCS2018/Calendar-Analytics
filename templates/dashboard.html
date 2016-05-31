@@ -7,7 +7,7 @@
     <ul style="list-style-type:none">
         <input type="checkbox" onClick="selectAll(this)"/> select all<br>
     {% for calendar in calendar_options %}
-        <li><input type="checkbox" name="calendar" value="{{calendar}}" onClick="sendSelected()"> {{calendar}}</input>
+        <li><input type="checkbox" name="calendar" value="{{calendar}}" onClick="sendFilters()"> {{calendar}}</input>
     {% endfor %}
         <br>
     </ul>
@@ -15,8 +15,8 @@
 </div>
 <div id="drop-chart">
     <select id="dropdown">
-        <option value="polar">Polar Chart</option>
         <option value="chord">Chord Diagram</option>
+        <option value="polar">Polar Chart</option> 
     </select>
 </div><br>
 <div class="dates">
