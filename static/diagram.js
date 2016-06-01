@@ -50,33 +50,42 @@ $( "#dropdown" ).change(
   function () { sendFilters(); }
 );
 
-function buildPolar(response) {
+function buildDoughnut(response) {
 
-  var data = response['data'];
+  var durations = response['durations'];
+  var labels = response['labels'];
   $(".diagram").empty();
   $("#chart").empty();
-  $("#chart").html('<canvas id="myChart" width="500" height="500"></canvas>');
+  $("#chart").html('<canvas id="myChart" width="400" height="400"></canvas>');
 
   var myChart = new Chart(document.getElementById("myChart"), {
-    type: 'polarArea',
+    title:{
+        text: "Types of meetings"
+      },
+    type: 'doughnut',
     data: {
       datasets: [{
-        data: data,
-        backgroundColor: [ '#d4d7d9', '#bd7aa9', '#884e7a', '#606165', '#61475d'],
-        label: 'My dataset' // for legend
+        data: durations,
+        backgroundColor: [ '#d4d7d9', '#bd7aa9', '#884e7a', '#606165', '#61475d']
       }],
-      labels: ["Red", "Green", "Yellow", "Grey", "Blue"]},
-    options: {responsive: false, elements: {arc: {borderColor: "#fff"}}}
+      labels: labels},
+    options: {
+                responsive: false,
+                elements: {arc: {borderColor: "#fff"}},
+
+              },
   });
 }
 
-// polar chart
-function sendPolarData() {
+
+ 
+// doughnut chart
+function sendDoughnutData() {
 
   var filters = getFilters();
   
-  $.get("/polar.json", filters, function(response) {
-    buildPolar(response);
+  $.get("/doughnut.json", filters, function(response) {
+    buildDoughnut(response);
   });
 }
 
@@ -95,8 +104,8 @@ function buildCharts (meetingsMatrix, emptyMatrix, mpr, filters, data) {
 
   // one calendar selected
   } else if (selectedCals == 1) {
-      if (chartType == "polar") {
-        sendPolarData();
+      if (chartType == "doughnut") {
+        sendDoughnutData();
       } else if (chartType == "chord") {
         $(".diagram").html("<p class='diagram-message'>Choose additional calendars</p>");
         $("#chart").empty();
@@ -110,7 +119,7 @@ function buildCharts (meetingsMatrix, emptyMatrix, mpr, filters, data) {
         $(".diagram").html("<p class='diagram-message'>No meetings between these calendars</p>");
       } else {
       drawChords(meetingsMatrix, mpr);
-    }} else if (chartType == "polar") {
+    }} else if (chartType == "doughnut") {
         $(".diagram").html("<p class='diagram-message'>One calendar only</p>");
         $("#chart").empty();
     }

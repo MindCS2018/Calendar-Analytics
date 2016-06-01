@@ -22,8 +22,8 @@ class UserCal(db.Model):
     usercal_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     user_id = db.Column(db.String(10000), db.ForeignKey('users.user_id'))
     calendar_id = db.Column(db.String(100), db.ForeignKey('calendars.calendar_id'))
-    primary = db.Column(db.String(10), nullable=True)
-    selected = db.Column(db.String(10), nullable=True)
+    primary = db.Column(db.String(10), nullable=False)
+    selected = db.Column(db.String(10), nullable=False)
 
     user = db.relationship("User", backref=db.backref("usercals", order_by=usercal_id))
 
@@ -63,11 +63,12 @@ class Event(db.Model):
     __tablename__ = "events"
 
     event_id = db.Column(db.String(10000), primary_key=True)
-    etag = db.Column(db.String(100), nullable=True)
-    creator = db.Column(db.String(100), nullable=True)
-    start = db.Column(db.DateTime, nullable=True)
-    end = db.Column(db.DateTime, nullable=True)
+    etag = db.Column(db.String(100), nullable=False)
+    creator = db.Column(db.String(100), nullable=False)
+    start = db.Column(db.DateTime, nullable=False)
+    end = db.Column(db.DateTime, nullable=False)
     summary = db.Column(db.String(1000), nullable=True)
+    label = db.Column(db.String(100), nullable=True)
 
     @property
     def duration_minutes(self):
@@ -84,7 +85,7 @@ class Event(db.Model):
 
         calendars = []
         for calevent in self.calevents:
-            calendar = calevent.calendar_id.split("@")[0].title()
+            calendar = calevent.calendar_id.split(".")[0].title()
             calendars.append(calendar)
 
         return calendars

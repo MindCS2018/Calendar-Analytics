@@ -35,7 +35,7 @@ def seed_calendars(calendarsResult, user_id):
 
     for calendar in calendars:
 
-        calendar_id = calendar['id']
+        calendar_id = calendar['id'].lower()
         timezone = calendar['timeZone']
         summary = calendar['summary']
         etag = calendar['etag']
@@ -110,10 +110,32 @@ def seed_events(eventsResult):
             etag = event['etag']
             start = event['start'].get('dateTime', event['start'].get('date'))
             end = event['end'].get('dateTime', event['end'].get('date'))
-            creator = event['creator'].get('email', [])
+            creator = event['creator'].get('email', []).lower()
             # status = event['status']
-            summary = event['summary']
+            summary = event['summary'].lower()
             event_id = event['id']
+
+            company = ['hands', 'company', 'office']
+            cross_department = ['operations']
+            department = ['team']
+            vertical = ['standup', 'scrum', 'daily', 'check']
+            one_on_one = [':', 'supervisor', 'mentor', 'supervisee', 'manager']
+            off_site = ['vendor', 'client', 'investor', 'conference', 'off-site']
+
+            if any(item in summary for item in company):
+                label = "company-wide"
+            elif any(item in summary for item in cross_department):
+                label = "cross-department"
+            elif any(item in summary for item in department):
+                label = "deparment"
+            elif any(item in summary for item in vertical):
+                label = "vertical"
+            elif any(item in summary for item in one_on_one):
+                label = "one-on-one"
+            elif any(item in summary for item in off_site):
+                label = "off-site"
+            else:
+                label = None
 
             event_exists = Event.query.get(event_id)
             calevents_exists = CalEvent.query.filter_by(calendar_id=key,
@@ -134,7 +156,8 @@ def seed_events(eventsResult):
                                   creator=creator,
                                   start=start,
                                   end=end,
-                                  summary=summary)
+                                  summary=summary,
+                                  label=label)
 
                 db.session.add(event_obj)
                 db.session.commit()
