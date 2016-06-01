@@ -1,3 +1,18 @@
+/*login page*/
+
+
+.login { 
+background: url("owl-background.jpg") no-repeat center center fixed; 
+-webkit-background-size: cover;
+-moz-background-size: cover;
+-o-background-size: cover;
+background-size: cover;
+left:0;
+}
+
+
+/*other pages*/
+
 .week-chart {
     width: 60%;
     /*margin-left: auto;*/

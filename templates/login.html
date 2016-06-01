@@ -1,9 +1,12 @@
 {% extends 'base.html' %}
 {% block content %} 
+    <script> 
+        $("body").addClass("login")
+    </script>
 
-        <form action="/oauth2callback">
-          <input type="submit" value="Sign in with google"/>
-        </form>
-
+    <form action="/oauth2callback">
+      <input type="submit" value="Sign in with google"/>
+    </form>
+    
 {% endblock %}
 
