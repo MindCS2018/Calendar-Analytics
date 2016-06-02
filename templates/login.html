@@ -3,10 +3,21 @@
     <script> 
         $("body").addClass("login")
     </script>
-
-    <form action="/oauth2callback">
-      <input type="submit" value="Sign in with google"/>
-    </form>
+    <div class="header">
+      <h2>cahoots</h2>
+    <div>
+    <div id="center-msg">
+      <h1>A calendar app for<br>teams!</h1>
+      <h3>Encouraging collaboration and productivity through data visualization.</h3>
+    </div>
+    <div id="outer-box">
+      <form id="form_login" action="/oauth2callback">
+        <input class="btn btn-primary" type="submit" value="Sign in With Google"/>
+      </form> 
+      <p id="outer-msg">Don't have a google calendar? 
+        <a href="https://accounts.google.com/signup">Create</a> an account or <a href="localhost:5000">demo</a>.
+    </div>
+   
     
 {% endblock %}
 

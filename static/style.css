@@ -1,6 +1,5 @@
 /*login page*/
 
-
 .login { 
 background: url("owl-background.jpg") no-repeat center center fixed; 
 -webkit-background-size: cover;
@@ -8,10 +7,129 @@ background: url("owl-background.jpg") no-repeat center center fixed;
 -o-background-size: cover;
 background-size: cover;
 left:0;
+padding:0;
 }
 
+body {
+    font-family: 'Roboto', sans-serif;
+    font-size: 150%;
+    font-weight: 400;
+    letter-spacing: 1.5px;
+}
 
-/*other pages*/
+.btn-primary {
+    padding: 14px 24px;
+    border: 0 none;
+    letter-spacing: 1.5px;
+    font-family: 'Roboto', sans-serif;
+    /*text-transform: uppercase;*/
+    background: #42A3EB;
+    color: #ffffff;
+}
+
+#form_login {
+    left: 50%;
+    top: 40%;
+    position: absolute;
+    -webkit-transform: translate3d(-50%, -50%, 0);
+    -moz-transform: translate3d(-50%, -50%, 0);
+    transform: translate3d(-50%, -50%, 0);
+}
+
+.btn:focus, .btn:active:focus, .btn.active:focus {
+    outline: 0 none;
+}
+ 
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active, .open > .dropdown-toggle.btn-primary {
+    background: #42A3EB;
+}
+ 
+.btn-primary:active, .btn-primary.active {
+    background: #42A3EB;
+    box-shadow: none;
+}
+
+/*.navbar-brand {
+    color: white;
+}*/
+
+#outer-box {
+    background-color: #000000;
+    border-radius: 8px;
+    opacity: .7;
+    height: 170px;
+    width: 550px;
+    left: 50%;
+    top: 65%;
+    position: absolute;
+    -webkit-transform: translate3d(-50%, -50%, 0);
+    -moz-transform: translate3d(-50%, -50%, 0);
+    transform: translate3d(-50%, -50%, 0);
+}
+
+#outer-msg {
+    color: white;
+    position: relative;
+    left: 8%;
+    top: 70%;
+    font-weight: 100;
+
+}
+
+#outer-msg a {
+    color: white;
+    text-decoration: underline;
+}
+
+#center-msg {
+    left: 37%;
+    top: 35%;
+    position: absolute;
+    -webkit-transform: translate3d(-50%, -50%, 0);
+    -moz-transform: translate3d(-50%, -50%, 0);
+    transform: translate3d(-50%, -50%, 0);
+}
+
+.header {
+    color: #ffffff;
+    height: 70px;
+    width: 300px;
+    padding-top: 20px;
+
+}
+
+h2 {
+    text-align: center;
+}
+
+h1 {
+    color: #ffffff;
+    font-weight: 600;
+    text-align: center;
+    font-size: 500%;
+}
+
+h3 {
+    color: #ffffff;
+    font-weight: 300;
+
+}
+
+/*dashboard*/
+
+.dashboard { 
+    left:0;
+    padding:0;
+}
+
+.inner-dashboard {
+    left: 10%;
+    top: 50%;
+}
+
+#sidebar {
+    float:left;
+}
 
 .week-chart {
     width: 60%;
@@ -29,19 +147,19 @@ left:0;
     margin-right: 5px;
 }
 
-body {
+/*body {
     padding-top:40px;
     padding-left:40px;
-    font-family: 'Raleway', sans-serif;
-    /*background-color: #3e3d3f; */
-}
+    font-family: 'montserrat', sans-serif;
+    background-color: #3e3d3f; 
+}*/
 
-h2 {
+/*h2 {
     text-align: center;
     margin-bottom: 2em;
 }
-
-  /* on hover info for chord diagram*/
+*/
+/* on hover info for chord diagram*/
 
 #tooltip {
     color: black;
@@ -65,6 +183,10 @@ h2 {
     fill: none;
     pointer-events: all;
   }
+
+.container {
+    padding: 0;
+}
 
 path.group {
     fill-opacity: .8;

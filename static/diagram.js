@@ -55,8 +55,8 @@ function buildDoughnut(response) {
   var durations = response['durations'];
   var labels = response['labels'];
   $(".diagram").empty();
-  $("#chart").empty();
-  $("#chart").html('<canvas id="myChart" width="400" height="400"></canvas>');
+  $(".diagram").empty();
+  $(".diagram").html('<canvas id="myChart" width="400" height="400"></canvas>');
 
   var myChart = new Chart(document.getElementById("myChart"), {
     title:{
@@ -100,7 +100,7 @@ function buildCharts (meetingsMatrix, emptyMatrix, mpr, filters, data) {
   // zero calendars selected, display message
   if (selectedCals === 0) {
       message.html("<p class='diagram-message'>Choose calendars</p>");
-      $("#chart").empty();
+      $(".diagram").empty();
 
   // one calendar selected
   } else if (selectedCals == 1) {
@@ -108,20 +108,20 @@ function buildCharts (meetingsMatrix, emptyMatrix, mpr, filters, data) {
         sendDoughnutData();
       } else if (chartType == "chord") {
         $(".diagram").html("<p class='diagram-message'>Choose additional calendars</p>");
-        $("#chart").empty();
+        $(".diagram").empty();
       }
 
   // more than one calendars are selected
   } else if (selectedCals > 1) {
     if (chartType == "chord") {
       if (_.isEqual(meetingsMatrix, emptyMatrix)) {
-        $("#chart").empty();
+        $(".diagram").empty();
         $(".diagram").html("<p class='diagram-message'>No meetings between these calendars</p>");
       } else {
       drawChords(meetingsMatrix, mpr);
     }} else if (chartType == "doughnut") {
         $(".diagram").html("<p class='diagram-message'>One calendar only</p>");
-        $("#chart").empty();
+        $(".diagram").empty();
     }
   }
 }
@@ -136,10 +136,10 @@ $(".diagram").html("<p class='open-message'>Choose calendars</p>");
 
 // draws chord diagram
 function drawChords (matrix, mpr) {
-  var w = 720, h = 540, r1 = h / 2, r0 = r1 - 110;
+  var w = 700, h = 620, r1 = h / 2, r0 = r1 - 110;
 
   $(".diagram").empty();
-  $("#chart").empty();
+  $(".diagram").empty();
 
   // sets color palette 
   // var fill = d3.scale.category20b()
@@ -158,10 +158,11 @@ function drawChords (matrix, mpr) {
       .innerRadius(r0 + 15)
       .outerRadius(r0 + 7);
 
-  // TODO: { 'megan:ryan': ['event 1', 'event 2']}
   var svg = d3.select(".diagram").append("svg:svg")
-      .attr("viewBox","0 0 780 600")
-      .attr("preserveAspectRatio","xMidYMid meet")  // makes diagram responsive
+      .attr("width", w)
+      .attr("height", h)
+      // .attr("viewBox","0 0 780 600")
+      // .attr("preserveAspectRatio","xMidYMid meet")  // makes diagram responsive
       .append("svg:g")
       .attr("id", "circle")
       // centering on half width, half height
