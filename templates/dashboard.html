@@ -59,34 +59,28 @@
 
 <div class="container-fluid">
   <div class="row">
-    <div class="col-xs-2 sidebar">
+    <div class="col-xs-3 sidebar">
       <ul class="nav nav-sidebar">
-        <li class="active"><a href="#">Overview <span class="sr-only">(current)</span></a></li>
-        <li><a href="#">Reports</a></li>
-      </ul>
-      <ul class="nav nav-sidebar">
-        <li><a href="">Nav item</a></li>
-      </ul>
-      <ul class="nav nav-sidebar">
-        <li><a href="">Nav item again</a></li>
-      </ul>
-      <div class="checkbox" data-toggle="buttons">
+      <div class="btn-group-vertical" data-toggle="buttons">
         <form id="selected-calendars" action="/dashboard">
-            <ul style="list-style-type:none">
-            <input type="checkbox" onClick="selectAll(this)"/> select all<br>
-            {% for calendar in calendar_options %}
-                <li><input type="checkbox" name="calendar" value="{{calendar}}" onClick="sendFilters()"> {{calendar}}</input>
-             {% endfor %}
-            <br>
-            </ul>
+          <label class="btn btn-sample" for="all">Select All
+            <input type="checkbox" class="all" onChange="selectAll(this)"/>
+          </label>
+          {% for calendar in calendar_options %}
+            <label class="btn btn-sample selectable" for="all">{{calendar}}
+              <input type="checkbox" class="all" name="calendar" value="{{calendar}}" onChange="sendFilters()"/>
+            </label>
+           {% endfor %}
         </form>
       </div>
+    </ul>
+      <ul class="nav nav-sidebar">
       <div id="drop-chart">
         <select id="dropdown">
             <option value="chord">Chord Diagram</option>
             <option value="doughnut">Doughnut Chart</option> 
         </select>
-      </div><br>
+      </div>
       <div class="dates">
         <p>Start <input type="text" class="datepicker" id="startdate"><br>
            End <input type="text" class="datepicker" id="enddate"></p>
@@ -97,29 +91,8 @@
           <div id="tooltip"></div>
           <div class="diagram"></div>
           <div id="chart"></div>
-          
         </div>
       </div>
 </div>
-
-<!-- <div class="btn-group" data-toggle="buttons">
-  <label class="btn btn-default">
-    <input type="checkbox" name="options" id="option1"> Option 1
-  </label>
-  <label class="btn btn-default">
-    <input type="checkbox" name="options" id="option2"> Option 2
-  </label>
-  <label class="btn btn-default">
-    <input type="checkbox" name="options" id="option3"> Option 3
-  </label>
-</div> -->
-      
-<!-- <div class="container">
-  <div class="row row-offcanvas row-offcanvas-left"> -->
-    
-    <!-- sidebar -->
-    <!-- <div class="col-sm-3 col-md2 sidebar" id="sidebar" role="navigation"> -->
-      
-
 
 {% endblock %}

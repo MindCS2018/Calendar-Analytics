@@ -1,11 +1,16 @@
 // creates select all button
 function selectAll(source) {
-          checkboxes = document.getElementsByName('calendar');
-          for(var i=0, n=checkboxes.length;i<n;i++) {
-            checkboxes[i].checked = source.checked;
-          }
-          sendFilters();
-        }
+    checkboxes = document.getElementsByName('calendar');
+    for(var i=0, n=checkboxes.length;i<n;i++) {
+      checkboxes[i].checked = source.checked;
+    }
+    if ($('.selectable').hasClass('active')) {
+      $('.selectable').removeClass('active');
+    } else {
+      $('.selectable').addClass('active');
+    }
+    sendFilters();
+  }
 
 // settings for date picker
 $(function() {
@@ -18,6 +23,7 @@ $(function() {
 function getFilters() {
 
   var filters = $("#selected-calendars input").serializeArray();
+  console.log(filters);
   var startdate = $("#startdate").val();
   var enddate = $("#enddate").val();
 
@@ -27,9 +33,13 @@ function getFilters() {
   return filters;
 }
 
+
+function onCheck() {
+  console.log("heyo");
+}
+
 // sends checkbox data to server, receives json to render chord diagram
 function sendFilters() {
-
   var filters = getFilters();
 
   $.get("/chord-diagram.json", filters,
@@ -249,7 +259,7 @@ function drawChords (matrix, mpr) {
       .style("visibility", "visible")
       .html(groupTip(rdr(d)))
       .style("top", function () { return (d3.event.pageY - 80)+"px";})
-      .style("left", function () { return (d3.event.pageX - 130)+"px";});
+      .style("left", function () { return (d3.event.pageX - 200)+"px";});
 
     chordPaths.classed("fade", function(p) {
       return p.source.index != i && p.target.index != i;

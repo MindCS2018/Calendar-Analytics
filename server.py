@@ -211,6 +211,7 @@ def chord_diagram():
 
     # receive from ajax request
     selected_calendars = request.args.getlist('calendar')
+    print selected_calendars
     startdate = request.args.get('startdate')
     enddate = request.args.get('enddate')
 
@@ -231,6 +232,7 @@ def dashboard():
     """"""
 
     calendar_options = get_calendar_options()
+    calendar_options = sorted(calendar_options)
 
     return render_template('dashboard.html',
                            calendar_options=calendar_options)

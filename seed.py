@@ -115,15 +115,18 @@ def seed_events(eventsResult):
             summary = event['summary'].lower()
             event_id = event['id']
 
+            management = ['mgmt', 'manage', 'lead']
             company = ['hands', 'company', 'office']
             cross_department = ['operations']
-            department = ['team']
+            department = ['team', 'engineer']
             vertical = ['standup', 'scrum', 'daily', 'check']
             one_on_one = [':', 'supervisor', 'mentor', 'supervisee', 'manager']
             off_site = ['vendor', 'client', 'investor', 'conference', 'off-site']
 
             if any(item in summary for item in company):
                 label = "company-wide"
+            elif any(item in summary for item in management):
+                label = "management"
             elif any(item in summary for item in cross_department):
                 label = "cross-department"
             elif any(item in summary for item in department):
