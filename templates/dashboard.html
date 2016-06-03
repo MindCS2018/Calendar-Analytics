@@ -5,6 +5,21 @@
     $("body").addClass("dashboard")
 </script>
 
+<!-- NAVBAR -->
+
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">Brand</a>
+    </div>
+
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
@@ -24,9 +39,14 @@
         </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
+        <li><a href="#">Link</a></li>
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
           <ul class="dropdown-menu">
+            <li><a href="#">Action</a></li>
+            <li><a href="#">Another action</a></li>
+            <li><a href="#">Something else here</a></li>
+            <li role="separator" class="divider"></li>
             <li><a href="/logout">Logout</a></li>
           </ul>
         </li>
@@ -35,29 +55,52 @@
   </div><!-- /.container-fluid -->
 </nav>
 
-<!-- <div class="container-fluid">
+<!-- SIDEBAR -->
+
+<div class="container-fluid">
   <div class="row">
-    <div class="col-sm-3 col-md-2 sidebar">
+    <div class="col-xs-2 sidebar">
       <ul class="nav nav-sidebar">
         <li class="active"><a href="#">Overview <span class="sr-only">(current)</span></a></li>
         <li><a href="#">Reports</a></li>
-        <li><a href="#">Analytics</a></li>
-        <li><a href="#">Export</a></li>
       </ul>
       <ul class="nav nav-sidebar">
         <li><a href="">Nav item</a></li>
-        <li><a href="">Nav item again</a></li>
-        <li><a href="">One more nav</a></li>
-        <li><a href="">Another nav item</a></li>
-        <li><a href="">More navigation</a></li>
       </ul>
       <ul class="nav nav-sidebar">
         <li><a href="">Nav item again</a></li>
-        <li><a href="">One more nav</a></li>
-        <li><a href="">Another nav item</a></li>
       </ul>
-    </div>
-</div> -->
+      <div class="checkbox" data-toggle="buttons">
+        <form id="selected-calendars" action="/dashboard">
+            <ul style="list-style-type:none">
+            <input type="checkbox" onClick="selectAll(this)"/> select all<br>
+            {% for calendar in calendar_options %}
+                <li><input type="checkbox" name="calendar" value="{{calendar}}" onClick="sendFilters()"> {{calendar}}</input>
+             {% endfor %}
+            <br>
+            </ul>
+        </form>
+      </div>
+      <div id="drop-chart">
+        <select id="dropdown">
+            <option value="chord">Chord Diagram</option>
+            <option value="doughnut">Doughnut Chart</option> 
+        </select>
+      </div><br>
+      <div class="dates">
+        <p>Start <input type="text" class="datepicker" id="startdate"><br>
+           End <input type="text" class="datepicker" id="enddate"></p>
+      </div>
+      </div>
+      <div class="col-xs-7">
+        <div class="inner-dashboard">
+          <div id="tooltip"></div>
+          <div class="diagram"></div>
+          <div id="chart"></div>
+          
+        </div>
+      </div>
+</div>
 
 <!-- <div class="btn-group" data-toggle="buttons">
   <label class="btn btn-default">
@@ -71,42 +114,12 @@
   </label>
 </div> -->
       
-<div class="container">
-  <div class="row row-offcanvas row-offcanvas-left">
+<!-- <div class="container">
+  <div class="row row-offcanvas row-offcanvas-left"> -->
     
     <!-- sidebar -->
-    <div class="col-sm-3 col-md2 sidebar" id="sidebar" role="navigation">
-        <div class="checkbox" data-toggle="buttons">
-        <form id="selected-calendars" action="/dashboard">
-            <ul style="list-style-type:none">
-            <input type="checkbox" onClick="selectAll(this)"/> select all<br>
-            {% for calendar in calendar_options %}
-                <li><input type="checkbox" name="calendar" value="{{calendar}}" onClick="sendFilters()"> {{calendar}}</input>
-             {% endfor %}
-            <br>
-            </ul>
-        </form>
-    </div>
-    <div id="drop-chart">
-        <select id="dropdown">
-            <option value="chord">Chord Diagram</option>
-            <option value="doughnut">Doughnut Chart</option> 
-        </select>
-    </div><br>
-    <div class="dates">
-      <p>Start <input type="text" class="datepicker" id="startdate"><br>
-         End <input type="text" class="datepicker" id="enddate"></p>
-    </div>
-    </div>
-  </div>
+    <!-- <div class="col-sm-3 col-md2 sidebar" id="sidebar" role="navigation"> -->
+      
 
-</div>
-
-
-<div id="tooltip"></div>
-<div class="inner-dashboard">
-    <div class="diagram"></div>
-<!--     <div id="chart"></div> -->
-</div>
 
 {% endblock %}

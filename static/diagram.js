@@ -56,7 +56,7 @@ function buildDoughnut(response) {
   var labels = response['labels'];
   $(".diagram").empty();
   $(".diagram").empty();
-  $(".diagram").html('<canvas id="myChart" width="400" height="400"></canvas>');
+  $(".diagram").html('<canvas id="myChart" width="550" height="500"></canvas>');
 
   var myChart = new Chart(document.getElementById("myChart"), {
     title:{
@@ -77,8 +77,6 @@ function buildDoughnut(response) {
   });
 }
 
-
- 
 // doughnut chart
 function sendDoughnutData() {
 
@@ -136,7 +134,7 @@ $(".diagram").html("<p class='open-message'>Choose calendars</p>");
 
 // draws chord diagram
 function drawChords (matrix, mpr) {
-  var w = 700, h = 620, r1 = h / 2, r0 = r1 - 110;
+  var w = 650, h = 600, r1 = h / 2, r0 = r1 - 110;
 
   $(".diagram").empty();
   $(".diagram").empty();
@@ -159,10 +157,10 @@ function drawChords (matrix, mpr) {
       .outerRadius(r0 + 7);
 
   var svg = d3.select(".diagram").append("svg:svg")
-      .attr("width", w)
-      .attr("height", h)
-      // .attr("viewBox","0 0 780 600")
-      // .attr("preserveAspectRatio","xMidYMid meet")  // makes diagram responsive
+      // .attr("width", w)
+      // .attr("height", h)
+      .attr("viewBox","0 0 650 600")
+      .attr("preserveAspectRatio","xMidYMid meet")  // makes diagram responsive
       .append("svg:g")
       .attr("id", "circle")
       // centering on half width, half height

@@ -374,4 +374,4 @@ if __name__ == "__main__":
 
     app.run()
 
-    # url_for('static', filename='flare.json')
+    url_for('static', filename='flare.json')
