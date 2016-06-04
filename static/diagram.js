@@ -100,7 +100,7 @@ function sendDoughnutData() {
 function buildCharts (meetingsMatrix, emptyMatrix, mpr, filters, data) {
 
   var chartType = $("#dropdown").val();
-
+  var selectedCals = filters.slice(0,-2).length;
   console.log("***selectedCals");
   console.log(selectedCals);
 
@@ -133,7 +133,7 @@ function buildCharts (meetingsMatrix, emptyMatrix, mpr, filters, data) {
       drawChords(meetingsMatrix, mpr);
     }} else if (chartType == "doughnut") {
         $(".diagram").empty();
-        $(".diagram").html("<p>Choose one calendar only</p>");
+        $(".diagram").html("<p>Choose one calendar</p>");
     }
   }
 }
