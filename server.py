@@ -108,7 +108,7 @@ def get_service_objects(http_auth):
 
 
 def get_dates():
-    """Datetime variables for events API call"""
+    """Creates datetime variables for events API call"""
 
     now = datetime.utcnow().isoformat() + 'Z'
     three_months = datetime.now() + timedelta(weeks=12)
@@ -181,6 +181,7 @@ def seed_db(profile_result, calendars_result, events_result):
 
 
 def get_calendar_options():
+    """"""
 
     user_id = get_user_id()
 
@@ -196,6 +197,11 @@ def get_calendar_options():
 
 
 def to_datetime(str_date):
+    """Converts string to datetime object
+
+    >>> to_datetime('05/30/2016')
+    datetime.datetime(2016, 5, 30, 0, 0)
+    """
 
     return datetime.strptime(str_date, "%m/%d/%Y")
 
@@ -203,15 +209,8 @@ def to_datetime(str_date):
 @app.route('/chord-diagram.json')
 def chord_diagram():
 
-    # now = datetime.now()
-    # next_month = now + relativedelta(months=1)
-
-    # startdate = request.args.get("startdate", "05/01/2016")
-    # enddate = request.args.get("enddate", "08/01/2016")
-
     # receive from ajax request
     selected_calendars = request.args.getlist('calendar')
-    print selected_calendars
     startdate = request.args.get('startdate')
     enddate = request.args.get('enddate')
 
@@ -276,7 +275,15 @@ def get_team_events(selected_calendars, startdate, enddate):
 
 def get_matrix(mpr):
     """Calculates number of nodes from mapper object,
-       returns matrix of all zeros."""
+       returns matrix of all zeros.
+
+       >>> get_matrix({u'name1': {'id': 1, 'name': u'name1'},
+       ...             u'name2': {'id': 0, 'name': u'name2'}})
+       [[0, 0], [0, 0]]
+
+       >>> get_matrix({})
+       []
+       """
 
     nodes = len(mpr.keys())
 
