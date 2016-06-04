@@ -101,8 +101,6 @@ function buildCharts (meetingsMatrix, emptyMatrix, mpr, filters, data) {
 
   var chartType = $("#dropdown").val();
   var selectedCals = filters.slice(0,-2).length;
-  console.log("***selectedCals");
-  console.log(selectedCals);
 
   // zero calendars selected, display message
   if (selectedCals == 0) {
