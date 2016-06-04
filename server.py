@@ -15,7 +15,7 @@ import json
 import itertools
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static')
 app.secret_key = os.environ["FLASK_APP_KEY"]
 app.jinja_env.undefined = StrictUndefined
 
@@ -108,7 +108,7 @@ def get_service_objects(http_auth):
 
 
 def get_dates():
-    """Datetime variables for events API call"""
+    """Creates datetime variables for events API call"""
 
     now = datetime.utcnow().isoformat() + 'Z'
     three_months = datetime.now() + timedelta(weeks=12)
@@ -181,6 +181,7 @@ def seed_db(profile_result, calendars_result, events_result):
 
 
 def get_calendar_options():
+    """"""
 
     user_id = get_user_id()
 
@@ -188,19 +189,25 @@ def get_calendar_options():
 
     calendar_options = []
     for cal in calendars:
-        calendar_options.append(cal.calendar.summary)
+        email = cal.calendar.summary
+        name = email.split(".")[0].title()
+        calendar_options.append(name)
 
     return calendar_options
 
 
+def to_datetime(str_date):
+    """Converts string to datetime object
+
+    >>> to_datetime('05/30/2016')
+    datetime.datetime(2016, 5, 30, 0, 0)
+    """
+
+    return datetime.strptime(str_date, "%m/%d/%Y")
+
+
 @app.route('/chord-diagram.json')
 def chord_diagram():
-
-    # now = datetime.now()
-    # next_month = now + relativedelta(months=1)
-
-    # startdate = request.args.get("startdate", "05/01/2016")
-    # enddate = request.args.get("enddate", "08/01/2016")
 
     # receive from ajax request
     selected_calendars = request.args.getlist('calendar')
@@ -208,7 +215,7 @@ def chord_diagram():
     enddate = request.args.get('enddate')
 
     mpr = get_mapper(selected_calendars)
-    events = get_events(selected_calendars, startdate, enddate)
+    events = get_team_events(selected_calendars, startdate, enddate)
     matrix = get_matrix(mpr)
     emptyMatrix = get_matrix(mpr)  # to test if final matrix is empty
 
@@ -224,6 +231,7 @@ def dashboard():
     """"""
 
     calendar_options = get_calendar_options()
+    calendar_options = sorted(calendar_options)
 
     return render_template('dashboard.html',
                            calendar_options=calendar_options)
@@ -237,7 +245,7 @@ def get_mapper(selected_calendars):
     x = 0
 
     for calendar in selected_calendars:
-        calendar_summary = (calendar.split("@")[0]).title()
+        calendar_summary = (calendar.split(".")[0]).title()
         mpr[calendar_summary] = {"id": x,
                                  "name": calendar_summary}
         x += 1
@@ -245,11 +253,11 @@ def get_mapper(selected_calendars):
     return mpr
 
 
-def get_events(selected_calendars, startdate, enddate):
+def get_team_events(selected_calendars, startdate, enddate):
     """"""
 
-    start = datetime.strptime(startdate, "%m/%d/%Y")
-    end = datetime.strptime(enddate, "%m/%d/%Y")
+    startdate = to_datetime(startdate)
+    enddate = to_datetime(enddate)
 
     events = set()
 
@@ -257,7 +265,7 @@ def get_events(selected_calendars, startdate, enddate):
 
     for cal in selected_calendars:
         for calevent, event in evts:
-            if calevent.calendar_id == cal and event.start > start and event.end < end:
+            if cal.lower() in calevent.calendar_id and event.start > startdate and event.end < enddate:
                 events.add(event)
 
     events = list(events)
@@ -267,7 +275,15 @@ def get_events(selected_calendars, startdate, enddate):
 
 def get_matrix(mpr):
     """Calculates number of nodes from mapper object,
-       returns matrix of all zeros."""
+       returns matrix of all zeros.
+
+       >>> get_matrix({u'name1': {'id': 1, 'name': u'name1'},
+       ...             u'name2': {'id': 0, 'name': u'name2'}})
+       [[0, 0], [0, 0]]
+
+       >>> get_matrix({})
+       []
+       """
 
     nodes = len(mpr.keys())
 
@@ -289,6 +305,58 @@ def populate_matrix(events, mpr, matrix):
                 matrix[item[1]][item[0]] += item[2]
 
     return matrix
+
+
+@app.route('/doughnut.json')
+def doughnut():
+    """"""
+
+    selected_calendar = request.args.get('calendar')
+    startdate = request.args.get('startdate')
+    enddate = request.args.get('enddate')
+
+    startdate = to_datetime(startdate)
+    enddate = to_datetime(enddate)
+
+    data = get_event_type(selected_calendar, startdate, enddate)
+
+    return jsonify(data)
+
+
+def get_event_type(selected_calendar, startdate, enddate):
+
+    events = []
+    evts = db.session.query(CalEvent, Event).join(Event).all()
+    for calevent, event in evts:
+        if selected_calendar.lower() in calevent.calendar_id and event.start > startdate and event.end < enddate:
+            events.append(event)
+
+    labels_and_durations = {}
+    for event in events:
+        if event.label:
+            labels_and_durations.setdefault(event.label, []).append(event.duration_minutes)
+
+    labels = []
+    durations = []
+    for key, value in labels_and_durations.iteritems():
+        labels.append(key)
+        durations.append(sum(value))
+
+    data = {"durations": durations, "labels": labels}
+
+    return data
+
+
+@app.route("/labels")
+def index():
+
+    return render_template("labels.html")
+
+
+@app.route("/nolabels")
+def nolabels():
+
+    return render_template("nolabels.html")
 
 
 @app.route('/logout')
@@ -314,3 +382,5 @@ if __name__ == "__main__":
     # DebugToolbarExtension(app)
 
     app.run()
+
+    url_for('static', filename='flare.json')

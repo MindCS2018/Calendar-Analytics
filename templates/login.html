@@ -1,11 +1,60 @@
-<!doctype html>
-<html>
-    <head>
-    </head>
-    <body>
-        <form action="/oauth2callback">
-          <input type="submit" value="Sign in with google"/>
+{% extends 'base.html' %}
+{% block style %}
+  <link rel="stylesheet" href="static/login.css">
+{% endblock %}
+{% block content %}
+
+<!-- NAVBAR -->
+
+<nav class="navbar navbar-transparent">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">-logo-</a>
+      <a class="navbar-brand" href="/">cahoots</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="#">Action</a></li>
+            <li><a href="#">Another action</a></li>
+            <li><a href="#">Something else here</a></li>            
+          </ul>
+        </li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+
+<div class="container-fluid container-height">
+  <div class="row float-left">
+    <div class="col-xs-12  outer-msg">
+      <h1>A calendar app for teams!</h1>
+      <h3>Encouraging collaboration and productivity through data visualization.</h3>
+      <div class="margin-box">
+        <div class="inner-box">
+        <form class="form_login" action="/oauth2callback">
+          <input class="btn btn-primary" type="submit" value="Sign in With Google"/>
         </form>
-    </body>
-</html>
+        <p class="inner-msg">Don't have a google calendar?
+          <a href="https://accounts.google.com/signup">Create</a> an account or <a href="localhost:5000">demo</a>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+{% endblock %}
 

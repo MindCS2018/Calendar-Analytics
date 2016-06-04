@@ -1,31 +1,16 @@
-// creates toggle button
-function toggle(source) {
-          checkboxes = document.getElementsByName('calendar');
-          for(var i=0, n=checkboxes.length;i<n;i++) {
-            checkboxes[i].checked = source.checked;
-          }
-          sendSelected();
-        }
-
-// sends checkbox data to server, receives json to render chord diagram
-function sendSelected() {
-
-  var selectedCals = $("#selected-calendars input").serializeArray();
-  var startdate = $( "#startdate" ).val();
-  var enddate = $( "#enddate" ).val();
-
-  selectedCals.push({name: "startdate", value: startdate});
-  selectedCals.push({name: "enddate", value: enddate});
-
-  $.get("/chord-diagram.json", selectedCals,
-          function(data) {
-          var mpr = data['mpr'];
-          var meetingsMatrix = data['meetingsMatrix'];
-          var emptyMatrix = data['emptyMatrix'];
-          buildMatrix(meetingsMatrix, emptyMatrix, mpr, selectedCals);
-          }
-  );
-}
+// creates select all button
+function selectAll(source) {
+    checkboxes = document.getElementsByName('calendar');
+    for(var i=0, n=checkboxes.length;i<n;i++) {
+      checkboxes[i].checked = source.checked;
+    }
+    if ($('.select-all.active')[0]) {
+      $('.selectable').addClass('active');
+    } else {
+      $('.selectable').removeClass('active');
+    }
+    sendFilters();
+  }
 
 // settings for date picker
 $(function() {
@@ -34,28 +19,124 @@ $(function() {
     $( "#enddate" ).datepicker( "setDate", "+2w" );
 });
 
+// returns object with selected calendars and dates
+function getFilters() {
+
+  var filters = $("#selected-calendars input").serializeArray();
+  console.log(filters);
+  var startdate = $("#startdate").val();
+  var enddate = $("#enddate").val();
+
+  filters.push({name: "startdate", value: startdate});
+  filters.push({name: "enddate", value: enddate});
+
+  return filters;
+}
+
+// sends checkbox data to server, receives json to render chord diagram
+function sendFilters() {
+  var filters = getFilters();
+
+  $.get("/chord-diagram.json", filters,
+          function(data) {
+          var mpr = data['mpr'];
+          var meetingsMatrix = data['meetingsMatrix'];
+          var emptyMatrix = data['emptyMatrix'];
+          buildCharts(meetingsMatrix, emptyMatrix, mpr, filters);
+          }
+  );
+}
 
 $( ".datepicker" ).change(
-  function () { sendSelected(); }
+  function () { sendFilters(); }
 );
 
+$( "#dropdown" ).change(
+  function () { sendFilters(); }
+);
 
-// builds matrix or gives message, depending on number of calendars selected
-function buildMatrix (meetingsMatrix, emptyMatrix, mpr, selectedCals) {
+function buildDoughnut(response) {
 
-  if (selectedCals.length === 0) {
-    $(".diagram").html("<p class='diagram-message'>Choose calendars</p>");
-  } else if (selectedCals.length === 1){
-    $(".diagram").html("<p class='diagram-message'>One calendar message</p>");
-  } else if (_.isEqual(meetingsMatrix, emptyMatrix)) {
-    $(".diagram").html("<p class='diagram-message'>No meetings between these calendars</p>");
-  } else {
-    drawChords(meetingsMatrix, mpr);
+  var durations = response['durations'];
+  var labels = response['labels'];
+  $(".diagram").empty();
+  $(".diagram").empty();
+  $(".diagram").html('<canvas id="myChart" width="550" height="500"></canvas>');
+
+  var myChart = new Chart(document.getElementById("myChart"), {
+    title:{
+        text: "Types of meetings"
+      },
+    type: 'doughnut',
+    data: {
+      datasets: [{
+        data: durations,
+        backgroundColor: [ '#d4d7d9', '#bd7aa9', '#884e7a', '#606165', '#61475d'],
+        hoverBackgroundColor: ['#d4d7d9', '#bd7aa9', '#884e7a', '#606165', '#61475d']
+      }],
+      labels: labels},
+    options: {
+                responsive: false,
+                elements: {arc: {borderColor: "#fff"}},
+
+              },
+  });
+}
+
+Chart.defaults.global.legend.display = false;
+
+// doughnut chart
+function sendDoughnutData() {
+
+  var filters = getFilters();
+  
+  $.get("/doughnut.json", filters, function(response) {
+    buildDoughnut(response);
+  });
+}
+
+// builds chart or provides message
+// depending on number of calendars selected
+function buildCharts (meetingsMatrix, emptyMatrix, mpr, filters, data) {
+
+  var chartType = $("#dropdown").val();
+  var selectedCals = filters.slice(0,-2).length;
+
+  // zero calendars selected, display message
+  if (selectedCals == 0) {
+    if (chartType == "chord") {
+      $(".diagram").empty();
+      $(".diagram").html("<p>Choose calendars</p>");
+    } else {
+      $(".diagram").empty();
+      $(".diagram").html("<p>Choose one calendar</p>");
+    }
+   
+  // one calendar selected
+  } else if (selectedCals == 1) {
+      if (chartType == "doughnut") {
+        sendDoughnutData();
+      } else if (chartType == "chord") {
+        $(".diagram").empty();
+        $(".diagram").html("<p>Choose additional calendars</p>");
+      }
+
+  // more than one calendars are selected
+  } else if (selectedCals > 1) {
+    if (chartType == "chord") {
+      if (_.isEqual(meetingsMatrix, emptyMatrix)) {
+        $(".diagram").empty();
+        $(".diagram").html("<p>No meetings between these calendars</p>");
+      } else {
+      drawChords(meetingsMatrix, mpr);
+    }} else if (chartType == "doughnut") {
+        $(".diagram").empty();
+        $(".diagram").html("<p>Choose one calendar</p>");
+    }
   }
 }
 
-
-$(".diagram").html("<p class='open-message'>Choose calendars</p>");
+$(".diagram").html("<p>Choose calendars</p>");
 
 
 /////////////////////////////////////////////////////////////////////
@@ -65,15 +146,16 @@ $(".diagram").html("<p class='open-message'>Choose calendars</p>");
 
 // draws chord diagram
 function drawChords (matrix, mpr) {
-  var w = 720, h = 540, r1 = h / 2, r0 = r1 - 110;
+  var w = 750, h = 700, r1 = h / 2, r0 = r1 - 110;
 
+  $(".diagram").empty();
   $(".diagram").empty();
 
   // sets color palette 
   // var fill = d3.scale.category20b()
   var fill = d3.scale.ordinal()
-      .range(['#d4d7d9','#3c3c3c','#bd7aa9','#848589','#884e7a',
-              '#6a657c','#606165','#9999a4','#61475d','#8ca49c',]);
+      .range(['#757052','#a26c5c','#7d5443','#72584d','#coa17e',
+              '#536068','#222325',]);
 
   // constructs a new chord layout
   var chord = d3.layout.chord()
@@ -86,12 +168,11 @@ function drawChords (matrix, mpr) {
       .innerRadius(r0 + 15)
       .outerRadius(r0 + 7);
 
-  // TODO: { 'megan:ryan': ['event 1', 'event 2']}
-
-
   var svg = d3.select(".diagram").append("svg:svg")
-      .attr("viewBox","0 0 780 600")
-      .attr("preserveAspectRatio","xMidYMid meet")  // makes diagram responsive
+      .attr("width", w)
+      .attr("height", h)
+      // .attr("viewBox","0 0 650 600")
+      // .attr("preserveAspectRatio","xMidYMid meet")  // makes diagram responsive
       .append("svg:g")
       .attr("id", "circle")
       // centering on half width, half height
@@ -172,7 +253,6 @@ function drawChords (matrix, mpr) {
   function groupTip (d) {
     var p = d3.format(".1%");
     return "" + d.hoverName + ": " + p(d.hoverValue/d.mtotal) + " of team total";
-
   }
 
   function mouseover(d, i) {
@@ -180,14 +260,14 @@ function drawChords (matrix, mpr) {
       .style("visibility", "visible")
       .html(groupTip(rdr(d)))
       .style("top", function () { return (d3.event.pageY - 80)+"px";})
-      .style("left", function () { return (d3.event.pageX - 130)+"px";});
+      .style("left", function () { return (d3.event.pageX - 200)+"px";});
 
     chordPaths.classed("fade", function(p) {
       return p.source.index != i && p.target.index != i;
     });
   }
 
-  //  Chord reader
+  // Chord reader
   function chordRdr (matrix, mpr) {
     return function (d) {
 

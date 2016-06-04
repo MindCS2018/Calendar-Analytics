@@ -1,23 +1,98 @@
 {% extends 'base.html' %}
-{% block content %} 
+{% block style %}
+  <link rel="stylesheet" href="static/dashboard.css">
+{% endblock %}
+{% block content %}
 
-<a href="/logout">Logout</a>
-<div class="checkbox" data-toggle="buttons">
-    <form id="selected-calendars" action="/dashboard">
-    <ul style="list-style-type:none">
-        <input type="checkbox" onClick="toggle(this)"/> select all<br>
-    {% for calendar in calendar_options %}
-        <li><input type="checkbox" name="calendar" value="{{calendar}}" onClick="sendSelected()"> {{calendar}}</input>
-    {% endfor %}
-        <br><br>
-    </ul>
-    </form>
+<!-- NAVBAR -->
+
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">Brand</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
+        <li><a href="#">Link</a></li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="#">Action</a></li>
+            <li><a href="#">Another action</a></li>
+            <li><a href="#">Something else here</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#">Separated link</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#">One more separated link</a></li>
+          </ul>
+        </li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="#">Link</a></li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="#">Action</a></li>
+            <li><a href="#">Another action</a></li>
+            <li><a href="#">Something else here</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="/logout">Logout</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+
+
+<!-- SIDEBAR -->
+
+<div class="container-fluid container-height">
+  <div class="row">
+    <div class="col-xs-3 sidebar">
+      <ul class="nav nav-sidebar">
+      <div class="btn-group-vertical" data-toggle="buttons">
+        <form id="selected-calendars" action="/dashboard">
+          <label class="btn btn-sample select-all" for="all">Select All
+            <input type="checkbox" class="all" onChange="selectAll(this)"/>
+          </label>
+          {% for calendar in calendar_options %}
+            <label class="btn btn-sample selectable" for="all">{{calendar}}
+              <input type="checkbox" class="all" name="calendar" value="{{calendar}}" onChange="sendFilters()"/>
+            </label>
+           {% endfor %}
+        </form>
+      </div>
+      </ul>
+      <ul class="nav nav-sidebar">
+      <div id="drop-chart">
+        <select id="dropdown">
+            <option value="chord">Chord Diagram</option>
+            <option value="doughnut">Doughnut Chart</option> 
+        </select>
+      </div>
+      <div class="dates">
+        <p>Start <input type="text" class="datepicker" id="startdate"><br>
+           End <input type="text" class="datepicker" id="enddate"></p>
+      </div>
+      </div>
+      <div class="col-xs-7">
+        <div class="inner-dashboard">
+          <div id="tooltip"></div>
+          <div class="diagram"></div>
+          <div id="chart"></div>
+        </div>
+      </div>
 </div>
-<div class="dates">
-  <p>Start <input type="text" class="datepicker" id="startdate">
-     End <input type="text" class="datepicker" id="enddate"></p>
-</div>
-<div id="tooltip"></div>
-<div class="diagram"></div>
-      
+
 {% endblock %}
