@@ -7,3 +7,4 @@
 .webassets-cache
 instance/
 *debug*
+*json*
