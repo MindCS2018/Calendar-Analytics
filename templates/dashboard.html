@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
+{% block style %}
+  <link rel="stylesheet" href="static/dashboard.css">
+{% endblock %}
 {% block content %}
 
-<script> 
-    $("body").addClass("dashboard")
-</script>
 
 <!-- NAVBAR -->
 
@@ -55,15 +55,16 @@
   </div><!-- /.container-fluid -->
 </nav>
 
+
 <!-- SIDEBAR -->
 
-<div class="container-fluid">
+<div class="container-fluid container-height">
   <div class="row">
     <div class="col-xs-3 sidebar">
       <ul class="nav nav-sidebar">
       <div class="btn-group-vertical" data-toggle="buttons">
         <form id="selected-calendars" action="/dashboard">
-          <label class="btn btn-sample" for="all">Select All
+          <label class="btn btn-sample select-all" for="all">Select All
             <input type="checkbox" class="all" onChange="selectAll(this)"/>
           </label>
           {% for calendar in calendar_options %}
@@ -73,7 +74,7 @@
            {% endfor %}
         </form>
       </div>
-    </ul>
+      </ul>
       <ul class="nav nav-sidebar">
       <div id="drop-chart">
         <select id="dropdown">
