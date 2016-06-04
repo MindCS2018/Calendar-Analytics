@@ -54,35 +54,21 @@
   </div><!-- /.container-fluid -->
 </nav>
 
-<div class="container">
-  <div class="row">
-    <div class="center-msg">
-      <h1>A calendar app for<br>teams!</h1>
+<div class="container-fluid container-height">
+  <div class="row float-left">
+    <div class="col-xs-12 col-m-8 center-msg">
+      <h1>A calendar app for teams!</h1>
       <h3>Encouraging collaboration and productivity through data visualization.</h3>
+      <div class="black-box">
+        <div class="inside-box">
+        <form class="form_login" action="/oauth2callback">
+          <input class="btn btn-primary" type="submit" value="Sign in With Google"/>
+        </form>
+        <p class="inner-msg">Don't have a google calendar?
+          <a href="https://accounts.google.com/signup">Create</a> an account or <a href="localhost:5000">demo</a>.</p>
+        </div>
+      </div>
     </div>
-  </div>
-
-<!--   <div class="row">
-    <div class="col-xs-offset-3 col-xs-6 jumbotron">
-      <h1>Hello, world!</h1>
-      <p>...</p>
-      <p><a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a></p>
-    </div>
-
-  <div class="row">
-    <div class="col-xs-offset-3 col-xs-6 jumbotron">
-      <h1>Hello, world!</h1>
-      <p>...</p>
-      <p><a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a></p>
-    </div> -->
-
-  <div class="outer-box">
-    <p class="outer-msg">Don't have a google calendar? 
-      <a href="https://accounts.google.com/signup">Create</a> an account or <a href="localhost:5000">demo</a>.
-    <form class="form_login" action="/oauth2callback">
-      <input class="btn btn-primary" type="submit" value="Sign in With Google"/>
-    </form> 
-    
   </div>
 </div>
  
