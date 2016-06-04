@@ -51,8 +51,8 @@ $( ".datepicker" ).change(
   function () { sendFilters(); }
 );
 
-$( "#dropdown" ).change(
-  function () { sendFilters(); }
+$( 'input[name="radio-chart"]' ).change(
+  function () {   sendFilters(); }
 );
 
 function buildDoughnut(response) {
@@ -99,7 +99,7 @@ function sendDoughnutData() {
 // depending on number of calendars selected
 function buildCharts (meetingsMatrix, emptyMatrix, mpr, filters, data) {
 
-  var chartType = $("#dropdown").val();
+  var chartType = $('input[name="radio-chart"]:checked').val();
   var selectedCals = filters.slice(0,-2).length;
 
   // zero calendars selected, display message

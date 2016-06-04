@@ -75,15 +75,13 @@
       </div>
       </ul>
       <ul class="nav nav-sidebar">
-      <div id="drop-chart">
-        <select id="dropdown">
-            <option value="chord">Chord Diagram</option>
-            <option value="doughnut">Doughnut Chart</option> 
-        </select>
-      </div>
+      <form id="radio-chart-types">
+        <input type="radio" name="radio-chart" value="chord" checked> Chord Diagram<br>
+        <input type="radio" name="radio-chart" value="doughnut"> Doughnut Chart<br>
+      </form>
       <div class="dates">
-        <p>Start <input type="text" class="datepicker" id="startdate"><br>
-           End <input type="text" class="datepicker" id="enddate"></p>
+        <p>Start <input type="text" class="datepicker btn btn-sample" id="startdate"><br>
+           End <input type="text" class="datepicker btn btn-sample" id="enddate"></p>
       </div>
       </div>
       <div class="col-xs-7">
