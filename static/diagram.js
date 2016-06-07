@@ -60,7 +60,6 @@ function buildDoughnut(response) {
   var durations = response['durations'];
   var labels = response['labels'];
   $(".diagram").empty();
-  $(".diagram").empty();
   $(".diagram").html('<canvas id="myChart" width="550" height="500"></canvas>');
 
   var myChart = new Chart(document.getElementById("myChart"), {
@@ -169,14 +168,14 @@ function drawChords (matrix, mpr) {
       .outerRadius(r0 + 7);
 
   var svg = d3.select(".diagram").append("svg:svg")
-      .attr("width", w)
+      .attr("width", w) // comment out to make diagram responsive
       .attr("height", h)
-      // .attr("viewBox","0 0 650 600")
-      // .attr("preserveAspectRatio","xMidYMid meet")  // makes diagram responsive
+      // .attr("viewBox","0 0 650 600") // makes diagram responsive
+      // .attr("preserveAspectRatio","xMidYMid meet")  
       .append("svg:g")
       .attr("id", "circle")
       // centering on half width, half height
-      .attr("transform", "translate(" + (w / 2) + "," + (h / 2) + ")");
+      .attr("transform", "translate(" + (350) + "," + (h / 2) + ")");
       svg.append("circle")
           .attr("r", r0 + 20);
 

@@ -347,16 +347,10 @@ def get_event_type(selected_calendar, startdate, enddate):
     return data
 
 
-@app.route("/labels")
-def index():
+# @app.route("/nolabels")
+# def nolabels():
 
-    return render_template("labels.html")
-
-
-@app.route("/nolabels")
-def nolabels():
-
-    return render_template("nolabels.html")
+#     return render_template("nolabels.html")
 
 
 @app.route('/logout')
@@ -370,7 +364,7 @@ def logout():
 
     del session['credentials']
 
-    return render_template("logout.html")
+    return redirect("/")
 
 
 if __name__ == "__main__":
@@ -383,4 +377,4 @@ if __name__ == "__main__":
 
     app.run()
 
-    url_for('static', filename='flare.json')
+    # url_for('static', filename='flare.json')
