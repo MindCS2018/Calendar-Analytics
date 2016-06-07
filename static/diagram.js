@@ -101,13 +101,12 @@ function sendDoughnutData() {
 }
 
 // builds chart or provides message
-// depending on number of calendars selected
 function buildCharts (meetingsMatrix, emptyMatrix, mpr, filters, data) {
 
   var chartType = $('input[name="radio-chart"]:checked').val();
   var selectedCals = filters.slice(0,-2).length;
 
-  // zero calendars selected, display message
+  // 0 calendars selected
   if (selectedCals == 0) {
     if (chartType == "chord") {
       $(".diagram").empty();
@@ -117,7 +116,7 @@ function buildCharts (meetingsMatrix, emptyMatrix, mpr, filters, data) {
       $(".diagram").html("<p>Choose one calendar</p>");
     }
    
-  // one calendar selected
+  // 1 calendar selected
   } else if (selectedCals == 1) {
       if (chartType == "doughnut") {
         sendDoughnutData();
@@ -126,7 +125,7 @@ function buildCharts (meetingsMatrix, emptyMatrix, mpr, filters, data) {
         $(".diagram").html("<p>Choose additional calendars</p>");
       }
 
-  // more than one calendars are selected
+  // >1 calendars selected
   } else if (selectedCals > 1) {
     if (chartType == "chord") {
       if (_.isEqual(meetingsMatrix, emptyMatrix)) {
@@ -156,8 +155,6 @@ function drawChords (matrix, mpr) {
   $(".diagram").empty();
   $(".diagram").empty();
 
-  // sets color palette 
-  // var fill = d3.scale.category20b()
   var fill = d3.scale.ordinal()
       .range([ '#707070', '#4b8089', '#c0b15c', '#eb8a42', '#5C6BC0', '#42A3EB',
                '#89544b', '#355959']);
@@ -174,13 +171,13 @@ function drawChords (matrix, mpr) {
       .outerRadius(r0 + 7);
 
   var svg = d3.select(".diagram").append("svg:svg")
-      .attr("width", w) // comment out to make diagram responsive
+      .attr("width", w)
       .attr("height", h)
       // .attr("viewBox","0 0 650 600") // makes diagram responsive
       // .attr("preserveAspectRatio","xMidYMid meet")  
       .append("svg:g")
       .attr("id", "circle")
-      // centering on half width, half height
+      // centering d3 diagram in svg
       .attr("transform", "translate(" + (350) + "," + (h / 2) + ")");
       svg.append("circle")
           .attr("r", r0 + 20);
@@ -235,7 +232,7 @@ function drawChords (matrix, mpr) {
           })
           .on("mouseout", function (d) { d3.select("#tooltip").style("visibility", "hidden");});
 
-          // hover text
+          // tooltip hover text
           function chordTip (d) {
             moment.relativeTimeThreshold('s', 60);
             moment.relativeTimeThreshold('m', 60);
