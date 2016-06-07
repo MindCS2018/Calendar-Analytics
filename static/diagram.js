@@ -153,8 +153,7 @@ function drawChords (matrix, mpr) {
   // sets color palette 
   // var fill = d3.scale.category20b()
   var fill = d3.scale.ordinal()
-      .range(['#757052','#a26c5c','#7d5443','#72584d','#coa17e',
-              '#536068','#222325',]);
+      .range([ '#5C6BC0','#C0B15C','#C07F5C','#5CC0B1']);
 
   // constructs a new chord layout
   var chord = d3.layout.chord()
