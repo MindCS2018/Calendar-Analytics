@@ -38,7 +38,7 @@ body, html {
 .btn-sample.active, 
 .open .dropdown-toggle.btn-sample { 
   background-image: none; 
-} 
+}
  
 .btn-sample.disabled, 
 .btn-sample[disabled], 
@@ -181,7 +181,7 @@ text {
 #tooltip {
   color: #090f0f;
   opacity: 1;
-  background: white;
+  background: #F1F0F5;
   padding: 5px;
   border: 1px solid lightgrey;
   border-radius: 5px;

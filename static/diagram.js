@@ -23,7 +23,6 @@ $(function() {
 function getFilters() {
 
   var filters = $("#selected-calendars input").serializeArray();
-  console.log(filters);
   var startdate = $("#startdate").val();
   var enddate = $("#enddate").val();
 
@@ -72,15 +71,20 @@ function buildDoughnut(response) {
     data: {
       datasets: [{
         data: durations,
-        backgroundColor: ['#89544b', '#42A3EB', '#eb8a42', '#5C6BC0', '#c0b15c'],
-        hoverBackgroundColor: ['#89544b', '#42A3EB', '#eb8a42', '#5C6BC0', '#c0b15c']
+        backgroundColor: ['#5C6BC0', '#42A3EB', '#eb8a42', '#89544b', '#c0b15c',
+                          '#355959', '#4b8089', '#707070'],
+        hoverBackgroundColor: ['#5C6BC0', '#42A3EB', '#eb8a42', '#89544b', '#c0b15c',
+                              '#355959', '#4b8089', '#707070']
       }],
       labels: labels},
     options: {
                 responsive: false,
                 elements: {arc: {borderColor: "#fff"}},
-
-              },
+                tooltips: {enabled: true,
+                           backgroundColor: 'black',
+                           yPadding: 10,
+                           caretSize: 5}
+              }
   });
 }
 
@@ -155,10 +159,8 @@ function drawChords (matrix, mpr) {
   // sets color palette 
   // var fill = d3.scale.category20b()
   var fill = d3.scale.ordinal()
-      .range([ '#4b8089', '#707070', '#eb8a42', '#5C6BC0', '#c0b15c', '#42A3EB',
+      .range([ '#707070', '#4b8089', '#c0b15c', '#eb8a42', '#5C6BC0', '#42A3EB',
                '#89544b', '#355959']);
-      // , '#6C3126', '#E0A271', '#495058', '#756E51', '#5D6771',
-      //           '#6D5E5A', '#22262A', '#42A3EB', '#857534', '#5A8539', '#B5652A'
 
   // constructs a new chord layout
   var chord = d3.layout.chord()
