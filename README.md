@@ -8,3 +8,5 @@ Technologies:
   - Python, OAuth 2.0, Google Calendar & People APIs, Flask, Jinja2, Datetime
   - Javascript, jQuery, AJAX, D3, Chart.js, Underscore.js, Moment.js
   - PostgreSQL, SQLAlchemy, HTML5, CSS, Bootstrap
+
+![alt text](static/home.png)
