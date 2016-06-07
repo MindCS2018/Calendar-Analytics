@@ -9,4 +9,4 @@ Technologies:
   - Javascript, jQuery, AJAX, D3, Chart.js, Underscore.js, Moment.js
   - PostgreSQL, SQLAlchemy, HTML5, CSS, Bootstrap
 
-![alt text](static/home.png)
+![alt text](static/hp.png)
