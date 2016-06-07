@@ -10,5 +10,5 @@ Technologies:
   - PostgreSQL, SQLAlchemy, HTML5, CSS, Bootstrap
 
 ![alt text](static/hp.png)
-![alt text](static/chord.gif)
-![alt text](static/doughnut.gif)
+<!-- ![alt text](static/chord.gif)
+![alt text](static/doughnut.gif) -->
