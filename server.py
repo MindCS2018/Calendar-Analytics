@@ -1,26 +1,20 @@
 import os
-from flask import Flask, session, render_template, request
-from flask import flash, redirect, url_for, jsonify
-# from flask_debugtoolbar import DebugToolbarExtension
+from flask import Flask, session, render_template, request, redirect, url_for, jsonify
 from jinja2 import StrictUndefined
 import httplib2
 from apiclient.discovery import build
-from oauth2client.client import OAuth2WebServerFlow, flow_from_clientsecrets, OAuth2Credentials
-from model import connect_to_db, Event, Calendar, User, UserCal, CalEvent, db
-from datetime import datetime, timedelta, date
-from dateutil.relativedelta import relativedelta
-import logging
+from oauth2client.client import flow_from_clientsecrets, OAuth2Credentials
+from model import connect_to_db, Event, UserCal, CalEvent, db
+from datetime import datetime, timedelta
 from seed import seed_user, seed_calendars, seed_events
+import logging
 import json
 import itertools
 
 
-app = Flask(__name__, static_url_path='/static')
+app = Flask(__name__)
 app.secret_key = os.environ["FLASK_APP_KEY"]
 app.jinja_env.undefined = StrictUndefined
-
-
-# import pdb; pdb.set_trace()
 
 
 @app.route('/')
@@ -83,6 +77,69 @@ def oauth2():
     seed_db(profile_result, calendars_result, events_result)
 
     return redirect("/dashboard")
+
+
+@app.route('/dashboard')
+def dashboard():
+    """Renders list of calendar options on dashboard page"""
+
+    calendar_options = get_calendar_options()
+    calendar_options = sorted(calendar_options)
+
+    return render_template('dashboard.html',
+                           calendar_options=calendar_options)
+
+
+@app.route('/chord-diagram.json')
+def chord_diagram():
+    """Receives data from ajax request,
+    jsonifies object to send to client."""
+
+    selected_calendars = request.args.getlist('calendar')
+    startdate = request.args.get('startdate')
+    enddate = request.args.get('enddate')
+
+    mpr = get_mapper(selected_calendars)
+    events = get_team_events(selected_calendars, startdate, enddate)
+    matrix = get_matrix(mpr)
+    emptyMatrix = get_matrix(mpr)  # to test if final matrix is empty
+
+    meetingsMatrix = populate_matrix(events, mpr, matrix)
+
+    data = {"mpr": mpr, "meetingsMatrix": meetingsMatrix, "emptyMatrix": emptyMatrix}
+
+    return jsonify(data)
+
+
+@app.route('/doughnut.json')
+def doughnut():
+    """Receives data from ajax request,
+    jsonifies object to send to client."""
+
+    selected_calendar = request.args.get('calendar')
+    startdate = request.args.get('startdate')
+    enddate = request.args.get('enddate')
+
+    startdate = to_datetime(startdate)
+    enddate = to_datetime(enddate)
+
+    data = get_event_type(selected_calendar, startdate, enddate)
+
+    return jsonify(data)
+
+
+@app.route('/logout')
+def logout():
+    """On logout, revokes oauth credentials,
+       and deletes them from the session"""
+
+    credentials = pull_credentials()
+
+    credentials.revoke(httplib2.Http())
+
+    del session['credentials']
+
+    return redirect("/")
 
 
 def pull_credentials():
@@ -149,7 +206,7 @@ def event_api_call(event_service, calendar_service, calendars_result):
 
     now, three_months = get_dates()
 
-    calendars = calendars_result.get('items', [])  # list of calendar objects
+    calendars = calendars_result.get('items', [])
     id_list = [calendar['id'] for calendar in calendars]
 
     for calendar_id in id_list:  # API request for events in each calendar
@@ -162,7 +219,7 @@ def event_api_call(event_service, calendar_service, calendars_result):
                                               orderBy='startTime'),
                   request_id=calendar_id)
 
-    batch.execute()  # executes batch api call
+    batch.execute()  # executes batched api call
 
     return events_result
 
@@ -203,39 +260,6 @@ def to_datetime(str_date):
     """Converts string to datetime object"""
 
     return datetime.strptime(str_date, "%m/%d/%Y")
-
-
-@app.route('/chord-diagram.json')
-def chord_diagram():
-    """Receives data from ajax request,
-    jsonifies object to send to client."""
-
-    # receive from ajax request
-    selected_calendars = request.args.getlist('calendar')
-    startdate = request.args.get('startdate')
-    enddate = request.args.get('enddate')
-
-    mpr = get_mapper(selected_calendars)
-    events = get_team_events(selected_calendars, startdate, enddate)
-    matrix = get_matrix(mpr)
-    emptyMatrix = get_matrix(mpr)  # to test if final matrix is empty
-
-    meetingsMatrix = populate_matrix(events, mpr, matrix)
-
-    data = {"mpr": mpr, "meetingsMatrix": meetingsMatrix, "emptyMatrix": emptyMatrix}
-
-    return jsonify(data)
-
-
-@app.route('/dashboard')
-def dashboard():
-    """Renders list of calendar options on dashboard page"""
-
-    calendar_options = get_calendar_options()
-    calendar_options = sorted(calendar_options)
-
-    return render_template('dashboard.html',
-                           calendar_options=calendar_options)
 
 
 def get_mapper(selected_calendars):
@@ -302,23 +326,6 @@ def populate_matrix(events, mpr, matrix):
     return matrix
 
 
-@app.route('/doughnut.json')
-def doughnut():
-    """Receives data from ajax request,
-    jsonifies object to send to client."""
-
-    selected_calendar = request.args.get('calendar')
-    startdate = request.args.get('startdate')
-    enddate = request.args.get('enddate')
-
-    startdate = to_datetime(startdate)
-    enddate = to_datetime(enddate)
-
-    data = get_event_type(selected_calendar, startdate, enddate)
-
-    return jsonify(data)
-
-
 def get_event_type(selected_calendar, startdate, enddate):
     """Queries db for selected calendar's event types and
     durations."""
@@ -345,28 +352,10 @@ def get_event_type(selected_calendar, startdate, enddate):
     return data
 
 
-@app.route('/logout')
-def logout():
-    """On logout, revokes oauth credentials,
-       and deletes them from the session"""
-
-    credentials = pull_credentials()
-
-    credentials.revoke(httplib2.Http())
-
-    del session['credentials']
-
-    return redirect("/")
-
-
 if __name__ == "__main__":
 
     app.debug = True
 
     connect_to_db(app)
 
-    # DebugToolbarExtension(app)
-
     app.run()
-
-    # url_for('static', filename='flare.json')
