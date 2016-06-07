@@ -52,7 +52,7 @@ $( ".datepicker" ).change(
 );
 
 $( 'input[name="radio-chart"]' ).change(
-  function () {   sendFilters(); }
+  function () { sendFilters(); }
 );
 
 function buildDoughnut(response) {
@@ -61,6 +61,8 @@ function buildDoughnut(response) {
   var labels = response['labels'];
   $(".diagram").empty();
   $(".diagram").html('<canvas id="myChart" width="550" height="500"></canvas>');
+  var selectedName = $(".active input").val();
+  $('.diagram').prepend('<h4 class="name">'+ selectedName + '\'s<br>meetings</h4>');
 
   var myChart = new Chart(document.getElementById("myChart"), {
     title:{
@@ -70,8 +72,8 @@ function buildDoughnut(response) {
     data: {
       datasets: [{
         data: durations,
-        backgroundColor: [ '#d4d7d9', '#bd7aa9', '#884e7a', '#606165', '#61475d'],
-        hoverBackgroundColor: ['#d4d7d9', '#bd7aa9', '#884e7a', '#606165', '#61475d']
+        backgroundColor: ['#89544b', '#42A3EB', '#eb8a42', '#5C6BC0', '#c0b15c'],
+        hoverBackgroundColor: ['#89544b', '#42A3EB', '#eb8a42', '#5C6BC0', '#c0b15c']
       }],
       labels: labels},
     options: {
@@ -153,8 +155,10 @@ function drawChords (matrix, mpr) {
   // sets color palette 
   // var fill = d3.scale.category20b()
   var fill = d3.scale.ordinal()
-      .range([ '#5C6BC0', '#6C3126', '#E0A271', '#495058', '#756E51', '#5D6771',
-                '#6D5E5A', '#22262A', '#42A3EB', '#857534', '#5A8539', '#B5652A']);
+      .range([ '#4b8089', '#707070', '#eb8a42', '#5C6BC0', '#c0b15c', '#42A3EB',
+               '#89544b', '#355959']);
+      // , '#6C3126', '#E0A271', '#495058', '#756E51', '#5D6771',
+      //           '#6D5E5A', '#22262A', '#42A3EB', '#857534', '#5A8539', '#B5652A'
 
   // constructs a new chord layout
   var chord = d3.layout.chord()
@@ -193,6 +197,7 @@ function drawChords (matrix, mpr) {
   g.append("svg:path")
       // border color for nodes
       .style("stroke", "black")
+      .style("font-size","150px")
       .style("fill", function(d) { return fill(rdr(d).hoverName); })
       .attr("d", arc);
 
@@ -201,7 +206,7 @@ function drawChords (matrix, mpr) {
       .each(function(d) { d.angle = (d.startAngle + d.endAngle) / 2; })
       .attr("dy", ".35em")
       .style("font-family", "helvetica, arial, sans-serif")
-      .style("font-size", "11px")
+      .style("font-size", "15px")
       .attr("text-anchor", function(d) { return d.angle > Math.PI ? "end" : null; })
 
   // rotates node labels
