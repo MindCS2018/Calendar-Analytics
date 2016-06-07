@@ -58,6 +58,8 @@ def oauth2callback():
 
 @app.route('/oauth2')
 def oauth2():
+    """Builds API service objects,
+    makes three API calls and seeds db"""
 
     if 'credentials' not in session:
         return redirect(url_for('oauth2callback'))
@@ -172,6 +174,7 @@ def get_user_id():
 
 
 def seed_db(profile_result, calendars_result, events_result):
+    """Seeds db"""
 
     user_id = get_user_id()
 
@@ -181,7 +184,7 @@ def seed_db(profile_result, calendars_result, events_result):
 
 
 def get_calendar_options():
-    """"""
+    """Queries db for users's list of shared calendars"""
 
     user_id = get_user_id()
 
@@ -197,17 +200,15 @@ def get_calendar_options():
 
 
 def to_datetime(str_date):
-    """Converts string to datetime object
-
-    >>> to_datetime('05/30/2016')
-    datetime.datetime(2016, 5, 30, 0, 0)
-    """
+    """Converts string to datetime object"""
 
     return datetime.strptime(str_date, "%m/%d/%Y")
 
 
 @app.route('/chord-diagram.json')
 def chord_diagram():
+    """Receives data from ajax request,
+    jsonifies object to send to client."""
 
     # receive from ajax request
     selected_calendars = request.args.getlist('calendar')
@@ -228,7 +229,7 @@ def chord_diagram():
 
 @app.route('/dashboard')
 def dashboard():
-    """"""
+    """Renders list of calendar options on dashboard page"""
 
     calendar_options = get_calendar_options()
     calendar_options = sorted(calendar_options)
@@ -254,7 +255,8 @@ def get_mapper(selected_calendars):
 
 
 def get_team_events(selected_calendars, startdate, enddate):
-    """"""
+    """Queries db for selected calendars and date range,
+    returns list of event objects."""
 
     startdate = to_datetime(startdate)
     enddate = to_datetime(enddate)
@@ -275,15 +277,7 @@ def get_team_events(selected_calendars, startdate, enddate):
 
 def get_matrix(mpr):
     """Calculates number of nodes from mapper object,
-       returns matrix of all zeros.
-
-       >>> get_matrix({u'name1': {'id': 1, 'name': u'name1'},
-       ...             u'name2': {'id': 0, 'name': u'name2'}})
-       [[0, 0], [0, 0]]
-
-       >>> get_matrix({})
-       []
-       """
+    returns matrix of all zeros."""
 
     nodes = len(mpr.keys())
 
@@ -291,7 +285,8 @@ def get_matrix(mpr):
 
 
 def populate_matrix(events, mpr, matrix):
-    """"""
+    """Iterates through events, plugging each duration
+    into the correct location in the matrix."""
 
     for event in events:
         attendees = event['calendars']
@@ -309,7 +304,8 @@ def populate_matrix(events, mpr, matrix):
 
 @app.route('/doughnut.json')
 def doughnut():
-    """"""
+    """Receives data from ajax request,
+    jsonifies object to send to client."""
 
     selected_calendar = request.args.get('calendar')
     startdate = request.args.get('startdate')
@@ -324,6 +320,8 @@ def doughnut():
 
 
 def get_event_type(selected_calendar, startdate, enddate):
+    """Queries db for selected calendar's event types and
+    durations."""
 
     events = []
     evts = db.session.query(CalEvent, Event).join(Event).all()
@@ -345,12 +343,6 @@ def get_event_type(selected_calendar, startdate, enddate):
     data = {"durations": durations, "labels": labels}
 
     return data
-
-
-# @app.route("/nolabels")
-# def nolabels():
-
-#     return render_template("nolabels.html")
 
 
 @app.route('/logout')

@@ -8,13 +8,13 @@ from model import connect_to_db, db
 class LoggedOut(unittest.TestCase):
 
     def setUp(self):
-        """Stuff to do before each test."""
+        """Before each test."""
 
         self.client = app.test_client()
         app.config['TESTING'] = True
 
     def tearDown(self):
-        """Stuff to do after each test."""
+        """After each test."""
 
         pass
 
@@ -28,6 +28,8 @@ class LoggedOut(unittest.TestCase):
 class Loggedin(unittest.TestCase):
 
     def setUp(self):
+        """Before each test"""
+
         app.config['TESTING'] = True
         app.config['SECRET_KEY'] = 'key'
         self.client = app.test_client()
@@ -43,8 +45,12 @@ class Loggedin(unittest.TestCase):
         server.get_calendar_options = _mock_calendar_options
 
     def tearDown(self):
+        """After each test"""
 
-        pass
+        self.client = app.test_client()
+
+        with self.client.session_transaction() as sess:
+            del sess['sub']
 
     def test_dashboard(self):
 
@@ -57,11 +63,13 @@ class Loggedin(unittest.TestCase):
 class HelperFunctions(unittest.TestCase):
 
     def setUp(self):
+        """Before each test"""
+
         self.client = app.test_client()
         app.config['TESTING'] = True
 
     def tearDown(self):
-        """Stuff to do after each test."""
+        """After each test."""
 
     def test_get_matrix(self):
         self.assertEqual(server.get_matrix({u'name1': {'id': 1, 'name': u'name1'},
@@ -72,40 +80,17 @@ class HelperFunctions(unittest.TestCase):
         self.assertEqual(server.to_datetime('05/30/2016'),
                          server.datetime.datetime(2016, 5, 30, 0, 0))
 
-    def test_account_page(self):
-        # FIXME: Add a test
-
-        pass
-
-    def test_access_page(self):
-        # FIXME: Add a test
-
-        pass
-
 
 class HelperFunctionsDb(unittest.TestCase):
 
     def setUp(self):
+        """Before each test"""
+
         self.client = app.test_client()
         app.config['TESTING'] = True
 
     def tearDown(self):
-        """Stuff to do after each test."""
-
-    def test_inbox(self):
-        # FIXME: Add a test
-
-        pass
-
-    def test_settings(self):
-        # FIXME: Add a test
-
-        pass
-
-    def test_search_tasks(self):
-        # FIXME: Add a test
-
-        pass
+        """After each test."""
 
 
 # class cahoots_tests_database(unittest.TestCase):
