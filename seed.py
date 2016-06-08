@@ -108,7 +108,7 @@ def seed_events(eventsResult):
             elif any(item in summary for item in cross_department):
                 label = "cross-department"
             elif any(item in summary for item in department):
-                label = "deparment"
+                label = "department"
             elif any(item in summary for item in vertical):
                 label = "vertical"
             elif any(item in summary for item in one_on_one):

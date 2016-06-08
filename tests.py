@@ -81,16 +81,16 @@ class HelperFunctions(unittest.TestCase):
                          server.datetime.datetime(2016, 5, 30, 0, 0))
 
 
-class HelperFunctionsDb(unittest.TestCase):
+# class HelperFunctionsDb(unittest.TestCase):
 
-    def setUp(self):
-        """Before each test"""
+#     def setUp(self):
+#         """Before each test"""
 
-        self.client = app.test_client()
-        app.config['TESTING'] = True
+#         self.client = app.test_client()
+#         app.config['TESTING'] = True
 
-    def tearDown(self):
-        """After each test."""
+#     def tearDown(self):
+#         """After each test."""
 
 
 # class cahoots_tests_database(unittest.TestCase):

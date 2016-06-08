@@ -14,7 +14,6 @@ import itertools
 
 app = Flask(__name__)
 app.secret_key = os.environ["FLASK_APP_KEY"]
-app.jinja_env.undefined = StrictUndefined
 
 
 @app.route('/')
@@ -135,7 +134,7 @@ def logout():
 
     credentials = pull_credentials()
 
-    credentials.revoke(httplib2.Http())
+    credentials.revoke(httplib2.Http())  # for demo purposes
 
     del session['credentials']
 

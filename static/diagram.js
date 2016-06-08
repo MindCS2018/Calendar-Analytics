@@ -88,7 +88,7 @@ function buildDoughnut(response) {
   });
 }
 
-Chart.defaults.global.legend.display = false;
+// Chart.defaults.global.legend.display = false;
 
 // doughnut chart
 function sendDoughnutData() {
