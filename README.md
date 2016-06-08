@@ -10,7 +10,7 @@ Technologies:
   - PostgreSQL, SQLAlchemy, HTML5, CSS, Bootstrap
 
 
-![alt text](static/hp.png "Homepage")
-![alt text](static/chord.png "Dashboard chord diagram")
-![alt text](static/chord-2.png "Dashboard chord diagram")
-![alt text](static/doughnut.png "Dashboard doughnut chart")
+![alt text](static/hp.png)
+![alt text](static/chord.png)
+![alt text](static/chord-2.png)
+![alt text](static/doughnut.png)
