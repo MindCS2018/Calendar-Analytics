@@ -13,4 +13,3 @@ Technologies:
 ![alt text](static/chord.png)
 ![alt text](static/chord-2.png)
 ![alt text](static/doughnut.png)
-![alt text](static/doughnut-2.png)
