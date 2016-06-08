@@ -23,7 +23,6 @@ $(function() {
 function getFilters() {
 
   var filters = $("#selected-calendars input").serializeArray();
-  console.log(filters);
   var startdate = $("#startdate").val();
   var enddate = $("#enddate").val();
 
@@ -51,7 +50,7 @@ $( ".datepicker" ).change(
   function () { sendFilters(); }
 );
 
-$( "#dropdown" ).change(
+$( 'input[name="radio-chart"]' ).change(
   function () { sendFilters(); }
 );
 
@@ -60,8 +59,9 @@ function buildDoughnut(response) {
   var durations = response['durations'];
   var labels = response['labels'];
   $(".diagram").empty();
-  $(".diagram").empty();
   $(".diagram").html('<canvas id="myChart" width="550" height="500"></canvas>');
+  var selectedName = $(".active input").val();
+  $('.diagram').prepend('<h4 class="name">'+ selectedName + '\'s<br>meetings</h4>');
 
   var myChart = new Chart(document.getElementById("myChart"), {
     title:{
@@ -71,19 +71,24 @@ function buildDoughnut(response) {
     data: {
       datasets: [{
         data: durations,
-        backgroundColor: [ '#d4d7d9', '#bd7aa9', '#884e7a', '#606165', '#61475d'],
-        hoverBackgroundColor: ['#d4d7d9', '#bd7aa9', '#884e7a', '#606165', '#61475d']
+        backgroundColor: ['#5C6BC0', '#42A3EB', '#eb8a42', '#89544b', '#c0b15c',
+                          '#355959', '#4b8089', '#707070'],
+        hoverBackgroundColor: ['#5C6BC0', '#42A3EB', '#eb8a42', '#89544b', '#c0b15c',
+                              '#355959', '#4b8089', '#707070']
       }],
       labels: labels},
     options: {
                 responsive: false,
                 elements: {arc: {borderColor: "#fff"}},
-
-              },
+                tooltips: {enabled: true,
+                           backgroundColor: 'black',
+                           yPadding: 10,
+                           caretSize: 5}
+              }
   });
 }
 
-Chart.defaults.global.legend.display = false;
+// Chart.defaults.global.legend.display = false;
 
 // doughnut chart
 function sendDoughnutData() {
@@ -96,13 +101,12 @@ function sendDoughnutData() {
 }
 
 // builds chart or provides message
-// depending on number of calendars selected
 function buildCharts (meetingsMatrix, emptyMatrix, mpr, filters, data) {
 
-  var chartType = $("#dropdown").val();
+  var chartType = $('input[name="radio-chart"]:checked').val();
   var selectedCals = filters.slice(0,-2).length;
 
-  // zero calendars selected, display message
+  // 0 calendars selected
   if (selectedCals == 0) {
     if (chartType == "chord") {
       $(".diagram").empty();
@@ -112,7 +116,7 @@ function buildCharts (meetingsMatrix, emptyMatrix, mpr, filters, data) {
       $(".diagram").html("<p>Choose one calendar</p>");
     }
    
-  // one calendar selected
+  // 1 calendar selected
   } else if (selectedCals == 1) {
       if (chartType == "doughnut") {
         sendDoughnutData();
@@ -121,7 +125,7 @@ function buildCharts (meetingsMatrix, emptyMatrix, mpr, filters, data) {
         $(".diagram").html("<p>Choose additional calendars</p>");
       }
 
-  // more than one calendars are selected
+  // >1 calendars selected
   } else if (selectedCals > 1) {
     if (chartType == "chord") {
       if (_.isEqual(meetingsMatrix, emptyMatrix)) {
@@ -151,11 +155,9 @@ function drawChords (matrix, mpr) {
   $(".diagram").empty();
   $(".diagram").empty();
 
-  // sets color palette 
-  // var fill = d3.scale.category20b()
   var fill = d3.scale.ordinal()
-      .range(['#757052','#a26c5c','#7d5443','#72584d','#coa17e',
-              '#536068','#222325',]);
+      .range([ '#707070', '#4b8089', '#c0b15c', '#eb8a42', '#5C6BC0', '#42A3EB',
+               '#89544b', '#355959']);
 
   // constructs a new chord layout
   var chord = d3.layout.chord()
@@ -171,12 +173,12 @@ function drawChords (matrix, mpr) {
   var svg = d3.select(".diagram").append("svg:svg")
       .attr("width", w)
       .attr("height", h)
-      // .attr("viewBox","0 0 650 600")
-      // .attr("preserveAspectRatio","xMidYMid meet")  // makes diagram responsive
+      // .attr("viewBox","0 0 650 600") // makes diagram responsive
+      // .attr("preserveAspectRatio","xMidYMid meet")  
       .append("svg:g")
       .attr("id", "circle")
-      // centering on half width, half height
-      .attr("transform", "translate(" + (w / 2) + "," + (h / 2) + ")");
+      // centering d3 diagram in svg
+      .attr("transform", "translate(" + (350) + "," + (h / 2) + ")");
       svg.append("circle")
           .attr("r", r0 + 20);
 
@@ -194,6 +196,7 @@ function drawChords (matrix, mpr) {
   g.append("svg:path")
       // border color for nodes
       .style("stroke", "black")
+      .style("font-size","150px")
       .style("fill", function(d) { return fill(rdr(d).hoverName); })
       .attr("d", arc);
 
@@ -202,7 +205,7 @@ function drawChords (matrix, mpr) {
       .each(function(d) { d.angle = (d.startAngle + d.endAngle) / 2; })
       .attr("dy", ".35em")
       .style("font-family", "helvetica, arial, sans-serif")
-      .style("font-size", "11px")
+      .style("font-size", "15px")
       .attr("text-anchor", function(d) { return d.angle > Math.PI ? "end" : null; })
 
   // rotates node labels
@@ -229,7 +232,7 @@ function drawChords (matrix, mpr) {
           })
           .on("mouseout", function (d) { d3.select("#tooltip").style("visibility", "hidden");});
 
-          // hover text
+          // tooltip hover text
           function chordTip (d) {
             moment.relativeTimeThreshold('s', 60);
             moment.relativeTimeThreshold('m', 60);

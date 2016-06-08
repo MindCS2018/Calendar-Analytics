@@ -1,27 +1,18 @@
 from model import db, Event, Calendar, User, UserCal, CalEvent
-from datetime import datetime
-# from dateutil import relativedelta, parser
 
 
 def seed_user(profile, user_id):
 
     first_name = profile['names'][0].get("givenName")
     last_name = profile['names'][0].get("familyName")
-    # user_sync_token = calendarsResult['nextSyncToken']
-    # calendar_etags = calendarsResult['etag']
 
     user_exists = User.query.get(user_id)
-
-    # if user_exists:
-
-        # User.user_sync_token = user_sync_token
 
     if user_exists is None:
 
         user = User(user_id=user_id,
                     first_name=first_name,
                     last_name=last_name)
-                    # user_sync_token=user_sync_token)
 
         db.session.add(user)
         db.session.commit()
@@ -52,16 +43,9 @@ def seed_calendars(calendarsResult, user_id):
         else:
             selected = False
 
-        # if calendar_exists and calendar_exists.etag == etag:
-        # else:
-
         cal_exists = Calendar.query.get(calendar_id)
         usercal_exists = UserCal.query.filter_by(user_id=user_id,
                                                  calendar_id=calendar_id).first()
-
-        # if next page token exists, call back to the api with the next page token
-        # next sync token @ the end
-        # calendar_sync_token = eventsResult[calendar_id]['nextSyncToken']
 
         if cal_exists and usercal_exists is None:
 
@@ -70,13 +54,8 @@ def seed_calendars(calendarsResult, user_id):
                               primary=primary,
                               selected=selected)
 
-            # usercal.calendar_id = calendar_id
-
             db.session.add(usercal)
             db.session.commit()
-
-        # elif cal_exists and cal_exists.etag != etag:
-        #     update db
 
         elif cal_exists is None:
 
@@ -84,7 +63,6 @@ def seed_calendars(calendarsResult, user_id):
                                     etag=etag,
                                     summary=summary,
                                     timezone=timezone)
-                                    # calendar_sync_token=calendar_sync_token)
 
             db.session.add(calendar_obj)
             db.session.commit()
@@ -120,7 +98,7 @@ def seed_events(eventsResult):
             cross_department = ['operations']
             department = ['team', 'engineer']
             vertical = ['standup', 'scrum', 'daily', 'check']
-            one_on_one = [':', 'supervisor', 'mentor', 'supervisee', 'manager']
+            one_on_one = [':', 'supervisor', 'mentor', 'supervisee', 'manager', 'training']
             off_site = ['vendor', 'client', 'investor', 'conference', 'off-site']
 
             if any(item in summary for item in company):
@@ -130,7 +108,7 @@ def seed_events(eventsResult):
             elif any(item in summary for item in cross_department):
                 label = "cross-department"
             elif any(item in summary for item in department):
-                label = "deparment"
+                label = "department"
             elif any(item in summary for item in vertical):
                 label = "vertical"
             elif any(item in summary for item in one_on_one):

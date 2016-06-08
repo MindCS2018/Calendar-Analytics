@@ -11,7 +11,6 @@ class User(db.Model):
     user_id = db.Column(db.String(10000), primary_key=True)
     first_name = db.Column(db.String(200), nullable=True)
     last_name = db.Column(db.String(200), nullable=True)
-    # user_sync_token = db.Column(db.String(200), nullable=True)
 
 
 class UserCal(db.Model):
@@ -39,7 +38,6 @@ class Calendar(db.Model):
     etag = db.Column(db.String(100), nullable=False)
     summary = db.Column(db.String(100), nullable=True)
     timezone = db.Column(db.String(100), nullable=False)
-    # calendar_sync_token = db.Column(db.String(200), nullable=True)
 
 
 class CalEvent(db.Model):
@@ -50,7 +48,6 @@ class CalEvent(db.Model):
     calevent_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     calendar_id = db.Column(db.String(100), db.ForeignKey('calendars.calendar_id'))
     event_id = db.Column(db.String(10000), db.ForeignKey('events.event_id'))
-    # status = db.Column(db.String(20), nullable=True)
 
     event = db.relationship("Event", backref=db.backref("calevents", order_by=calevent_id))
 
