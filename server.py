@@ -4,7 +4,7 @@ from jinja2 import StrictUndefined
 import httplib2
 from apiclient.discovery import build
 from oauth2client.client import flow_from_clientsecrets, OAuth2Credentials
-from model import connect_to_db, Event, UserCal, CalEvent, db
+from model import connect_to_db, Event, UserCal, CalEvent, db, User, Calendar
 from datetime import datetime, timedelta
 from seed import seed_user, seed_calendars, seed_events
 import logging
@@ -357,4 +357,4 @@ if __name__ == "__main__":
 
     connect_to_db(app)
 
-    app.run()
+    # app.run()
