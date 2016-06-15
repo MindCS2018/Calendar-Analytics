@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.schema import Index, PrimaryKeyConstraint
 
 db = SQLAlchemy()
 
@@ -31,16 +32,18 @@ class UserCal(db.Model):
     primary = db.Column(db.String(10), nullable=False)
     selected = db.Column(db.String(10), nullable=False)
 
-    user = db.relationship("User", backref=db.backref("usercals", order_by=usercal_id))
-
-    calendar = db.relationship("Calendar", backref=db.backref("usercals", order_by=usercal_id))
-
     def __repr__(self):
         """Redefines how object displays"""
 
         return "<UserCal {}, user_id: {} calendar_id: {}>".format(self.usercal_id,
                                                                   self.user_id,
                                                                   self.calendar_id)
+
+    user = db.relationship("User", backref=db.backref("usercals",
+                                                      order_by=usercal_id))
+
+    calendar = db.relationship("Calendar", backref=db.backref("usercals",
+                                                              order_by=usercal_id))
 
 
 class Calendar(db.Model):
@@ -50,7 +53,7 @@ class Calendar(db.Model):
 
     calendar_id = db.Column(db.String(100), primary_key=True)
     etag = db.Column(db.String(100), nullable=False)
-    summary = db.Column(db.String(100), nullable=True)
+    summary = db.Column(db.String(100), nullable=True, index=True)
     timezone = db.Column(db.String(100), nullable=False)
 
     def __repr__(self):
@@ -69,16 +72,18 @@ class CalEvent(db.Model):
     calendar_id = db.Column(db.String(100), db.ForeignKey('calendars.calendar_id'))
     event_id = db.Column(db.String(10000), db.ForeignKey('events.event_id'))
 
-    event = db.relationship("Event", backref=db.backref("calevents", order_by=calevent_id))
-
-    calendar = db.relationship("Calendar", backref=db.backref("calevents", order_by=calevent_id))
-
     def __repr__(self):
         """Redefines how object displays"""
 
         return "<CalEvent {}, calendar_id: {}, event_id: {}>".format(self.calevent_id,
                                                                      self.calendar_id,
                                                                      self.event_id)
+
+    event = db.relationship("Event", backref=db.backref("calevents",
+                                                        order_by=calevent_id))
+
+    calendar = db.relationship("Calendar", backref=db.backref("calevents",
+                                                              order_by=calevent_id))
 
 
 class Event(db.Model):
