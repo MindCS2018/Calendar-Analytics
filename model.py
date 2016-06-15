@@ -94,9 +94,9 @@ class Event(db.Model):
     event_id = db.Column(db.String(10000), primary_key=True)
     etag = db.Column(db.String(100), nullable=False)
     creator = db.Column(db.String(100), nullable=False)
-    start = db.Column(db.DateTime, nullable=False)
-    end = db.Column(db.DateTime, nullable=False)
-    summary = db.Column(db.String(1000), nullable=True)
+    start = db.Column(db.DateTime, nullable=False, index=True)
+    end = db.Column(db.DateTime, nullable=False, index=True)
+    summary = db.Column(db.String(1000), nullable=True, index=True)
     label = db.Column(db.String(100), nullable=True)
 
     def __repr__(self):
