@@ -12,6 +12,13 @@ class User(db.Model):
     first_name = db.Column(db.String(200), nullable=True)
     last_name = db.Column(db.String(200), nullable=True)
 
+    def __repr__(self):
+        """Redefines how object displays"""
+
+        return "<User {}: {} {}>".format(self.user_id,
+                                         self.first_name,
+                                         self.last_name)
+
 
 class UserCal(db.Model):
     """Each calendar shared with a user"""
@@ -28,6 +35,13 @@ class UserCal(db.Model):
 
     calendar = db.relationship("Calendar", backref=db.backref("usercals", order_by=usercal_id))
 
+    def __repr__(self):
+        """Redefines how object displays"""
+
+        return "<UserCal {}, user_id: {} calendar_id: {}>".format(self.usercal_id,
+                                                                  self.user_id,
+                                                                  self.calendar_id)
+
 
 class Calendar(db.Model):
     """Each calendar"""
@@ -38,6 +52,12 @@ class Calendar(db.Model):
     etag = db.Column(db.String(100), nullable=False)
     summary = db.Column(db.String(100), nullable=True)
     timezone = db.Column(db.String(100), nullable=False)
+
+    def __repr__(self):
+        """Redefines how object displays"""
+
+        return "<Calendar {}: {}>".format(self.calendar_id,
+                                          self.summary)
 
 
 class CalEvent(db.Model):
@@ -53,6 +73,13 @@ class CalEvent(db.Model):
 
     calendar = db.relationship("Calendar", backref=db.backref("calevents", order_by=calevent_id))
 
+    def __repr__(self):
+        """Redefines how object displays"""
+
+        return "<CalEvent {}, calendar_id: {}, event_id: {}>".format(self.calevent_id,
+                                                                     self.calendar_id,
+                                                                     self.event_id)
+
 
 class Event(db.Model):
     """Each event"""
@@ -67,6 +94,14 @@ class Event(db.Model):
     summary = db.Column(db.String(1000), nullable=True)
     label = db.Column(db.String(100), nullable=True)
 
+    def __repr__(self):
+        """Redefines how object displays"""
+
+        return "<Event {}: {}, start: {} end: {}>".format(self.event_id,
+                                                          self.summary,
+                                                          self.start,
+                                                          self.end)
+
     @property
     def duration_minutes(self):
         """Given an event object,
@@ -78,7 +113,7 @@ class Event(db.Model):
 
     def get_calendars(self):
         """Given an event object,
-        return a list of calendar_ids associated with the event"""
+        returns a list of calendar_ids associated with the event"""
 
         calendars = []
         for calevent in self.calevents:
@@ -102,7 +137,7 @@ class Event(db.Model):
 def connect_to_db(app):
     """Connects database to Flask app."""
 
-    # configures PostgreSQL database
+    # configures database
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///cals'
     db.app = app
     db.init_app(app)
