@@ -338,13 +338,11 @@ def get_event_type(selected_calendar, startdate, enddate):
     labels_and_durations = {}
     for event in events:
         if event.label:
-            labels_and_durations.setdefault(event.label, []).append(event.duration_minutes)
+            labels_and_durations.setdefault(event.label, 0)
+            labels_and_durations[event.label] += event.duration_minutes
 
-    labels = []
-    durations = []
-    for key, value in labels_and_durations.iteritems():
-        labels.append(key)
-        durations.append(sum(value))
+    labels = [key for key in labels_and_durations.iterkeys()]
+    durations = [value for value in labels_and_durations.itervalues()]
 
     data = {"durations": durations, "labels": labels}
 
@@ -357,4 +355,4 @@ if __name__ == "__main__":
 
     connect_to_db(app)
 
-    # app.run()
+    app.run()
