@@ -88,8 +88,6 @@ function buildDoughnut(response) {
   });
 }
 
-// Chart.defaults.global.legend.display = false;
-
 // doughnut chart
 function sendDoughnutData() {
 
@@ -100,34 +98,27 @@ function sendDoughnutData() {
   });
 }
 
-// builds chart or provides message
-function buildCharts (meetingsMatrix, emptyMatrix, mpr, filters, data) {
-
-  var chartType = $('input[name="radio-chart"]:checked').val();
-  var selectedCals = filters.slice(0,-2).length;
-
-  // 0 calendars selected
-  if (selectedCals == 0) {
-    if (chartType == "chord") {
+function zeroCalendars(chartType) {
+   if (chartType == "chord") {
       $(".diagram").empty();
       $(".diagram").html("<p>Choose calendars</p>");
     } else {
       $(".diagram").empty();
       $(".diagram").html("<p>Choose one calendar</p>");
     }
-   
-  // 1 calendar selected
-  } else if (selectedCals == 1) {
-      if (chartType == "doughnut") {
+}
+
+function oneCalendar(chartType) {
+  if (chartType == "doughnut") {
         sendDoughnutData();
       } else if (chartType == "chord") {
         $(".diagram").empty();
         $(".diagram").html("<p>Choose additional calendars</p>");
       }
+}
 
-  // >1 calendars selected
-  } else if (selectedCals > 1) {
-    if (chartType == "chord") {
+function multipleCalendars(chartType, meetingsMatrix, emptyMatrix, mpr) {
+      if (chartType == "chord") {
       if (_.isEqual(meetingsMatrix, emptyMatrix)) {
         $(".diagram").empty();
         $(".diagram").html("<p>No meetings between these calendars</p>");
@@ -137,6 +128,22 @@ function buildCharts (meetingsMatrix, emptyMatrix, mpr, filters, data) {
         $(".diagram").empty();
         $(".diagram").html("<p>Choose one calendar</p>");
     }
+}
+
+// builds chart or provides message
+function buildCharts (meetingsMatrix, emptyMatrix, mpr, filters) {
+
+  var chartType = $('input[name="radio-chart"]:checked').val();
+  var selectedCals = filters.slice(0,-2).length;
+
+  if (selectedCals == 0) {
+    zeroCalendars(chartType);
+   
+  } else if (selectedCals == 1) {
+    oneCalendar(chartType);
+
+  } else if (selectedCals > 1) {
+    multipleCalendars(chartType, meetingsMatrix, emptyMatrix, mpr);
   }
 }
 
