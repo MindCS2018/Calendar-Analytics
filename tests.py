@@ -8,28 +8,24 @@ from model import connect_to_db, db
 class LoggedOut(unittest.TestCase):
 
     def setUp(self):
-        """Before each test."""
-
         self.client = app.test_client()
         app.config['TESTING'] = True
 
-    def tearDown(self):
-        """After each test."""
-
-        pass
-
     def test_homepage(self):
-
         result = self.client.get('/')
         self.assertEqual(result.status_code, 200)
         self.assertIn('collaboration', result.data)
+        print "Homepage 200"
+
+    def test_session(self):
+        with self.client.session_transaction() as sess:
+            self.assertNotIn('sub', sess)
+        print "Session empty when logged out"
 
 
 class Loggedin(unittest.TestCase):
 
     def setUp(self):
-        """Before each test"""
-
         app.config['TESTING'] = True
         app.config['SECRET_KEY'] = 'key'
         self.client = app.test_client()
@@ -37,47 +33,38 @@ class Loggedin(unittest.TestCase):
         with self.client.session_transaction() as sess:
             sess["sub"] = os.environ['SUB']
 
-        # Make mocks
+        # Mocks calendar list
         def _mock_calendar_options():
             return ['meggie.engineering@gmail.com']
 
         server.get_calendar_options = _mock_calendar_options
 
     def tearDown(self):
-        """After each test"""
-
-        self.client = app.test_client()
-
         with self.client.session_transaction() as sess:
             sess.pop("sub", None)
 
     def test_dashboard(self):
-
         result = self.client.get('/dashboard')
-
         self.assertEqual(result.status_code, 200)
         self.assertIn('logout', result.data)
+        print "Dashboard 200"
 
 
 class HelperFunctions(unittest.TestCase):
 
     def setUp(self):
-        """Before each test"""
-
         self.client = app.test_client()
         app.config['TESTING'] = True
-
-    def tearDown(self):
-        """After each test."""
 
     def test_get_matrix(self):
         self.assertEqual(server.get_matrix({u'name1': {'id': 1, 'name': u'name1'},
                                             u'name2': {'id': 0, 'name': u'name2'}}),
                                             [[0, 0], [0, 0]])
+        print "Built empty matrix"
 
-    def to_datetime(self):
-        self.assertEqual(server.to_datetime('05/30/2016'),
-                         server.datetime.datetime(2016, 5, 30, 0, 0))
+    def test_to_datetime(self):
+        self.assertEqual(server.to_datetime('05/30/2016'), server.datetime(2016, 5, 30, 0, 0))
+        print "Correct datetime input"
 
 
 # class HelperFunctionsDb(unittest.TestCase):
