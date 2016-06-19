@@ -2,10 +2,11 @@ import os
 import unittest
 from server import app
 import server
-from model import connect_to_db, db
+from model import connect_to_db, db, test_data
 
 
 class LoggedOut(unittest.TestCase):
+    """Flask tests with logged out user."""
 
     def setUp(self):
         self.client = app.test_client()
@@ -24,6 +25,7 @@ class LoggedOut(unittest.TestCase):
 
 
 class Loggedin(unittest.TestCase):
+    """Flask tests with logged in user."""
 
     def setUp(self):
         app.config['TESTING'] = True
@@ -51,6 +53,7 @@ class Loggedin(unittest.TestCase):
 
 
 class HelperFunctions(unittest.TestCase):
+    """Flask tests for helper functions."""
 
     def setUp(self):
         self.client = app.test_client()
@@ -67,40 +70,24 @@ class HelperFunctions(unittest.TestCase):
         print "Correct datetime input"
 
 
-# class HelperFunctionsDb(unittest.TestCase):
+class Database(unittest.TestCase):
+    """Flask tests that use the database."""
 
-#     def setUp(self):
-#         """Before each test"""
+    def setUp(self):
+        self.client = app.test_client()
+        app.config['TESTING'] = True
 
-#         self.client = app.test_client()
-#         app.config['TESTING'] = True
+        # Connect to test database
+        connect_to_db(app, "postgresql:///cals_test")
+        print "Built test db"
 
-#     def tearDown(self):
-#         """After each test."""
+        # Create tables and add sample data
+        db.create_all()
+        test_data()
 
-
-# class cahoots_tests_database(unittest.TestCase):
-#     """Flask tests that use the database."""
-
-#     def setUp(self):
-#         """Before every test."""
-
-#         self.client = app.test_client()
-#         app.config['TESTING'] = True
-
-#         # Connect to test database
-#         # Use name of test database here to override default database in model.py
-#         connect_to_db(app, "postgresql:///testdb")
-
-#         # Create tables and add sample data
-#         db.create_all()
-#         example_data()
-
-#     def tearDown(self):
-#         """Do at end of every test."""
-
-#         db.session.close()
-#         db.drop_all()
+    def tearDown(self):
+        db.session.close()
+        db.drop_all()
 
 
 if __name__ == "__main__":
