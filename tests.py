@@ -34,7 +34,6 @@ class Loggedin(unittest.TestCase):
         app.config['SECRET_KEY'] = 'key'
         self.client = app.test_client()
 
-        # with self.client as test_client:
         with self.client.session_transaction() as sess:
             sess["sub"] = os.environ['SUB']
 
@@ -50,7 +49,7 @@ class Loggedin(unittest.TestCase):
         self.client = app.test_client()
 
         with self.client.session_transaction() as sess:
-            del sess['sub']
+            sess.pop("sub", None)
 
     def test_dashboard(self):
 
@@ -97,7 +96,7 @@ class HelperFunctions(unittest.TestCase):
 #     """Flask tests that use the database."""
 
 #     def setUp(self):
-#         """Stuff to do before every test."""
+#         """Before every test."""
 
 #         self.client = app.test_client()
 #         app.config['TESTING'] = True
@@ -116,10 +115,6 @@ class HelperFunctions(unittest.TestCase):
 #         db.session.close()
 #         db.drop_all()
 
-#     def test_pages(self):
-#         #FIXME: test that the pages displays from all example_()_data() functions
-
-#         pass
 
 if __name__ == "__main__":
     unittest.main()
