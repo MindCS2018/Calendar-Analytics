@@ -137,6 +137,7 @@ def logout():
     credentials = pull_credentials()
     credentials.revoke(httplib2.Http())  # for demo purposes
     del session['credentials']
+    del session['sub']
 
     return redirect("/")
 
