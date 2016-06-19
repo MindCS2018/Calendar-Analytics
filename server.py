@@ -135,9 +135,7 @@ def logout():
        and deletes them from the session"""
 
     credentials = pull_credentials()
-
     credentials.revoke(httplib2.Http())  # for demo purposes
-
     del session['credentials']
 
     return redirect("/")
@@ -287,16 +285,13 @@ def get_team_events(selected_calendars, startdate, enddate):
     enddate = to_datetime(enddate)
 
     events = set()
-
     evts = db.session.query(CalEvent, Event).join(Event).all()
-
     for cal in selected_calendars:
         for calevent, event in evts:
             if cal.lower() in calevent.calendar_id and event.start > startdate and event.end < enddate:
                 events.add(event)
 
     events = list(events)
-
     return [event.serialize() for event in events]
 
 
@@ -305,7 +300,6 @@ def get_matrix(mpr):
     returns matrix of all zeros."""
 
     nodes = len(mpr.keys())
-
     return [[0] * nodes for i in range(nodes)]
 
 
@@ -323,7 +317,6 @@ def populate_matrix(events, mpr, matrix):
                 item.append(event['duration'])
                 matrix[item[0]][item[1]] += item[2]
                 matrix[item[1]][item[0]] += item[2]
-
     return matrix
 
 
@@ -360,7 +353,6 @@ def doughnut_data(labels_and_durations):
     durations = [value for value in labels_and_durations.itervalues()]
 
     data = {"durations": durations, "labels": labels}
-
     return data
 
 
