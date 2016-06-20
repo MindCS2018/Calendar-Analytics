@@ -167,6 +167,19 @@ def test_data():
                        calendar_id="reuben.engineering@gmail.com",
                        primary=True, selected=True)
 
+    event1 = Event(event_id="abc", etag="123",
+                   creator="meggie.engineering@gmail.com",
+                   start="2016-07-15 13:00:00", end="2016-07-15 15:00:00",
+                   summary="mentor meeting", label="one-on-one")
+    event2 = Event(event_id="defg", etag="456",
+                   creator="reuben.engineering@gmail.com",
+                   start="2016-07-15 8:00:00", end="2016-07-15 9:00:00",
+                   summary="1:1", label="one-on-one")
+    event3 = Event(event_id="hij", etag="789",
+                   creator="reuben.engineering@gmail.com",
+                   start="2016-07-15 10:00:00", end="2016-07-15 12:00:00",
+                   summary="standup", label="vertical")
+
     calendar1 = Calendar(calendar_id="meggie.engineering@gmail.com",
                          etag="123", timezone="America/Los_Angeles")
     calendar2 = Calendar(calendar_id="jessie.engineering@gmail.com",
@@ -179,32 +192,19 @@ def test_data():
                          event_id="abc")
     calevent2 = CalEvent(calevent_id=2,
                          calendar_id="meggie.engineering@gmail.com",
-                         event_id="def")
+                         event_id="defg")
     calevent3 = CalEvent(calevent_id=3,
                          calendar_id="jessie.engineering@gmail.com",
                          event_id="abc")
     calevent4 = CalEvent(calevent_id=4,
                          calendar_id="jessie.engineering@gmail.com",
-                         event_id="ghi")
+                         event_id="hij")
     calevent5 = CalEvent(calevent_id=5,
                          calendar_id="reuben.engineering@gmail.com",
-                         event_id="def")
+                         event_id="defg")
     calevent6 = CalEvent(calevent_id=6,
                          calendar_id="reuben.engineering@gmail.com",
-                         event_id="ghi")
-
-    event1 = Event(event_id="abc", etag="123",
-                   creator="meggie.engineering@gmail.com",
-                   start="2016-07-15 13:00:00", end="201-07-15 15:00:00",
-                   summary="mentor meeting", label="one-on-one")
-    event2 = Event(event_id="def", etag="456",
-                   creator="reuben.engineering@gmail.com",
-                   start="2016-07-15 8:00:00", end="2016-07-15 9:00:00",
-                   summary="1:1", label="one-on-one")
-    event3 = Event(event_id="ghi", etag="789",
-                   creator="reuben.engineering@gmail.com",
-                   start="2016-07-15 10:00:00", end="2016-07-15 12:00:00",
-                   summary="standup", label="vertical")
+                         event_id="hij")
 
     db.session.add_all([user1, usercal1, usercal2, usercal3, calendar1,
                         calendar2, calendar3, calevent1, calevent2,

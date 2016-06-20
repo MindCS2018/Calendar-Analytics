@@ -81,7 +81,7 @@ class Database(unittest.TestCase):
         connect_to_db(app, "postgresql:///cals_test")
         print "Built test db"
 
-        # Create tables and add sample data
+        # Create tables and seed sample data
         db.create_all()
         test_data()
 
@@ -89,6 +89,16 @@ class Database(unittest.TestCase):
         db.session.close()
         db.drop_all()
 
+    def test_get_event_type(self):
+        selected_calendar = "meggie.engineering@gmail.com"
+        startdate = server.datetime(2016, 7, 14, 0, 0)
+        enddate = server.datetime(2016, 7, 16, 0, 0)
+        events = server.get_event_type(selected_calendar,
+                                       startdate,
+                                       enddate)
+        self.assertEqual(events[0].event_id, "abc")
+        self.assertEqual(events[1].event_id, "defg")
+        print "Tested get event type"
 
 if __name__ == "__main__":
     unittest.main()
