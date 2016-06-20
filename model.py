@@ -212,7 +212,7 @@ def test_data():
                         event1, event2, event3])
     db.session.commit()
 
-    print "Added sample data to test database"
+    print "Seeded test db"
 
 
 if __name__ == "__main__":
