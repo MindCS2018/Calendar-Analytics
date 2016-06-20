@@ -96,7 +96,7 @@ class Event(db.Model):
     creator = db.Column(db.String(100), nullable=False)
     start = db.Column(db.DateTime, nullable=False, index=True)
     end = db.Column(db.DateTime, nullable=False, index=True)
-    summary = db.Column(db.String(1000), nullable=True, index=True)
+    summary = db.Column(db.String(1000), nullable=False, index=True)
     label = db.Column(db.String(100), nullable=True)
 
     def __repr__(self):
@@ -139,13 +139,80 @@ class Event(db.Model):
                 "calendars": calendars}
 
 
-def connect_to_db(app):
+#####################################################################
+
+
+def connect_to_db(app, db_uri='postgresql:///cals'):
     """Connects database to Flask app."""
 
     # configures database
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///cals'
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+    # app.config['SQLALCHEMY_ECHO'] = True
     db.app = app
     db.init_app(app)
+
+
+def test_data():
+    """Creates sample data for test database."""
+
+    user1 = User(user_id="1")
+
+    usercal1 = UserCal(usercal_id=1, user_id="1",
+                       calendar_id="meggie.engineering@gmail.com",
+                       primary=True, selected=True)
+    usercal2 = UserCal(usercal_id=2, user_id="1",
+                       calendar_id="jessie.engineering@gmail.com",
+                       primary=True, selected=True)
+    usercal3 = UserCal(usercal_id=3, user_id="1",
+                       calendar_id="reuben.engineering@gmail.com",
+                       primary=True, selected=True)
+
+    event1 = Event(event_id="abc", etag="123",
+                   creator="meggie.engineering@gmail.com",
+                   start="2016-07-15 13:00:00", end="2016-07-15 15:00:00",
+                   summary="mentor meeting", label="one-on-one")
+    event2 = Event(event_id="defg", etag="456",
+                   creator="reuben.engineering@gmail.com",
+                   start="2016-07-15 8:00:00", end="2016-07-15 9:00:00",
+                   summary="1:1", label="one-on-one")
+    event3 = Event(event_id="hij", etag="789",
+                   creator="reuben.engineering@gmail.com",
+                   start="2016-07-15 10:00:00", end="2016-07-15 12:00:00",
+                   summary="standup", label="vertical")
+
+    calendar1 = Calendar(calendar_id="meggie.engineering@gmail.com",
+                         etag="123", timezone="America/Los_Angeles")
+    calendar2 = Calendar(calendar_id="jessie.engineering@gmail.com",
+                         etag="456", timezone="America/Los_Angeles")
+    calendar3 = Calendar(calendar_id="reuben.engineering@gmail.com",
+                         etag="789", timezone="America/Los_Angeles")
+
+    calevent1 = CalEvent(calevent_id=1,
+                         calendar_id="meggie.engineering@gmail.com",
+                         event_id="abc")
+    calevent2 = CalEvent(calevent_id=2,
+                         calendar_id="meggie.engineering@gmail.com",
+                         event_id="defg")
+    calevent3 = CalEvent(calevent_id=3,
+                         calendar_id="jessie.engineering@gmail.com",
+                         event_id="abc")
+    calevent4 = CalEvent(calevent_id=4,
+                         calendar_id="jessie.engineering@gmail.com",
+                         event_id="hij")
+    calevent5 = CalEvent(calevent_id=5,
+                         calendar_id="reuben.engineering@gmail.com",
+                         event_id="defg")
+    calevent6 = CalEvent(calevent_id=6,
+                         calendar_id="reuben.engineering@gmail.com",
+                         event_id="hij")
+
+    db.session.add_all([user1, usercal1, usercal2, usercal3, calendar1,
+                        calendar2, calendar3, calevent1, calevent2,
+                        calevent3, calevent4, calevent5, calevent6,
+                        event1, event2, event3])
+    db.session.commit()
+
+    print "Seeded test db"
 
 
 if __name__ == "__main__":

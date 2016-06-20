@@ -122,7 +122,9 @@ def doughnut():
     startdate = to_datetime(startdate)
     enddate = to_datetime(enddate)
 
-    data = get_event_type(selected_calendar, startdate, enddate)
+    events = get_event_type(selected_calendar, startdate, enddate)
+    labels_and_durations = total_durations(events)
+    data = doughnut_data(labels_and_durations)
 
     return jsonify(data)
 
@@ -133,10 +135,9 @@ def logout():
        and deletes them from the session"""
 
     credentials = pull_credentials()
-
     credentials.revoke(httplib2.Http())  # for demo purposes
-
     del session['credentials']
+    del session['sub']
 
     return redirect("/")
 
@@ -285,16 +286,13 @@ def get_team_events(selected_calendars, startdate, enddate):
     enddate = to_datetime(enddate)
 
     events = set()
-
     evts = db.session.query(CalEvent, Event).join(Event).all()
-
     for cal in selected_calendars:
         for calevent, event in evts:
             if cal.lower() in calevent.calendar_id and event.start > startdate and event.end < enddate:
                 events.add(event)
 
     events = list(events)
-
     return [event.serialize() for event in events]
 
 
@@ -303,7 +301,6 @@ def get_matrix(mpr):
     returns matrix of all zeros."""
 
     nodes = len(mpr.keys())
-
     return [[0] * nodes for i in range(nodes)]
 
 
@@ -321,33 +318,42 @@ def populate_matrix(events, mpr, matrix):
                 item.append(event['duration'])
                 matrix[item[0]][item[1]] += item[2]
                 matrix[item[1]][item[0]] += item[2]
-
     return matrix
 
 
 def get_event_type(selected_calendar, startdate, enddate):
-    """Queries db for selected calendar's event types and
-    durations."""
+    """Queries db for selected calendar's event types
+    and durations."""
 
     events = []
     evts = db.session.query(CalEvent, Event).join(Event).all()
     for calevent, event in evts:
         if selected_calendar.lower() in calevent.calendar_id and event.start > startdate and event.end < enddate:
             events.append(event)
+    return events
+
+
+def total_durations(events):
+    """Creates a dictionary of the total duration of
+    all events in each category."""
 
     labels_and_durations = {}
     for event in events:
         if event.label:
-            labels_and_durations.setdefault(event.label, []).append(event.duration_minutes)
+            labels_and_durations.setdefault(event.label, 0)
+            labels_and_durations[event.label] += event.duration_minutes
+    return labels_and_durations
 
-    labels = []
-    durations = []
-    for key, value in labels_and_durations.iteritems():
-        labels.append(key)
-        durations.append(sum(value))
+
+def doughnut_data(labels_and_durations):
+    """Creates two lists to populate the doughnut chart:
+    one of event labels,
+    and the other of their coordinating event durations."""
+
+    labels = [key for key in labels_and_durations.iterkeys()]
+    durations = [value for value in labels_and_durations.itervalues()]
 
     data = {"durations": durations, "labels": labels}
-
     return data
 
 
@@ -357,4 +363,4 @@ if __name__ == "__main__":
 
     connect_to_db(app)
 
-    # app.run()
+    app.run()
