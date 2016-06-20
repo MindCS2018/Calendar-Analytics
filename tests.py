@@ -100,5 +100,19 @@ class Database(unittest.TestCase):
         self.assertEqual(events[1].event_id, "defg")
         print "Tested get event type"
 
+    def test_get_team_events(self):
+        selected_calendars = ["meggie.engineering@gmail.com",
+                              "jessie.engineering@gmail.com"]
+        startdate = "07/14/2016"
+        enddate = "07/16/2016"
+        result = {'event_id': u'hij',
+                  'duration': 120,
+                  'calendars': [u'Jessie', u'Reuben'],
+                  'summary': u'standup'}
+        self.assertIn(result, server.get_team_events(selected_calendars,
+                                                     startdate,
+                                                     enddate))
+
+
 if __name__ == "__main__":
     unittest.main()
