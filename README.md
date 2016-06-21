@@ -76,13 +76,13 @@ To run the app from the command line of the terminal, run
 ```
 $ python server.py
 ```
-Then go to http://localhost:5000/ and login
+Go to [http://localhost:5000/](http://localhost:5000/) and login
 
 
 ## <a name="future"></a>Version 2.0
 
 Further development includes:
-- Point out additional insights in team view, including:
+- Additional insights in team view, including:
     - Meeting names
     - Largest and smallest collaborators
-- Add D3 sunburst diagram to individual view, showing heirarchy of events
+- A D3 sunburst diagram in individual view, showing heirarchy of events
