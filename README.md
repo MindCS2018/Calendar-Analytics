@@ -23,7 +23,7 @@ Users sign in with Google. This is handled through OAuth 2.0, which authenticate
 
 ####Dashboard
 
-After login, the user is directed to the dashboard page where they choose calendars to analyze, along with a chart type and date range. Clicking any of these buttons sends an AJAX request to the server, which then queries the database and returns an object to render the chart.
+After login, the user is directed to the dashboard page where they choose calendars to analyze, along with the chart type and date range. Clicking any of these buttons sends an AJAX request to the server, which then queries the database and returns an object to render the chart.
 
 ![alt text](static/imgs/chord.png)
 
@@ -35,6 +35,34 @@ In this D3 chord diagram, the nodes represent each member of the team, and the a
 
 ####Individual View
 
+In this chart.js doughnut chart, each person's events are categorized into different meeting types. Hovering over each section of the chart displays the total amount of time spent in each meeting type.
+
 ![alt text](static/imgs/doughnut.png)
 
 ## <a name="install"></a>Installation
+
+
+####Requirements
+
+- Install PostgreSQL (Mac OSX)
+- Python 2.6 or greater
+- A Google account with Google Calendar enabled
+
+Clone repository:
+```
+$ git clone https://github.com/maheskett/Calendar-Analytics.git
+```
+
+Create a virtual environment:
+
+```
+$ virtualenv env
+```
+Activate the virtual environment
+```
+$ source env/bin/activate
+```
+Install dependencies
+```
+$ pip install -r requirements.txt
+```
