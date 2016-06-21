@@ -66,3 +66,23 @@ Install dependencies
 ```
 $ pip install -r requirements.txt
 ```
+Create a project in the [Google Developers Console](https://console.developers.google.com/projectselector/apis/api/calendar/overview)
+
+Run PostgreSQL and create a database with the name 'cals'
+```
+$ createdb cals
+```
+To run the app from the command line of the terminal, run
+```
+$ python server.py
+```
+Then go to http://localhost:5000/ and login
+
+
+## <a name="future"></a>Version 2.0
+
+Further development includes:
+- Point out additional insights in team view, including:
+    - Meeting names
+    - Largest and smallest collaborators
+- Add D3 sunburst diagram to individual view, showing heirarchy of events
