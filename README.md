@@ -49,38 +49,38 @@ In this chart.js doughnut chart, each person's events are categorized into diffe
 - A Google account with Google Calendar enabled
 
 
-Clone repository:
+Clone repository
 ```
 $ git clone https://github.com/maheskett/Calendar-Analytics.git
 ```
-Create a virtual environment:
+Create a virtual environment
 ```
 $ virtualenv env
 ```
-Activate the virtual environment:
+Activate the virtual environment
 ```
 $ source env/bin/activate
 ```
-Install dependencies:
+Install dependencies
 ```
 $ pip install -r requirements.txt
 ```
 Create a project in the [Google Developers Console](https://console.developers.google.com/projectselector/apis/api/calendar/overview) and enable the Google Calendar and Google People APIs.
 
-Create a secrets.sh file:
+Create a secrets.sh file
 ```
 $ touch secrets.sh
 ```
-Add your flask app key to the secrets file:
+Add your flask app key to the secrets file
 ```
 export FLASK_APP_KEY="flask_app_key_here"
 ```
-Add your client id and client secret to the secrets file:
+Add your OAuth client id and client secret to the secrets file
 ```
 export CLIENT_ID="client_id_here"
 export CLIENT_SECRET="client_secret_here"
 ```
-Load your secret information into your environment:
+Load your secrets file into your environment
 ```
 $ source secrets.sh
 ```
