@@ -23,13 +23,13 @@ Users sign in with Google. This is handled through OAuth 2.0, which authenticate
 
 ####Dashboard
 
-After login, the user is directed to the dashboard page where they choose the calendars to analyze, along with the chart type and date range. Clicking any of the buttons sends an AJAX request to the server, which then queries the database and returns the appropriate data structure to render the chart.
+After login, the user is directed to the dashboard page where they choose calendars to analyze, along with a chart type and date range. Clicking any of these buttons sends an AJAX request to the server, which then queries the database and returns an object to render the chart.
 
 ![alt text](static/imgs/chord.png)
 
 ####Team View
 
-In this D3 chord diagram, the nodes represent the members of the team and the arcs represent the total amount of time any two coworkers spend working together. Hovering over the arcs displays a tooltip with information about the total number of hours spent together, the total percentage of each person's time, and the total percentage of the team's time.
+In this D3 chord diagram, the nodes represent each member of the team, and the arcs represent the total amount of time spent working together. Hovering over each arc displays a tooltip with the following summary information: the total number of hours spent collaborating, the total percentage of each person's time that represents, and the total percentage of the team's time.
 
 ![alt text](static/imgs/chord-2.png)
 
