@@ -19,7 +19,7 @@ Cahoots is a full-stack, data visualization app that provides valuable insights 
 
 ![alt text](static/imgs/hp.png)
 
-Users sign in with Google. This is handled through OAuth 2.0, which authenticates the user and authorizes the app to view the user's Google calendar. For more information, see [Google's OAuth docs](https://developers.google.com/api-client-library/python/guide/aaa_oauth).
+Users sign in with Google. This is handled through OAuth 2.0, which authenticates the user and authorizes the app to view the user's calendar. For more information, see [Google's OAuth docs](https://developers.google.com/api-client-library/python/guide/aaa_oauth).
 
 ####Dashboard
 
