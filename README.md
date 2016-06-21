@@ -88,7 +88,7 @@ Run PostgreSQL and create a database with the name 'cals'
 ```
 $ createdb cals
 ```
-To run the app locally
+Run the app locally
 ```
 $ python server.py
 ```
