@@ -23,6 +23,16 @@ Users sign in with Google. This is handled through OAuth 2.0, which authenticate
 
 ####Dashboard
 
+After login, the user is directed to the dashboard page where they can choose the calendars they want to look at, along with the chart type and date range.
+
 ![alt text](static/imgs/chord.png)
+
+####Analyze Collaboration
+
 ![alt text](static/imgs/chord-2.png)
+
+####Analyze Individual's Time
+
 ![alt text](static/imgs/doughnut.png)
+
+## <a name="install"></a>Installation
