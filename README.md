@@ -23,15 +23,15 @@ Users sign in with Google. This is handled through OAuth 2.0, which authenticate
 
 ####Dashboard
 
-After login, the user is directed to the dashboard page where they can choose the calendars they want to look at, along with the chart type and date range.
+After login, the user is directed to the dashboard page where they can choose the calendars to analyze, along with the chart type and date range. Clicking any of these buttons sends an AJAX request to the server, which then queries the database and returns the data structure to render the chart.
 
 ![alt text](static/imgs/chord.png)
 
-####Analyze Collaboration
+####Team View
 
 ![alt text](static/imgs/chord-2.png)
 
-####Analyze Individual's Time
+####Individual View
 
 ![alt text](static/imgs/doughnut.png)
 
