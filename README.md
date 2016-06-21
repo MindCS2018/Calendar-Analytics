@@ -19,11 +19,11 @@ Cahoots is a full-stack, data visualization app that provides valuable insights 
 
 ![alt text](static/imgs/hp.png)
 
-Users sign in with Google. This is handled through OAuth 2.0, which authenticates the user and authorizes the app to view the user's Google calendar. For more information, please see [Google's OAuth documentation](https://developers.google.com/api-client-library/python/guide/aaa_oauth).
+Users sign in with Google. This is handled through OAuth 2.0, which authenticates the user and authorizes the app to view the user's Google calendar. For more information, see [Google's OAuth documentation](https://developers.google.com/api-client-library/python/guide/aaa_oauth).
 
 ####Dashboard
 
-After login, the user is directed to the dashboard page where they choose calendars to analyze, along with the chart type and date range. Clicking any of these buttons sends an AJAX request to the server, which then queries the database and returns an object to render the chart.
+After login, the user is directed to the dashboard page where they choose which calendars to analyze, along with a chart type and date range. Clicking any of these buttons sends an AJAX request to the server, which then queries the database and returns an object to render the chart.
 
 ![alt text](static/imgs/chord.png)
 
@@ -35,7 +35,7 @@ In this D3 chord diagram, the nodes represent each member of the team, and the a
 
 ####Individual View
 
-In this chart.js doughnut chart, each person's events are categorized into different meeting types. Hovering over each section of the chart displays the total amount of time spent in each meeting type.
+In this chart.js doughnut chart, each person's events are categorized into different meeting types. Hovering over each section of the chart displays the total amount of time spent in each type of meeting.
 
 ![alt text](static/imgs/doughnut.png)
 
@@ -88,7 +88,7 @@ Run PostgreSQL and create a database with the name 'cals'
 ```
 $ createdb cals
 ```
-To run the app from the command line of the terminal, run
+To run the app locally
 ```
 $ python server.py
 ```
