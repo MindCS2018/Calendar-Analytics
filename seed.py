@@ -80,6 +80,14 @@ def seed_calendars(calendarsResult, user_id):
 
 def seed_events(eventsResult):
 
+    management = ['mgmt', 'manage', 'lead']
+    company = ['hands', 'company', 'office']
+    cross_department = ['operations']
+    department = ['team', 'engineer']
+    vertical = ['standup', 'scrum', 'daily', 'check']
+    one_on_one = [':', 'supervisor', 'mentor', 'supervisee', 'manager', 'training']
+    off_site = ['vendor', 'client', 'investor', 'conference', 'off-site']
+
     for key, value in eventsResult.iteritems():
         items = value.get('items', [])
 
@@ -92,14 +100,6 @@ def seed_events(eventsResult):
             # status = event['status']
             summary = event['summary'].lower()
             event_id = event['id']
-
-            management = ['mgmt', 'manage', 'lead']
-            company = ['hands', 'company', 'office']
-            cross_department = ['operations']
-            department = ['team', 'engineer']
-            vertical = ['standup', 'scrum', 'daily', 'check']
-            one_on_one = [':', 'supervisor', 'mentor', 'supervisee', 'manager', 'training']
-            off_site = ['vendor', 'client', 'investor', 'conference', 'off-site']
 
             if any(item in summary for item in company):
                 label = "company-wide"
