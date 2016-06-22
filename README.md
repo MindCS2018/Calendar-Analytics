@@ -92,6 +92,10 @@ $ python server.py
 ```
 Go to [http://localhost:5000/](http://localhost:5000/) and login
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> b9c3a309c952d9d756df28e41660ace416bb9119
 ## <a name="future"></a>Version 2.0
 
 Further development includes:
