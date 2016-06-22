@@ -48,6 +48,7 @@ function sendFilters() {
 // returns object with selected calendars and dates
 function getFilters() {
   var filters = $("#selected-calendars input").serializeArray();
+  console.log(filters);
   var startdate = $("#startdate").val();
   var enddate = $("#enddate").val();
 
