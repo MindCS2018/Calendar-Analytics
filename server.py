@@ -46,10 +46,9 @@ def oauth2callback():
         auth_code = request.args.get('code')
         credentials = flow.step2_exchange(auth_code)  # creates credentials object
         session['credentials'] = credentials.to_json()
-        return redirect(url_for('oauth2'))
+        return redirect(url_for('dashboard'))
 
 
-@app.route('/oauth2')
 def oauth2():
     """Builds API service objects,
     makes three API calls and seeds db"""
@@ -81,6 +80,8 @@ def oauth2():
 @app.route('/dashboard')
 def dashboard():
     """Renders list of calendar options on dashboard page"""
+
+    oauth2()
 
     calendar_options = get_calendar_options()
     calendar_options = sorted(calendar_options)
