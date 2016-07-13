@@ -76,6 +76,7 @@ def oauth2():
     # database seed
     seed_db(profile_result, calendars_result, events_result)
 
+    print "*******5*******"
     return redirect("/dashboard")
 
 
