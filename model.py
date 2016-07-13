@@ -142,11 +142,11 @@ class Event(db.Model):
 #####################################################################
 
 
-def connect_to_db(app, db_uri='postgresql:///cals'):
+def connect_to_db(app, db_uri=None):
     """Connects database to Flask app."""
 
     # configures database
-    app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_uri or 'postgresql:///cals'
     # app.config['SQLALCHEMY_ECHO'] = True
     db.app = app
     db.init_app(app)
