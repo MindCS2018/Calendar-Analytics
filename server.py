@@ -142,6 +142,11 @@ def logout():
     return redirect("/")
 
 
+@app.route("/error")
+def error():
+    raise Exception("Error!")
+
+
 def pull_credentials():
     """Pulls credentials out of session"""
 
@@ -363,4 +368,7 @@ if __name__ == "__main__":
 
     connect_to_db(app)
 
-    app.run()
+    DEBUG = "NO_DEBUG" not in os.environ
+    PORT = int(os.environ.get("PORT", 5000))
+
+    app.run(host="0.0.0.0", port=PORT, debug=DEBUG)
