@@ -3,6 +3,7 @@ from flask import Flask, session, render_template, request, redirect, url_for, j
 from jinja2 import StrictUndefined
 import httplib2
 from apiclient.discovery import build
+from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.client import flow_from_clientsecrets, OAuth2Credentials
 from model import connect_to_db, Event, UserCal, CalEvent, db, User, Calendar
 from datetime import datetime, timedelta
@@ -29,11 +30,10 @@ def oauth2callback():
 
     logging.basicConfig(filename='debug.log', level=logging.WARNING)
 
-    flow = flow_from_clientsecrets(
-                  'client_secret.json',
-                  scope='https://www.googleapis.com/auth/calendar.readonly \
-                  https://www.googleapis.com/auth/plus.login',
-                  redirect_uri=url_for('oauth2callback', _external=True))
+    flow = OAuth2WebServerFlow(client_id=os.environ["CLIENT_ID"],
+                               client_secret=os.environ["CLIENT_SECRET"],
+                               scope='https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/plus.login',
+                               redirect_uri=url_for('oauth2callback', _external=True))
 
     flow.params['access_type'] = 'online'
     flow.params['approval_prompt'] = 'auto'
