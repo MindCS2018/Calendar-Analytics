@@ -61,23 +61,20 @@ def oauth2():
     if credentials.access_token_expired:
         return redirect(url_for('oauth2callback'))
     else:
-        print "******1********"
         http_auth = credentials.authorize(httplib2.Http())
         people_service, calendar_service, event_service = get_service_objects(http_auth)
-    print "******2********"
+
     create_user_id()
-    print "******3********"
+
     profile_result = profile_api_call(people_service)
     calendars_result = calendar_api_call(calendar_service)
     events_result = event_api_call(event_service,
                                    calendar_service,
                                    calendars_result)
-    print "***", profile_result
-    print "******4********"
+
     # database seed
     seed_db(profile_result, calendars_result, events_result)
 
-    print "*******5*******"
     return redirect("/dashboard")
 
 
