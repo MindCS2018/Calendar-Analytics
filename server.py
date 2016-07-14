@@ -371,14 +371,18 @@ if __name__ == "__main__":
 
     app.debug = True
 
+    print "***********6*********"
     connect_to_db(app, os.environ.get("DATABASE_URL"))
 
+    print "***********7*********"
     DEBUG = "NO_DEBUG" not in os.environ
     PORT = int(os.environ.get("PORT", 5000))
 
+    print "***********8*********"
     urlparse.uses_netloc.append("postgres")
     url = urlparse.urlparse(os.environ["DATABASE_URL"])
 
+    print "***********9*********"
     conn = psycopg2.connect(
         database=url.path[1:],
         user=url.username,
@@ -387,4 +391,7 @@ if __name__ == "__main__":
         port=url.port
     )
 
+    print "***********10*********"
     app.run(host="0.0.0.0", port=PORT, debug=DEBUG)
+
+    print "***********11*********"
