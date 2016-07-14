@@ -11,6 +11,8 @@ from seed import seed_user, seed_calendars, seed_events
 import logging
 import json
 import itertools
+import psycopg2
+import urlparse
 
 
 app = Flask(__name__)
@@ -373,5 +375,16 @@ if __name__ == "__main__":
 
     DEBUG = "NO_DEBUG" not in os.environ
     PORT = int(os.environ.get("PORT", 5000))
+
+    urlparse.uses_netloc.append("postgres")
+    url = urlparse.urlparse(os.environ["DATABASE_URL"])
+
+    conn = psycopg2.connect(
+        database=url.path[1:],
+        user=url.username,
+        password=url.password,
+        host=url.hostname,
+        port=url.port
+    )
 
     app.run(host="0.0.0.0", port=PORT, debug=DEBUG)
