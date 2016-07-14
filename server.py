@@ -72,6 +72,7 @@ def oauth2():
     events_result = event_api_call(event_service,
                                    calendar_service,
                                    calendars_result)
+    print "***", profile_result
     print "******4********"
     # database seed
     seed_db(profile_result, calendars_result, events_result)
